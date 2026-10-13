@@ -1,0 +1,2 @@
+local:cse752.pdf
+drive:Stuffs/my_stuffs/MSc/CSE752
