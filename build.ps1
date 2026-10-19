@@ -1,8 +1,4 @@
 # Build main.tex with pdflatex. Intermediate files go to build/, the PDF to the project root.
-param(
-    [switch]$u
-)
-
 $ErrorActionPreference = 'Stop'
 
 $Root = $PSScriptRoot
@@ -46,12 +42,3 @@ if (-not (Test-Path $PdfFile)) {
     Write-Host "error: expected PDF was not generated at $PdfFile" -ForegroundColor Red
     exit 1
 }
-
-if ($u) {
-    Write-Host "==> uploading $PdfFile"
-    uv run upload.py
-    if ($LASTEXITCODE -ne 0) {
-        exit $LASTEXITCODE
-    }
-}
-
