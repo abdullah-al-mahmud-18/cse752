@@ -1,0 +1,280 @@
+\section{Neurons and Logistic Regression}
+
+The big picture: \textbf{one neuron = a weighted score + a squashing step}. The affine score is introduced first, logistic regression shows it is a one-neuron network, two worked examples use real numbers, and finally we derive why one formula turns out so clean.
+
+\subsection*{The Neuron as an Affine Score}
+
+\textbf{Plain idea:} A neuron takes some numbers in, mixes them using ``importance'' values (weights), adds a nudge (bias), then passes the result through a bending function.
+
+Think of grading a student: score $= (2 \times \text{exam}) + (1 \times \text{homework}) + 5$ bonus points. That is the first half. The second half might be ``cap the final grade between 0 and 1.''
+
+\subsubsection*{Equation: Neuron Score and Activation}
+
+\[
+z = w^\top x + b, \qquad a = f(z)
+\]
+
+\textbf{Symbols:}
+\begin{itemize}
+  \item $x$ = the inputs, a list of $d$ numbers (e.g., exam mark, homework mark)
+  \item $w$ = the weights, a list of $d$ numbers, one per input. Bigger weight means that input matters more
+  \item $w^\top x$ = multiply each input by its weight, then add everything up
+  \item $b$ = bias, a single number added at the end (a shift)
+  \item $z$ = the raw score (called the pre-activation)
+  \item $f$ = the activation function, a rule that reshapes $z$
+  \item $a$ = the neuron's final output
+\end{itemize}
+
+\textbf{What it says:} First compute a straight-line score $z$. Then pass $z$ through $f$ to get the output $a$.
+
+\textbf{Conditions:} Always holds. ``Affine'' just means ``straight-line style'': plotted against any single input, $z$ is a straight line.
+
+\textbf{Special values:}
+\begin{itemize}
+  \item $w = 0$: the neuron ignores the input, and $z$ is just $b$.
+  \item $b = 0$: the line passes through the origin, so zero input gives zero score.
+  \item $f$ = identity ($f(z) = z$): the neuron stays purely straight-line, no curves at all.
+\end{itemize}
+
+\subsubsection*{Equation: Stacking Affine Layers Collapses}
+
+\[
+W_2(W_1 x + b_1) + b_2 = (W_2 W_1)x + (W_2 b_1 + b_2)
+\]
+
+\textbf{Symbols:}
+\begin{itemize}
+  \item $W_1, W_2$ = weight tables (matrices) for layer 1 and layer 2
+  \item $b_1, b_2$ = the biases of each layer
+  \item $x$ = the input
+\end{itemize}
+
+\textbf{What it says:} If you stack two straight-line layers with no bending function between them, you could replace both with \textbf{one} straight-line layer. The left side is ``do layer 1, then layer 2.'' The right side is the same thing as a single layer with weights $W_2 W_1$ and bias $W_2 b_1 + b_2$. (You get it by multiplying out the brackets.)
+
+\textbf{Why it matters:} Without a bending function between layers, a 100-layer network is no more powerful than a 1-layer one. The activation function $f$ is what makes depth useful.
+
+\textbf{Conditions:} Holds whenever the matrix sizes fit together so the multiplication is possible.
+
+\textbf{Special values:} If $W_1 = 0$, everything collapses to just $b_2$, so the input is ignored. If $W_2 = 0$, same result.
+
+\subsection*{Logistic Regression as a One-Neuron Network}
+
+\textbf{Plain idea:} You want a yes/no answer (spam or not, $y = 1$ or $0$). A neuron gives you any number, but you want a probability between 0 and 1. The sigmoid squeezes any number into that range. Then you need a way to measure how wrong the prediction was.
+
+\subsubsection*{Equation: Sigmoid Function}
+
+\[
+\sigma(z) = \frac{1}{1 + e^{-z}}
+\]
+
+\textbf{Symbols:}
+\begin{itemize}
+  \item $\sigma$ (sigma) = the sigmoid function
+  \item $z$ = the raw score from the neuron
+  \item $e$ = a special constant $\approx 2.718$
+  \item $e^{-z}$ = $e$ raised to the power minus $z$
+\end{itemize}
+
+\textbf{What it says:} It takes any number and squashes it into the range between 0 and 1, which can be read as ``probability of yes.''
+
+\textbf{Conditions:} Works for every real number $z$.
+
+\textbf{Special values:}
+\begin{itemize}
+  \item $z = 0$: $e^0 = 1$, so $\sigma = 1/2$. Total uncertainty.
+  \item $z \to$ very large positive: $e^{-z} \to 0$, so $\sigma \to 1$ (confident ``yes'').
+  \item $z \to$ very large negative: $e^{-z} \to$ huge, so $\sigma \to 0$ (confident ``no'').
+  \item It never actually reaches 0 or 1, which is why the range is written as $(0, 1)$.
+\end{itemize}
+
+\subsubsection*{Equation: Prediction}
+
+\[
+\hat{y} = \sigma(w^\top x + b)
+\]
+
+\textbf{Symbols:} $\hat{y}$ (y-hat) is the predicted probability. The rest are as before.
+
+\textbf{What it says:} Compute the straight-line score, then squash it. That is the whole prediction.
+
+\subsubsection*{Equation: Binary Cross-Entropy Loss}
+
+\[
+L = -\Big[\, y \log \hat{y} + (1 - y)\log(1 - \hat{y}) \,\Big]
+\]
+
+This is the ``how wrong was I?'' number.
+
+\textbf{Symbols:}
+\begin{itemize}
+  \item $L$ = loss (the penalty; lower is better)
+  \item $y$ = the true answer (0 or 1)
+  \item $\hat{y}$ = your predicted probability
+  \item $\log$ = natural logarithm
+\end{itemize}
+
+\textbf{What it says:} Because $y$ is either 0 or 1, one half always disappears:
+\begin{itemize}
+  \item If $y = 1$: $L = -\log \hat{y}$. Penalty is small when $\hat{y}$ is near 1, big when $\hat{y}$ is near 0.
+  \item If $y = 0$: $L = -\log(1 - \hat{y})$. Penalty is small when $\hat{y}$ is near 0, big when $\hat{y}$ is near 1.
+\end{itemize}
+So it punishes you for being confident and wrong.
+
+\textbf{Conditions:} Needs $y \in \{0, 1\}$ and $\hat{y}$ strictly between 0 and 1.
+
+\textbf{Special values:}
+\begin{itemize}
+  \item $\hat{y} = 1/2$: $L = \log 2 \approx 0.693$ either way (a coin-flip guess).
+  \item $y = 1$ and $\hat{y} \to 0$: $\log \hat{y} \to -\infty$, so $L \to \infty$. Infinite penalty for being completely sure and wrong.
+  \item $\hat{y}$ exactly 0 or 1: $\log(0)$ is undefined, which is why code ``clips'' $\hat{y}$ slightly away from the edges.
+\end{itemize}
+
+\subsubsection*{Two Key Facts (Previewed)}
+
+\[
+\sigma'(z) = \sigma(z)\big(1 - \sigma(z)\big), \qquad \frac{\partial L}{\partial z} = \hat{y} - y
+\]
+
+\textbf{Symbols:}
+\begin{itemize}
+  \item $\sigma'(z)$ = the slope of the sigmoid at $z$ (how fast it changes)
+  \item $\partial L / \partial z$ = how much the loss changes if you nudge $z$ a tiny bit
+\end{itemize}
+
+\textbf{What they say:} The sigmoid's slope can be written using its own output. And the loss's sensitivity to $z$ is just ``prediction minus truth,'' which is very simple. The derivation below proves the second one.
+
+\subsection*{Worked Example: Logistic Forward Pass}
+
+\textbf{Setup:} $w = 2$, $b = -2$, $x = 1$, $y = 1$ (true answer: yes).
+
+\textbf{Step by step:}
+\begin{itemize}
+  \item $z = wx + b = 2 \cdot 1 - 2 = \mathbf{0}$
+  \item $\hat{y} = \sigma(0) = \mathbf{1/2}$
+  \item $L = -\log(1/2) = \mathbf{\ln 2 \approx 0.693}$
+\end{itemize}
+
+(The loss formula reduces to $-\log \hat{y}$ because $y = 1$, so the second half vanishes.)
+
+\textbf{Reading the number:} $\hat{y} = 1/2$ means the neuron is basically guessing, like flipping a coin. A loss of $\ln 2 \approx 0.693$ is the ``coin flip loss.'' If your classes are balanced (half yes, half no) and you start with random weights, your starting loss should be near 0.693. If it starts at, say, 50, something is likely wrong.
+
+\subsection*{Worked Example: Logistic Backward Pass}
+
+\textbf{Plain idea:} ``Backward'' means asking: \emph{which way should I nudge $w$ and $b$ to reduce the loss?} The answer is the slope (gradient) of the loss with respect to each.
+
+\textbf{Step by step} (same numbers: $\hat{y} = 1/2$, $y = 1$, $x = 1$):
+\begin{enumerate}
+  \item $\dfrac{\partial L}{\partial z} = \hat{y} - y = \dfrac{1}{2} - 1 = -\dfrac{1}{2}$. The negative sign means: \emph{increasing $z$ would lower the loss.}
+  \item $\dfrac{\partial L}{\partial w} = \dfrac{\partial L}{\partial z}\cdot x = -\dfrac{1}{2}\cdot 1 = -\dfrac{1}{2}$. Since $z = wx + b$, a nudge to $w$ changes $z$ by $x$ times as much, so you multiply by $x$. This is the chain rule: multiply the slopes along the path.
+  \item $\dfrac{\partial L}{\partial b} = \dfrac{\partial L}{\partial z} = -\dfrac{1}{2}$. A nudge to $b$ changes $z$ by exactly that amount (the factor is 1).
+\end{enumerate}
+
+\subsubsection*{Equation: Gradient Descent Update}
+
+\[
+w \leftarrow w - \eta \frac{\partial L}{\partial w}
+\]
+
+\textbf{Symbols:}
+\begin{itemize}
+  \item $\leftarrow$ = ``replace with the new value''
+  \item $\eta$ (eta) = learning rate, the step size (a small positive number you choose)
+  \item $\partial L / \partial w$ = the slope computed above
+\end{itemize}
+
+\textbf{What it says:} Move $w$ a small step \emph{opposite} to the slope. Here: $w \leftarrow 2 - \eta(-1/2) = \mathbf{2 + \eta/2}$.
+
+\textbf{Result:} $w$ grows, so $z$ on this input becomes positive, so $\hat{y}$ moves up toward 1 (the correct answer).
+
+\textbf{Conditions:} $\eta$ must be positive. If it is too big you overshoot; too small and learning is slow.
+
+\textbf{Special values:}
+\begin{itemize}
+  \item $\eta = 0$: nothing changes, no learning.
+  \item Gradient $= 0$: no movement, which happens at a minimum, a flat spot, or a ``dead'' path.
+\end{itemize}
+
+\subsection*{Derivation of $\partial L/\partial z = \hat{y} - y$}
+
+\textbf{Plain idea:} The loss depends on $\hat{y}$, and $\hat{y}$ depends on $z$. So the chain is $z \to \hat{y} \to L$. To find how $L$ changes with $z$, find the slope of each link and multiply them (chain rule):
+\[
+\frac{\partial L}{\partial z} = \frac{\partial L}{\partial \hat{y}} \cdot \frac{\partial \hat{y}}{\partial z}
+\]
+
+\subsubsection*{Setup}
+
+\begin{itemize}
+  \item $L = -\big[\, y \log \hat{y} + (1 - y)\log(1 - \hat{y}) \,\big]$ is the loss
+  \item $\hat{y} = \sigma(z)$ is the prediction
+  \item $\sigma(z) = \dfrac{1}{1 + e^{-z}}$ is the sigmoid
+  \item $y$ is the true label (0 or 1), a fixed number, not something that changes with $z$
+\end{itemize}
+
+\subsubsection*{Step 1: Slope of the Sigmoid, $\partial \hat{y}/\partial z$}
+
+Write $\sigma(z) = (1 + e^{-z})^{-1}$. Differentiate:
+\[
+\sigma'(z) = (1 + e^{-z})^{-2}\cdot e^{-z}
+\]
+Split this into two fractions:
+\[
+\sigma'(z) = \frac{1}{1 + e^{-z}} \cdot \frac{e^{-z}}{1 + e^{-z}}
+\]
+The first fraction is $\sigma(z) = \hat{y}$. For the second, note that $1 - \sigma(z) = \dfrac{e^{-z}}{1 + e^{-z}}$, so it equals $1 - \hat{y}$. Therefore:
+\[
+\frac{\partial \hat{y}}{\partial z} = \hat{y}(1 - \hat{y})
+\]
+
+\subsubsection*{Step 2: Slope of the Loss with Respect to $\hat{y}$, $\partial L/\partial \hat{y}$}
+
+Differentiate each term (the derivative of $\log u$ is $1/u$, and the derivative of $\log(1 - \hat{y})$ picks up a minus sign):
+\[
+\frac{\partial L}{\partial \hat{y}} = -\left[\frac{y}{\hat{y}} - \frac{1 - y}{1 - \hat{y}}\right] = -\frac{y}{\hat{y}} + \frac{1 - y}{1 - \hat{y}}
+\]
+Put both fractions over the common denominator $\hat{y}(1 - \hat{y})$:
+\[
+= \frac{-y(1 - \hat{y}) + (1 - y)\hat{y}}{\hat{y}(1 - \hat{y})}
+\]
+Expand the top: $-y + y\hat{y} + \hat{y} - y\hat{y} = \hat{y} - y$ (the $y\hat{y}$ terms cancel). So:
+\[
+\frac{\partial L}{\partial \hat{y}} = \frac{\hat{y} - y}{\hat{y}(1 - \hat{y})}
+\]
+
+\subsubsection*{Step 3: Multiply}
+
+\[
+\frac{\partial L}{\partial z} = \frac{\hat{y} - y}{\hat{y}(1 - \hat{y})} \cdot \hat{y}(1 - \hat{y})
+\]
+The $\hat{y}(1 - \hat{y})$ on top and bottom cancel:
+\[
+\frac{\partial L}{\partial z} = \hat{y} - y
+\]
+
+\subsubsection*{Sanity Check}
+
+With the worked example's numbers, $\hat{y} = 1/2$ and $y = 1$ give $\hat{y} - y = -1/2$, which matches the backward pass above.
+
+\subsubsection*{Conditions}
+
+This holds only for \textbf{sigmoid output + binary cross-entropy} together, with $0 < \hat{y} < 1$ (otherwise Step 2 divides by zero). With a different loss or activation, the factors would not cancel.
+
+\subsubsection*{Special Values}
+
+\begin{itemize}
+  \item $\hat{y} = y$: gradient is 0, so there is nothing to fix.
+  \item $y = 1$, $\hat{y} \to 0$ (confident and wrong): gradient $\to -1$, a strong push. It does not vanish, even though $\sigma' \to 0$ and $\partial L/\partial \hat{y} \to \infty$ individually. The two extremes cancel exactly.
+\end{itemize}
+
+\subsection*{Why Squared Error Is a Poor Match for Sigmoid}
+
+If you used $L = \tfrac{1}{2}(\hat{y} - y)^2$ instead, the same chain gives:
+\[
+\frac{\partial L}{\partial z} = (\hat{y} - y)\,\sigma'(z)
+\]
+Nothing cancels, so there is a leftover $\sigma'(z)$.
+
+\textbf{Why that is a problem:} When the neuron is very confident ($z$ very large or very small), $\sigma'(z) \approx 0$. So even if the neuron is \textbf{confidently wrong}, the gradient is nearly zero and the weights barely move. Learning stalls exactly when it is needed most. Binary cross-entropy cancels that $\sigma'$ factor, which is why sigmoid + BCE is the standard pairing for yes/no problems.
+
+\subsection*{Summary}
+
+A neuron = straight-line score + squash; sigmoid turns scores into probabilities; cross-entropy punishes confident mistakes; and the gradient of that pair is simply \emph{prediction $-$ truth}, which tells you which direction to nudge the weights.
