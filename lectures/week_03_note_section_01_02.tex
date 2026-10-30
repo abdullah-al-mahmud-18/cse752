@@ -1,0 +1,149 @@
+\section{Convolutional Neural Networks (CNNs)}
+
+\subsection*{Problem 2: Locality Is Ignored}
+
+\textbf{The core claim:} an MLP is allowed to connect every unit to every pixel, but in images only nearby pixels matter for most useful features. The MLP has to discover this from data, whereas a CNN has it built in.
+
+\subsubsection*{Sentence by sentence}
+
+\begin{enumerate}[leftmargin=*]
+  \item \textbf{``The statistics of natural images are local.''} Whether pixel $(10,10)$ belongs to an edge depends on pixels around it, such as $(9,10)$, $(11,10)$ and $(10,11)$. A pixel at $(30,2)$ tells you almost nothing about it. Pixel values are strongly correlated with their neighbours, and the correlation fades quickly with distance.
+  \item \textbf{``Edges, corners and textures are properties of small neighbourhoods.''} An edge is just a sharp intensity change between adjacent pixels, so a $3\times3$ or $5\times5$ patch is enough to detect it. Larger structures like faces or cats are built later by combining many of these local detections (the feature hierarchy in Section 10).
+  \item \textbf{``An MLP must learn from data that most of its weights should be nearly zero.''} A hidden unit in a dense layer has one weight for every input pixel. For a $32\times32\times3$ CIFAR image, that is 3072 weights per unit. A unit that should detect a small edge only needs about 75 of them (a $5\times5\times3$ patch). The other $\sim$3000 should be zero, but nothing in the architecture says so. The network must push them toward zero through training.
+  \item \textbf{``Connecting each unit only to a small blob of pixels, instead of being told so in advance.''} ``Told in advance'' means building the assumption into the architecture. That is what the notes call an inductive bias.
+\end{enumerate}
+
+\subsubsection*{Why this is a real problem}
+
+\begin{itemize}[leftmargin=*]
+  \item \textbf{Flattening hides the structure.} After flattening, the MLP sees 3072 numbers with no notion of which are neighbours. Two vertical neighbours end up 32 positions apart (Section 2.2). If you applied the same random shuffle to the pixels of every image, the MLP would learn equally well (or equally badly), because it never used the layout anyway. Locality is a fact about images that the MLP cannot see.
+  \item \textbf{It is a learning problem, not a representation problem.} A dense layer can represent a local detector by setting the right weights to zero. This is exactly the matrix view in Section 6.4, where a convolution is a dense layer with a sparse, weight-tied matrix. So the MLP is not incapable of it. The difficulty is finding that solution from finite, noisy data.
+  \item \textbf{The cost is overfitting and wasted capacity.} The weights that should be zero never become exactly zero. They pick up noise from the training set, which hurts generalisation, and they take up capacity that could detect something useful.
+\end{itemize}
+
+\subsubsection*{How CNNs fix it}
+
+Choice 1 (local connectivity) hard-codes the zeros: each output unit reads only a $k\times k$ patch, and the other links do not exist. In Example 2.1 this alone cuts the weights from $16{,}384 \times 3072 = 50{,}331{,}648$ to $16{,}384 \times 75 = 1{,}228{,}800$, a factor of about 41.
+
+The three problems are separate. Problem 1 is about the sheer count of weights. Problem 2 (this one) is about the structure of those weights, which should be local. Problem 3 is about re-learning the same detector at every position, which Choice 2 (parameter sharing) fixes. The $\sim$41{,}000$\times$ total reduction comes from locality and sharing together.
+
+% ------------------------------------------------------------
+\subsection*{Exercise 2.1: Dense Layer Weights for a $64\times64$ Image}
+
+Excluding biases, a dense layer needs $n_{\text{in}} \times n_{\text{out}}$ weights, and flattening gives $n_{\text{in}} = H \cdot W \cdot C$:
+
+\begin{itemize}[leftmargin=*]
+  \item \textbf{Grey-scale:} $64 \cdot 64 \cdot 512 = 4096 \cdot 512 = 2{,}097{,}152$ weights ($\approx 2.1\times10^{6}$).
+  \item \textbf{RGB:} $64 \cdot 64 \cdot 3 \cdot 512 = 12{,}288 \cdot 512 = 6{,}291{,}456$ weights ($\approx 6.3\times10^{6}$).
+\end{itemize}
+
+The RGB count is exactly $3\times$ the grey-scale count, since the input has three times as many numbers. If biases were included, you would add 512 to each, but the exercise says to exclude them.
+
+% ------------------------------------------------------------
+\subsection*{Exercise 2.2: Three Wirings for a $224\times224\times3$ Input}
+
+The output is 64 maps of size $224\times224$, and a $3\times3$ kernel on 3 input channels sees $3\cdot3\cdot3 = 27$ inputs. Excluding biases:
+
+\begin{itemize}[leftmargin=*]
+  \item \textbf{Dense:} $(224\cdot224\cdot3)\cdot(64\cdot224\cdot224) = 150{,}528 \cdot 3{,}211{,}264 = 483{,}385{,}147{,}392 \approx 4.83\times10^{11}$.
+  \item \textbf{Local, not shared:} $27 \cdot 3{,}211{,}264 = 86{,}704{,}128 \approx 8.67\times10^{7}$.
+  \item \textbf{Local and shared:} $27 \cdot 64 = 1{,}728$.
+\end{itemize}
+
+Locality alone cuts the weights by a factor of $150{,}528 / 27 \approx 5{,}575.1$, and sharing then divides by the number of positions, $224\cdot224 = 50{,}176$. That gives a total reduction of about 279.7 million times ($483{,}385{,}147{,}392 / 1{,}728$).
+
+If you include one bias per filter, the shared count becomes $64\cdot(27+1) = 1{,}792$. The exercise says to exclude biases, so $1{,}728$ is the answer here.
+
+% ------------------------------------------------------------
+\subsection*{Local, Not Shared vs.\ Local and Shared}
+
+Both versions use the same wiring: every output unit looks at the same local $3\times3\times3$ patch (27 numbers). The only difference is whether different output units get their own weights or reuse the same ones.
+
+\textbf{The output has $64\times224\times224 = 3{,}211{,}264$ units.} Each one computes a dot product over its 27 inputs.
+
+\textbf{Local, not shared: $27 \times 3{,}211{,}264$.} Every output unit has its own private set of 27 weights, so the unit at position $(5,7)$ in map 1 and the unit at $(100,40)$ in map 1 have different weights. You count 27 weights for each of the $3{,}211{,}264$ units, which gives $86{,}704{,}128$. This is a thought experiment (a ``locally connected'' layer), not a CNN.
+
+\textbf{Local and shared: $27 \times 64$.} All $224\times224 = 50{,}176$ units in the same output map use the same 27 weights, because that map is produced by one filter sliding over the image. Only the 64 maps differ from each other, since each map has its own filter. So you count 27 weights per filter for 64 filters, which gives $1{,}728$. The number of positions drops out entirely.
+
+\textbf{How they relate:} $86{,}704{,}128 / 1{,}728 = 50{,}176$, which is exactly the number of positions per map. Sharing divides the weight count by the number of spatial positions.
+
+\textbf{Sharing saves memory, not computation.} In both cases the layer still performs $3{,}211{,}264$ dot products of length 27, which is $86{,}704{,}128$ multiply--accumulates. That number happens to equal the not-shared weight count, because there each weight is used exactly once. In the shared case each weight is used $50{,}176$ times. This matches the point in Section 7.1 that parameters are independent of image size but MACs grow with it.
+
+\textbf{What sharing means for the network:} because one filter is applied everywhere, a pattern learned at one position is detected at every position (this is Problem 3, translation). Without sharing, the unit at each position would have to learn the same edge detector separately.
+
+% ------------------------------------------------------------
+\subsection*{Meaning of ``Each Output'' in Example 2.1}
+
+In Example 2.1, ``each output'' means \textbf{one number in the output volume}, which is one neuron.
+
+\textbf{Where 16,384 comes from.} The layer produces 16 feature maps, each $32\times32$. Every entry in those maps is one neuron:
+\[
+32 \cdot 32 \cdot 16 = 16{,}384 \text{ neurons.}
+\]
+
+\textbf{What each neuron does.} Take the neuron at position $(i,j)$ in map $o$. It looks at the $5\times5$ patch around $(i,j)$ in the input, across all 3 colour channels. That is $5\cdot5\cdot3 = 75$ input numbers, and it computes one dot product with 75 weights:
+\[
+z = w_1x_1 + w_2x_2 + \dots + w_{75}x_{75} \;(+\,b).
+\]
+
+\textbf{What ``not shared'' means.} Every one of the $16{,}384$ neurons owns its own private 75 weights:
+\begin{itemize}[leftmargin=*]
+  \item The neuron at $(0,0)$ in map 1 has weight set A.
+  \item The neuron at $(0,1)$ in map 1 has a different set B, even though it is in the same map and only one step over.
+  \item The neuron at $(0,0)$ in map 2 has yet another set C.
+\end{itemize}
+Nothing is reused, so the total is $16{,}384 \times 75 = 1{,}228{,}800$ weights.
+
+\textbf{Comparison with the other two cases in the same example:}
+\begin{itemize}[leftmargin=*]
+  \item \textbf{Dense:} each of the $16{,}384$ neurons looks at all $3{,}072$ inputs, so $16{,}384 \times 3{,}072$ weights.
+  \item \textbf{Local, not shared:} each neuron looks at only 75 inputs, so $16{,}384 \times 75$. Locality shrinks how many inputs each neuron sees.
+  \item \textbf{Local and shared (CNN):} all $1{,}024$ neurons in the same map use one set of 75 weights. Only the 16 maps have different weights, so $16 \times (75+1) = 1{,}216$. Sharing shrinks how many distinct weight sets exist.
+\end{itemize}
+
+So in the ``not shared'' case, the wiring already looks like a CNN (small patches), but the weights are still private per neuron, like an MLP.
+
+% ------------------------------------------------------------
+\subsection*{Exercise 2.3: Why Parameter Sharing Is Poor for Aligned Passport Photos}
+
+In aligned passport photos the eyes, nose and mouth always sit in roughly the same pixel positions, so translation is not a problem. Parameter sharing becomes a poor fit for a related reason: \textbf{in aligned photos, position itself carries meaning, and sharing throws that information away.}
+
+\textbf{What sharing assumes.} Sharing builds in stationarity (the Key Idea box in Section 2.3): the same pattern can appear anywhere, so the same detector should be used everywhere. The image statistics are assumed to be the same at every location.
+
+\textbf{Why that assumption breaks for passport photos.}
+\begin{enumerate}[leftmargin=*]
+  \item \textbf{Different regions need different detectors.} The top-middle region always contains eyes, the centre a nose, the bottom a mouth. The best features for the eye region (iris shape, eyelid edges) are different from the best features for the mouth region (lip contours, teeth). With sharing, one filter must serve every position, so it cannot specialise to ``what belongs here''.
+  \item \textbf{Sharing wastes capacity.} Every filter slides over the whole image, so an eye detector also runs over the chin, the hair and the background, where its output is useless. Without sharing, each position's weights can learn only what matters at that position.
+  \item \textbf{The benefit of sharing disappears.} Sharing earns its place by giving translation equivariance: a pattern learned in one place is recognised in every other place. When faces never move, that benefit is unused, but the restriction (identical weights everywhere) is still paid.
+\end{enumerate}
+
+\textbf{What still helps.} Locality is still a good assumption, since eyes and mouths are still local structures. So a reasonable design is the ``local, not shared'' layer from Example 2.1: small patches, but private weights per position. This is a real technique called a \emph{locally connected layer}. For example, Facebook's DeepFace (2014) used locally connected layers after aligning faces, for exactly this reason. In practice, early layers often still share weights (edges look the same everywhere), and the unshared layers come later, where features become position-specific.
+
+\textbf{Short answer:} sharing assumes the same feature means the same thing at every location. In aligned passport photos, each location has its own fixed role (eyes here, mouth there), so position-specific weights fit better, and the equivariance that sharing provides is never needed.
+
+% ------------------------------------------------------------
+\subsection*{Exercise 2.4: Distance Between Vertical Neighbours After Flattening}
+
+\textbf{Setup.} A $32\times32$ grey image has 1024 pixels. Flattening turns it into a vector of length 1024. The question asks how far apart pixels $(i,j)$ and $(i+1,j)$ land, which are vertical neighbours (same column, adjacent rows).
+
+\textbf{Row-major flattening (rows stacked one after another).} Row 0 fills positions 0--31, row 1 fills 32--63, and so on. So pixel $(i,j)$ goes to
+\[
+\text{index} = 32i + j.
+\]
+\begin{itemize}[leftmargin=*]
+  \item $(i,j) \to 32i + j$
+  \item $(i+1,j) \to 32(i+1) + j = 32i + j + 32$
+\end{itemize}
+\textbf{Distance $= 32$.} Moving down one row skips a whole row of 32 pixels.
+
+\textbf{Column-major flattening (columns stacked one after another).} Column 0 fills positions 0--31, column 1 fills 32--63, and so on. So pixel $(i,j)$ goes to
+\[
+\text{index} = 32j + i.
+\]
+\begin{itemize}[leftmargin=*]
+  \item $(i,j) \to 32j + i$
+  \item $(i+1,j) \to 32j + i + 1$
+\end{itemize}
+\textbf{Distance $= 1$.} Vertical neighbours are in the same column, so they stay adjacent.
+
+\textbf{The point of the exercise.} Horizontal neighbours $(i,j)$ and $(i,j+1)$ behave the opposite way: distance 1 in row-major, 32 in column-major. Whichever order you choose, one kind of neighbour gets separated by 32. A 2-D grid cannot be laid out in 1-D while keeping both directions adjacent, so flattening always destroys part of the spatial layout. An MLP sees only the vector, so it has no way to know which pixels were neighbours. A CNN avoids this by keeping the $H\times W$ layout and sliding its kernel over both axes.
