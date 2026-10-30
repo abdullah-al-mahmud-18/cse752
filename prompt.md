@@ -1,7 +1,7 @@
 # Explain Pages
 
 First, go through all the project files. Understand the context properly. 
-Then explain page 5 - 9 of CSE752_W01_Slides.pdf. 
+Then explain page 5 - 9 of CSE752_W03_Lecture_Notes.pdf. 
 
 How to explain concepts: 
 Explanation should be easily understandable. 
