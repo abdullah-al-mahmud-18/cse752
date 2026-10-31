@@ -1,0 +1,316 @@
+\subsection*{Padding, Stride, Dilation and the Output-Size Formula}
+
+This topic covers Section~5 of the Week~3 lecture notes (Act~IV of the slides, Steps~10--13). It takes the plain sliding window and adds the three settings that control \textbf{where} the window goes and \textbf{how big} the output is.
+
+The running example is the $5\times5$ input $X$ and the Sobel-x kernel $K$:
+\[
+X=\begin{bmatrix}1&2&3&0&1\\0&1&2&3&1\\1&0&1&2&2\\2&1&0&1&3\\0&2&1&0&1\end{bmatrix},\qquad
+K=\begin{bmatrix}1&0&-1\\2&0&-2\\1&0&-1\end{bmatrix},\qquad
+Y^{\text{valid}}=\begin{bmatrix}-6&-4&3\\0&-6&-4\\3&0&-7\end{bmatrix}.
+\]
+$Y^{\text{valid}}$ is the result with no padding and stride 1.
+
+% ------------------------------------------------------------
+\subsubsection*{Padding}
+
+\textbf{The problem it solves.} A valid convolution shrinks the map by $k-1$ per axis. A $3\times3$ kernel takes $32\to30\to28\to\dots$; after ten layers the map would be $12\times12$, so the network could not be very deep.
+
+There is a second problem. A corner pixel is covered by only one window, while a centre pixel is covered by up to $k^2$ windows, so border information is under-used.
+
+\textbf{What padding does.} It adds a frame of $p$ rows and columns around the input before sliding. The input becomes $(H+2p)\times(W+2p)$, and the original pixel $x_{ij}$ moves to position $(i+p,\,j+p)$.
+
+\textbf{How the frame is filled:}
+\begin{itemize}
+  \item \textbf{Zero padding} is the default. The border is all 0s.
+  \item \textbf{Reflect/replicate padding} copies nearby image values. This avoids an artificial dark frame that could look like a fake edge.
+\end{itemize}
+
+\textbf{Three named conventions:}
+
+\begin{center}
+\begin{tabular}{lll}
+\toprule
+Name & $p$ & Effect ($s=1$)\\
+\midrule
+valid & $0$ & shrinks by $k-1$\\
+same & $(k-1)/2$ & $H_{\text{out}}=H_{\text{in}}$\\
+full & $k-1$ & grows by $k-1$; every partial overlap is included\\
+\bottomrule
+\end{tabular}
+\end{center}
+
+With $p=1$ and $k=3$, the first window has its centre on $x_{00}$. The corner pixel finally gets a full window, and $7-3+1=5$, so the output stays $5\times5$.
+
+% ------------------------------------------------------------
+\subsubsection*{Stride}
+
+The stride $s$ is how far the window jumps each step.
+\begin{itemize}
+  \item With $s=1$ it visits every position.
+  \item With $s=2$ it visits every other position, so each dimension is roughly halved. Strided convolution is therefore a \textbf{downsampling} operation, an alternative to pooling.
+\end{itemize}
+
+Example: a $5\times5$ input with $p=1$ gives a $7\times7$ padded grid. With $k=3$ and $s=2$, the windows start at columns 0, 2 and 4. A start at 6 would need columns 6--8, which do not exist. That gives 3 outputs per axis.
+
+% ------------------------------------------------------------
+\subsubsection*{Dilation}
+
+Dilation $d$ puts $d-1$ gaps between kernel taps:
+\[
+(X\star_d K)_{i,j}=\sum_{u=0}^{k-1}\sum_{v=0}^{k-1} x_{i+du,\;j+dv}\,k_{u,v}.
+\]
+The only change from normal correlation is $i+u\to i+du$: the taps are spaced $d$ apart.
+
+\textbf{Effective kernel size:}
+\[
+k_e=d(k-1)+1.
+\]
+A row has $k$ taps, so it has $k-1$ gaps between them. Each gap is now $d$ pixels wide, so the first and last taps are $d(k-1)$ apart. Add 1 because the pixels at both ends are counted.
+
+For $k=3$: $d=1$ gives 3, $d=2$ gives 5, $d=3$ gives 7. \textbf{The number of weights stays 9.}
+
+\textbf{Purpose of dilation.} Dilation lets a kernel see a larger area without adding weights or shrinking the image.
+\begin{itemize}
+  \item \textbf{A bigger receptive field cheaply.} Normally the view is widened by stacking more layers, using bigger kernels (more weights), or pooling/striding (which loses resolution). Dilation avoids all three costs.
+  \item \textbf{Full resolution kept.} Pooling throws away spatial detail, while dilation does not. This matters when a prediction is needed for every pixel. Semantic segmentation (DeepLab) is the main use case, and WaveNet uses the same idea for audio.
+\end{itemize}
+
+\textbf{The catch.} Dilation skips the pixels in between. Stacking layers with the same $d$ leaves a checkerboard of input pixels that are never seen, called \emph{gridding}. The fix is to mix dilations, either stacked as $1,2,4$ or run in parallel as in ASPP.
+
+\textbf{How the computation works with only 9 weights.} The 9 weights stay the same; they sample spaced-out pixels instead of neighbouring ones. The pixels in the gaps are skipped and get no weight.
+
+Normal correlation and dilated correlation ($d=2$) compare as follows:
+\[
+y_{ij}=\sum_{u}\sum_{v} x_{i+u,\,j+v}\,k_{u,v},
+\qquad
+y_{ij}=\sum_{u}\sum_{v} x_{i+2u,\,j+2v}\,k_{u,v}.
+\]
+With $u,v\in\{0,1,2\}$, the offsets $2u,2v$ are $\{0,2,4\}$. So the 9 taps land on rows 0, 2, 4 and columns 0, 2, 4 of a $5\times5$ region.
+
+\textbf{Concrete example.} Use the same $X$ and Sobel-x $K$. The boxed cells are the 9 pixels the dilated kernel reads:
+\[
+X=\begin{bmatrix}
+\boxed{1}&2&\boxed{3}&0&\boxed{1}\\
+0&1&2&3&1\\
+\boxed{1}&0&\boxed{1}&2&\boxed{2}\\
+2&1&0&1&3\\
+\boxed{0}&2&\boxed{1}&0&\boxed{1}
+\end{bmatrix}
+\]
+
+\textbf{Step 1 -- pick out the sampled pixels} (rows 0, 2, 4 and columns 0, 2, 4):
+\[
+\text{sampled}=\begin{bmatrix}1&3&1\\1&1&2\\0&1&1\end{bmatrix}.
+\]
+
+\textbf{Step 2 -- ordinary correlation of this $3\times3$ with $K$.} Multiply element-wise and sum:
+\begin{align*}
+\text{row 0: } & 1\cdot1+3\cdot0+1\cdot(-1)=0\\
+\text{row 1: } & 1\cdot2+1\cdot0+2\cdot(-2)=-2\\
+\text{row 2: } & 0\cdot1+1\cdot0+1\cdot(-1)=-1
+\end{align*}
+\[
+y_{00}=0-2-1=-3.
+\]
+The output size is $\lfloor(5-5)/1\rfloor+1=1$, because $k_e=5$ fills the whole $5\times5$ input. This single number is the entire output.
+
+\textbf{How it slides on a bigger input.} The next window (stride 1) shifts one column right and reads columns 1, 3, 5. The window moves by the stride $s$; the dilation $d$ only controls the spacing \emph{inside} the window. These are two separate settings.
+
+\textbf{An equivalent view.} A dilated $3\times3$ is identical to a $5\times5$ kernel with zeros inserted between the taps:
+\[
+\begin{bmatrix}
+1&0&0&0&-1\\
+0&0&0&0&0\\
+2&0&0&0&-2\\
+0&0&0&0&0\\
+1&0&0&0&-1
+\end{bmatrix}
+\]
+Correlating $X$ with this $5\times5$ kernel gives the same $-3$, since the zero entries cancel the skipped pixels. Dilation simply avoids storing and multiplying those zeros, so it costs only 9 weights and 9 multiplications per output.
+
+% ------------------------------------------------------------
+\subsubsection*{The Output-Size Formula}
+
+\[
+H_{\text{out}}=\left\lfloor\frac{H_{\text{in}}+2p-k_e}{s}\right\rfloor+1,\qquad k_e=d(k-1)+1.
+\]
+When $d=1$ this becomes $H_{\text{out}}=\lfloor(H_{\text{in}}+2p-k)/s\rfloor+1$. The same formula with $W_{\text{in}}$ gives $W_{\text{out}}$.
+
+\textbf{Proof} (counting valid window starting rows):
+\begin{enumerate}
+  \item \textbf{After padding} there are $H_{\text{in}}+2p$ rows, indexed $0,\dots,H_{\text{in}}+2p-1$.
+  \item \textbf{Fit condition.} A window starting at row $r$ covers rows $r,\dots,r+k_e-1$. It fits if $r+k_e-1\le H_{\text{in}}+2p-1$, i.e.\ $r\le H_{\text{in}}+2p-k_e$.
+  \item \textbf{Stride.} Window number $i$ starts at $r=is$. It is valid if $i\le(H_{\text{in}}+2p-k_e)/s$. Since $i$ is an integer, the largest valid $i$ is the floor of that.
+  \item \textbf{Count.} The windows are numbered $i=0,1,\dots,i_{\max}$, which is $i_{\max}+1$ windows. The ``$+1$'' is there because counting starts at 0.
+\end{enumerate}
+
+\textbf{Remarks:}
+\begin{itemize}
+  \item \textbf{The floor.} If $s$ does not divide $H_{\text{in}}+2p-k_e$ exactly, the last few rows can never start a window, so they are silently dropped.
+  \item \textbf{Why ``same'' needs odd $k$.} With $s=1$, $H_{\text{out}}=H_{\text{in}}+2p-k+1$. Setting this equal to $H_{\text{in}}$ gives $p=(k-1)/2$, which is an integer only for odd $k$. This is one reason kernel sizes 1, 3, 5, 7 dominate. For $s>1$, TensorFlow's \texttt{"SAME"} instead targets $H_{\text{out}}=\lceil H_{\text{in}}/s\rceil$ and may pad unevenly.
+  \item \textbf{What the formula ignores.} Batch size $N$ and channel counts do not appear. A PyTorch layer maps $N\times C_{\text{in}}\times H\times W$ to $N\times C_{\text{out}}\times H_{\text{out}}\times W_{\text{out}}$; the formula only touches $H$ and $W$.
+\end{itemize}
+
+\textbf{Two checks from the notes' table:}
+\begin{itemize}
+  \item AlexNet stem, $H=227$, $k=11$, $s=4$: $(227-11)/4=54$, then $+1$ gives $\mathbf{55}$.
+  \item $H=7$, $k=3$, $d=2$, $p=0$: $k_e=5$, so $(7-5)/1+1=\mathbf{3}$. With $p=2$: $(7+4-5)+1=\mathbf{7}$, which is ``same'' for a dilated kernel.
+\end{itemize}
+
+% ------------------------------------------------------------
+\subsubsection*{Worked Examples: Sobel with Padding and Stride}
+
+\begin{center}
+\begin{tabular}{llll}
+\toprule
+Configuration & $p$ & $s$ & $\lfloor(5+2p-3)/s\rfloor+1$\\
+\midrule
+valid, stride 1 & 0 & 1 & $3\times3$\\
+same, stride 1 & 1 & 1 & $5\times5$\\
+padded, stride 2 & 1 & 2 & $3\times3$\\
+valid, stride 2 & 0 & 2 & $2\times2$\\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\textbf{Same padding ($p=1$, $s=1$).} Zero-pad to $7\times7$ and slide. In the top row of windows, the kernel's top row sits on zeros, so only $K$'s middle row (weights $2,-2$) and bottom row ($1,-1$) contribute. For example, $y_{00}=2\cdot0-2\cdot2+1\cdot0-1\cdot1=-5$.
+\[
+Y^{\text{same}}=\begin{bmatrix}
+-5&-6&2&5&3\\
+-4&-6&-4&3&8\\
+-2&0&-6&-4&8\\
+-4&3&0&-7&4\\
+-5&0&4&-3&1
+\end{bmatrix}
+\]
+\textbf{Key observation:} the centre $3\times3$ block equals $Y^{\text{valid}}$ exactly. Those windows never touch the padding; padding only adds the outer ring.
+
+\textbf{Padding with stride 2 ($p=1$, $s=2$).} Windows start at rows/columns 0, 2, 4 of the padded grid:
+\[
+Y^{p=1,s=2}=\begin{bmatrix}-5&2&3\\-2&-6&8\\-5&4&1\end{bmatrix},
+\]
+which is rows and columns 0, 2, 4 of $Y^{\text{same}}$.
+
+\textbf{No padding with stride 2 ($p=0$, $s=2$).} Windows start at 0 and 2 of $X$ itself:
+\[
+Y^{p=0,s=2}=\begin{bmatrix}-6&3\\3&-7\end{bmatrix},
+\]
+the four corners of $Y^{\text{valid}}$.
+
+\textbf{Stride is subsampling (Proposition 5.7):}
+\[
+Y^{(s)}_{i,j}=Y^{(1)}_{si,\,sj}.
+\]
+Proof: the stride-$s$ window $(i,j)$ starts at $(si,sj)$, which is exactly where the stride-1 window $(si,sj)$ starts. Same patch, same kernel, same sum.
+
+Practical meaning: strided convolution equals ``convolve fully, then throw away outputs'', but it is about $s^2$ times cheaper because the discarded outputs are never computed.
+
+\textbf{Summary.}
+\begin{itemize}
+  \item Padding preserves size and border influence.
+  \item Stride downsamples.
+  \item Dilation widens the view without adding weights.
+  \item One formula counts window starts for all of them.
+\end{itemize}
+
+% ------------------------------------------------------------
+\subsubsection*{Exercise Solutions}
+
+\textbf{Exercise 5.1: $H_{\text{out}}$ for $H_{\text{in}}=28$.}
+
+\begin{center}
+\begin{tabular}{lll}
+\toprule
+$(k,p,s)$ & Calculation & $H_{\text{out}}$\\
+\midrule
+$(5,0,1)$ & $(28-5)/1+1$ & \textbf{24}\\
+$(5,2,1)$ & $(28+4-5)/1+1$ & \textbf{28} (same)\\
+$(3,1,2)$ & $\lfloor27/2\rfloor+1=13+1$ & \textbf{14}\\
+$(7,3,2)$ & $\lfloor27/2\rfloor+1=13+1$ & \textbf{14}\\
+\bottomrule
+\end{tabular}
+\end{center}
+
+The last two give the same size because both use same-style padding, $p=(k-1)/2$, at stride 2. The numerator is $H_{\text{in}}-1=27$ in both cases.
+
+\textbf{Exercise 5.2: Padding that keeps $64\times64$ at $s=1$.}
+\begin{itemize}
+  \item \textbf{$5\times5$ kernel:} $p=(k-1)/2$, so $\mathbf{p=2}$.
+  \item \textbf{$3\times3$ with $d=2$:} replace $k$ by $k_e=2\cdot2+1=5$, so again $\mathbf{p=2}$. Check: $(64+4-5)+1=64$.
+\end{itemize}
+The dilated $3\times3$ needs the same padding as a dense $5\times5$ because the formula only sees the span, not the weight count.
+
+\textbf{Exercise 5.3: Uncovered rows ($k=3$, $p=0$, $s=2$).}
+
+$H_{\text{in}}=15$:
+\begin{itemize}
+  \item $H_{\text{out}}=\lfloor12/2\rfloor+1=7$.
+  \item Windows start at rows $0,2,\dots,12$. The last one covers rows 12--14, and 14 is the final row.
+  \item \textbf{0 rows uncovered.} Here $s$ divides $H_{\text{in}}-k=12$, so the floor drops nothing.
+\end{itemize}
+
+$H_{\text{in}}=16$:
+\begin{itemize}
+  \item $H_{\text{out}}=\lfloor13/2\rfloor+1=7$, the same count.
+  \item The last start is still 12 (a start at 14 would need rows 14--16, and row 16 does not exist).
+  \item \textbf{1 row (row 15) is never covered.} This is the floor dropping the remainder $13 \bmod 2=1$.
+\end{itemize}
+
+\textbf{Exercise 5.4: Full padding.} Set $p=k-1$, $s=1$:
+\[
+H_{\text{out}}=H_{\text{in}}+2(k-1)-k+1=H_{\text{in}}+k-1.
+\]
+Link to Example~3.2: $n=6$, $m=3$ gives $6+3-1=\mathbf{8}$, exactly the length of the full 1-D convolution listed there, $(1,5,7,1,-3,0,5,-2)$.
+
+Full padding adds enough zeros that the kernel can hang off by all but one tap at each end. Every partial overlap is therefore counted, which is the definition of ``full''.
+
+(Strictly, padded correlation gives the full correlation. To get the full convolution values the kernel must also be flipped. The length is the same either way.)
+
+\textbf{Exercise 5.5: Replicate padding instead of zeros.}
+
+\textbf{Step 1 -- build the padded input.} Each border cell copies the nearest real pixel. The top row duplicates row 0 extended, the left column duplicates column 0, and corners copy the corner pixel:
+\[
+P=\begin{bmatrix}
+1&1&2&3&0&1&1\\
+1&1&2&3&0&1&1\\
+0&0&1&2&3&1&1\\
+1&1&0&1&2&2&2\\
+2&2&1&0&1&3&3\\
+0&0&2&1&0&1&1\\
+0&0&2&1&0&1&1
+\end{bmatrix}
+\]
+
+\textbf{Step 2 -- use a shortcut.} Sobel-x is ``(left column $-$ right column), weighted $1,2,1$ down the rows''. First compute, for each padded row $r$,
+\[
+D[r][j]=P[r][j]-P[r][j+2],
+\]
+then
+\[
+y_{ij}=D[i][j]+2\,D[i+1][j]+D[i+2][j].
+\]
+This shortcut reproduces the zero-padded $Y^{\text{same}}$ when applied to the zero-padded input.
+
+\textbf{Step 3 -- result:}
+\[
+Y^{\text{replicate}}=\begin{bmatrix}
+-4&-8&4&7&-1\\
+-2&-6&-4&3&3\\
+2&0&-6&-4&0\\
+1&3&0&-7&-5\\
+-5&-1&6&-3&-5
+\end{bmatrix}
+\]
+
+\textbf{Which entries change} (compared with $Y^{\text{same}}$):
+\begin{itemize}
+  \item \textbf{The centre $3\times3$ is identical} ($-6,-4,3\,/\,0,-6,-4\,/\,3,0,-7$). Those windows never touch the padding, so the padding rule cannot affect them.
+  \item \textbf{The border ring changes in 14 of its 16 entries.} For example, the top-right entry goes from 3 to $-1$, and the right-column 8s become 3 and 0.
+  \item \textbf{Two border entries stay equal:}
+  \begin{itemize}
+    \item $(4,3)=-3$. Its window touches padding only in the bottom row. That row duplicates the image's last row, which has zero left-minus-right difference at that position, just like the zero row.
+    \item $(4,0)=-5$. This is a numerical coincidence: different contributions happen to sum to the same value.
+  \end{itemize}
+\end{itemize}
+
+\textbf{Takeaway.} Zero padding creates artificial strong responses at the edges. For example, the right-column 8s in $Y^{\text{same}}$ come partly from the image ``dropping'' to 0 at the border. Replicate padding removes most of those fake edges, which is why it exists.

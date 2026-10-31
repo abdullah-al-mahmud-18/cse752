@@ -1,0 +1,245 @@
+\bigskip
+
+Section 4 of the Week 3 lecture notes is where convolution stops being a formula (Section 3) and becomes a \textbf{pattern detector you can compute by hand}. It corresponds to Act II of the slides (Steps 8--9 and Step 20). Below is the section broken down, followed by worked solutions to Exercises 4.1--4.4.
+
+% ------------------------------------------------------------
+\subsection*{4.1 What a kernel computes}
+
+\textbf{Core idea.} At each position, the output is a \textbf{dot product} between the kernel weights and the patch under it:
+\[
+y_{ij} = \sum_{u,v} x_{i+u,\,j+v}\,k_{u,v} + b
+\]
+A dot product is largest when the two arrays ``point the same way.'' So:
+\begin{itemize}[nosep]
+  \item The patch \textbf{looks like} the kernel $\Rightarrow$ large positive output.
+  \item The patch looks like the \textbf{opposite} pattern $\Rightarrow$ large negative output.
+  \item The patch is unrelated or flat $\Rightarrow$ output near 0 (for zero-sum kernels).
+\end{itemize}
+This is why a kernel is called a \textbf{template} or \textbf{pattern detector}. The grid of all its responses is the \textbf{feature map} (also called the activation map).
+
+\textbf{Definitions you must keep distinct:}
+
+\begin{center}
+\begin{tabular}{>{\raggedright}p{0.18\linewidth} p{0.72\linewidth}}
+\toprule
+Term & Meaning \\
+\midrule
+Kernel & One 2-D weight array $K$ (for example $3\times3$). \\
+Filter & The full stack of kernels, one per input channel ($k\times k\times C_{\text{in}}$). For a single-channel input, filter = kernel. \\
+Feature map & $Y = X \star K + b$, taken before or after the activation. Entry $y_{ij}$ is the strength of the pattern in the patch whose top-left corner is $(i,j)$. The top-left reading assumes stride 1 and no padding. \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\textbf{Classical kernels.} These are hand-designed. CNNs \emph{learn} their kernels, but first-layer filters of trained networks often end up looking like these.
+\begin{itemize}[nosep]
+  \item \textbf{Box blur} (all entries $1/9$): each output is the mean of its 9 pixels, which smooths the image.
+  \item \textbf{Sobel-x} $\begin{bmatrix}1&0&-1\\2&0&-2\\1&0&-1\end{bmatrix}$: left column minus right column, with the middle row weighted $2\times$. It responds to \textbf{vertical edges}, meaning intensity that changes horizontally.
+  \item \textbf{Sobel-y} $\begin{bmatrix}1&2&1\\0&0&0\\-1&-2&-1\end{bmatrix}$: top row minus bottom row. It responds to \textbf{horizontal edges}.
+  \item \textbf{Laplacian}: 4 neighbours minus $4\times$ the centre. It responds to blobs and fine detail, and gives 0 on flat or linear regions.
+  \item \textbf{Identity}: copies the centre pixel.
+\end{itemize}
+
+\textbf{The sign subtlety (important).} Libraries compute cross-correlation, so Sobel-x is applied \emph{as written}:
+\begin{itemize}[nosep]
+  \item Positive output means intensity \textbf{decreases} left $\to$ right (left side brighter).
+  \item Negative output means intensity \textbf{increases} left $\to$ right.
+\end{itemize}
+Image-processing textbooks apply Sobel as a \emph{true} convolution, which rotates the kernel by $180^\circ$. They therefore see the opposite sign. This is Theorem 3.4 in action: $X * K = X \star \mathrm{rot180}(K)$.
+
+% ------------------------------------------------------------
+\subsection*{4.2 The sliding window procedure}
+
+\begin{enumerate}[nosep]
+  \item Place the kernel at the top-left, covering rows $0,\dots,k-1$ and columns $0,\dots,k-1$.
+  \item Multiply element-wise, sum all $k^2$ products, add the bias, and write the result to $y_{00}$.
+  \item Move $s$ columns right ($s=1$ here). \textbf{Never let the kernel hang off the edge.}
+  \item At the end of a row, return to the left edge and move one row down.
+  \item Stop at the bottom-right position where the kernel still fits.
+\end{enumerate}
+
+\textbf{Why there are $H-k+1$ positions per axis.} The last valid start row $r$ must satisfy $r+k-1 \le H-1$, so $r \le H-k$. Starts run $0,\dots,H-k$, which is $H-k+1$ values. Section 5 generalises this to padding, stride and dilation.
+
+\textbf{Receptive field (on this layer's input).} This is the set of pixels under the kernel when $y_{ij}$ is computed. Section 10 extends the idea back to the network input across many layers.
+
+% ------------------------------------------------------------
+\subsection*{4.3 Worked example: Sobel-x on a $5\times5$ image}
+
+$X$ ($5\times5$), $K$ = Sobel-x, $b=0$, stride 1, no padding $\Rightarrow$ output $(5-3+1)\times(5-3+1) = 3\times3$.
+\[
+X = \begin{bmatrix}1&2&3&0&1\\0&1&2&3&1\\1&0&1&2&2\\2&1&0&1&3\\0&2&1&0&1\end{bmatrix}
+\]
+
+\textbf{Entry $y_{00}$ in full.} The patch is rows 0--2, columns 0--2:
+\[
+\begin{bmatrix}1&2&3\\0&1&2\\1&0&1\end{bmatrix} \odot \begin{bmatrix}1&0&-1\\2&0&-2\\1&0&-1\end{bmatrix} = \begin{bmatrix}1&0&-3\\0&0&-4\\1&0&-1\end{bmatrix} \Rightarrow \text{sum} = -6
+\]
+
+\textbf{Shortcut.} The middle column of $K$ is 0, so only 6 products matter. Each output reduces to:
+\[
+y_{ij} = (\text{left column, weighted } 1,2,1) - (\text{right column, weighted } 1,2,1)
+\]
+Result:
+\[
+Y^{\text{valid}} = \begin{bmatrix}-6&-4&3\\0&-6&-4\\3&0&-7\end{bmatrix}
+\]
+
+\textbf{Interpretation.} Take window $(2,2)$. Its left column is $(1,0,1)$, giving weighted sum $1+0+1=2$. Its right column is $(2,3,1)$, giving weighted sum $2+6+1=9$. The difference is $2-9=-7$. Brightness rises left $\to$ right, so the response is strongly negative. Positive entries (3) mark windows where brightness falls left $\to$ right.
+
+This $X$ and $K$ carry forward into Section 5 (padding/stride), Section 8 (bias + ReLU) and Section 9 (pooling). It is worth knowing this result well.
+
+% ------------------------------------------------------------
+\subsection*{4.4 The lecture simulation: diagonal kernel on two images}
+
+The kernel is $K = I_3$ (identity matrix). Only the main diagonal is 1, so every output is just:
+\[
+y_{ij} = x_{i,j} + x_{i+1,j+1} + x_{i+2,j+2} \qquad (7)
+\]
+There are no other multiplications. This makes every number checkable at a glance, which is the whole point of the example.
+\[
+X_5 = \begin{bmatrix}1&2&0&1&3\\0&1&2&0&1\\2&0&1&3&0\\1&2&0&1&2\\0&1&3&0&1\end{bmatrix}, \qquad
+X_6 = \begin{bmatrix}1&2&0&1&3&1\\0&1&2&0&1&2\\2&0&1&3&0&1\\1&2&0&1&2&0\\0&1&3&0&1&2\\2&0&1&2&0&1\end{bmatrix}
+\]
+
+\textbf{$5\times5$ image $X_5$:} $5-3+1 = 3$ positions per axis $\Rightarrow$ $3\times3$ output.
+\[
+Y_5 = \begin{bmatrix}3&7&0\\0&3&7\\7&0&3\end{bmatrix}
+\]
+For example, $y_{01} = x_{01} + x_{12} + x_{23} = 2+2+3 = 7$.
+
+\textbf{$6\times6$ image $X_6$:} $6-3+1 = 4$ positions per axis $\Rightarrow$ $4\times4$ output. The extra row and column give exactly one more valid origin per axis.
+\[
+Y_6 = \begin{bmatrix}3&7&0&3\\0&3&7&0\\7&0&3&7\\3&7&0&3\end{bmatrix}
+\]
+
+\textbf{Why the output is so regular.} $X_5$ and $X_6$ are built so that values repeat along diagonals. For example, $x_{00}, x_{11}, x_{22}, \dots$ are all 1. Summing along a diagonal therefore gives the same value wherever that diagonal pattern recurs. The top-left $3\times3$ of $Y_6$ equals $Y_5$, because the windows are identical there.
+
+\textbf{Correction to the slides.} The slides print $y_{23} = 8$. The correct value is $x_{23} + x_{34} + x_{45} = 3+2+2 = \mathbf{7}$, verified by script. This changes the downstream Section 9.3 stack:
+\begin{itemize}[nosep]
+  \item Pool gives $\begin{bmatrix}7&7\\7&7\end{bmatrix}$ instead of $\begin{bmatrix}7&7\\7&8\end{bmatrix}$.
+  \item Conv2 gives $\begin{bmatrix}14&7\\7&14\end{bmatrix}$ instead of $\begin{bmatrix}15&7\\7&15\end{bmatrix}$.
+  \item The final value is \textbf{14}, not 15.
+\end{itemize}
+If an exam uses the slide numbers, be ready to state the correction.
+
+% ------------------------------------------------------------
+\subsection*{Exercise Solutions}
+
+\subsubsection*{Exercise 4.1 --- Sobel-y on the $5\times5$ input of Example 4.2}
+
+With Sobel-y applied by cross-correlation:
+\[
+y_{ij} = \underbrace{(x_{i,j} + 2x_{i,j+1} + x_{i,j+2})}_{\text{top row, } w(i,j)} - \underbrace{(x_{i+2,j} + 2x_{i+2,j+1} + x_{i+2,j+2})}_{\text{bottom row, } w(i+2,j)}
+\]
+
+\textbf{Step 1: weighted row sums} $w(r,j) = x_{r,j} + 2x_{r,j+1} + x_{r,j+2}$
+
+\begin{center}
+\begin{tabular}{lccc}
+\toprule
+row $r$ & $j=0$ & $j=1$ & $j=2$ \\
+\midrule
+0: $(1,2,3,0,1)$ & $1+4+3=8$ & $2+6+0=8$ & $3+0+1=4$ \\
+1: $(0,1,2,3,1)$ & $0+2+2=4$ & $1+4+3=8$ & $2+6+1=9$ \\
+2: $(1,0,1,2,2)$ & $1+0+1=2$ & $0+2+2=4$ & $1+4+2=7$ \\
+3: $(2,1,0,1,3)$ & $2+2+0=4$ & $1+0+1=2$ & $0+2+3=5$ \\
+4: $(0,2,1,0,1)$ & $0+4+1=5$ & $2+2+0=4$ & $1+0+1=2$ \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\textbf{Step 2:} $y_{ij} = w(i,j) - w(i+2,j)$
+\begin{itemize}[nosep]
+  \item Row 0: $(8-2,\ 8-4,\ 4-7) = (6,\ 4,\ -3)$
+  \item Row 1: $(4-4,\ 8-2,\ 9-5) = (0,\ 6,\ 4)$
+  \item Row 2: $(2-5,\ 4-4,\ 7-2) = (-3,\ 0,\ 5)$
+\end{itemize}
+\[
+Y_{\text{Sobel-y}} = \begin{bmatrix}6&4&-3\\0&6&4\\-3&0&5\end{bmatrix}
+\]
+
+\textbf{Answer.} The strongest horizontal edges are at windows \textbf{$(0,0)$ and $(1,1)$}, both with response $+6$. Positive means the top row of the window is brighter than the bottom row. For example, window $(1,1)$ has top row $(1,2,3)$ and bottom row $(1,0,1)$. Next strongest is $(2,2)$ at $+5$. The $-3$ entries at $(0,2)$ and $(2,0)$ are weaker edges where the bottom is brighter.
+
+\subsubsection*{Exercise 4.2 --- Box blur on $X_5$}
+
+Box blur gives $y_{ij} = \frac{1}{9}\sum(\text{window})$. Since a $3\times3$ window has 9 entries, $(\text{sum})/9$ \textbf{is the mean by definition}. That is the ``show that.''
+
+Row triple sums $t(r,j) = x_{r,j} + x_{r,j+1} + x_{r,j+2}$:
+
+\begin{center}
+\begin{tabular}{cccc}
+\toprule
+row & $j=0$ & $j=1$ & $j=2$ \\
+\midrule
+0 & 3 & 3 & 4 \\
+1 & 3 & 3 & 3 \\
+2 & 3 & 4 & 4 \\
+3 & 3 & 3 & 3 \\
+4 & 4 & 4 & 4 \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+The window sum is $S_{ij} = t(i,j) + t(i+1,j) + t(i+2,j)$:
+\[
+S = \begin{bmatrix}9&10&11\\9&10&10\\10&11&11\end{bmatrix} \Rightarrow Y = \frac{1}{9}S \approx \begin{bmatrix}1&1.111&1.222\\1&1.111&1.111\\1.111&1.222&1.222\end{bmatrix}
+\]
+
+\textbf{Check $y_{00}$.} The window holds $1,2,0,0,1,2,2,0,1$, which sums to 9, so the mean is 1.
+
+Note how flat the output is. Blur removes the sharp diagonal structure that the identity kernel exposed.
+
+\subsubsection*{Exercise 4.3 --- Inputs giving output 9 and output 0}
+
+By (7), only the three diagonal entries matter. Off-diagonal entries can be anything.
+\begin{itemize}
+  \item \textbf{Output 9:} make the diagonal sum 9, for example
+  \[
+  \begin{bmatrix}3&5&1\\2&3&4\\7&6&3\end{bmatrix} \Rightarrow 3+3+3 = 9
+  \]
+  \item \textbf{Output 0 with no zero entry:} the diagonal must sum to 0 without containing a 0. That \textbf{requires a negative value}, for example
+  \[
+  \begin{bmatrix}1&5&5\\5&2&5\\5&5&-3\end{bmatrix} \Rightarrow 1+2-3 = 0
+  \]
+\end{itemize}
+
+\textbf{The point of the exercise.} If pixels were restricted to non-negative values (raw intensities), the second case would be impossible. The lesson is that the kernel ignores everything off its taps. A large off-diagonal ``edge'' produces no response at all.
+
+\subsubsection*{Exercise 4.4 --- Anti-diagonal kernel on $X_5$}
+
+\[
+K_{\text{anti}} = \begin{bmatrix}0&0&1\\0&1&0\\1&0&0\end{bmatrix} \Rightarrow y_{ij} = x_{i,j+2} + x_{i+1,j+1} + x_{i+2,j}
+\]
+This is the identity flipped left--right.
+
+\begin{center}
+\begin{tabular}{cccc}
+\toprule
+ & $j=0$ & $j=1$ & $j=2$ \\
+\midrule
+$i=0$ & $x_{02}+x_{11}+x_{20} = 0+1+2 = \mathbf{3}$ & $x_{03}+x_{12}+x_{21} = 1+2+0 = \mathbf{3}$ & $x_{04}+x_{13}+x_{22} = 3+0+1 = \mathbf{4}$ \\
+$i=1$ & $x_{12}+x_{21}+x_{30} = 2+0+1 = \mathbf{3}$ & $x_{13}+x_{22}+x_{31} = 0+1+2 = \mathbf{3}$ & $x_{14}+x_{23}+x_{32} = 1+3+0 = \mathbf{4}$ \\
+$i=2$ & $x_{22}+x_{31}+x_{40} = 1+2+0 = \mathbf{3}$ & $x_{23}+x_{32}+x_{41} = 3+0+1 = \mathbf{4}$ & $x_{24}+x_{33}+x_{42} = 0+1+3 = \mathbf{4}$ \\
+\bottomrule
+\end{tabular}
+\end{center}
+\[
+Y_{\text{anti}} = \begin{bmatrix}3&3&4\\3&3&4\\3&4&4\end{bmatrix}
+\]
+
+\textbf{Interpretation.} Compare this with the main-diagonal response $\begin{bmatrix}3&7&0\\0&3&7\\7&0&3\end{bmatrix}$, which swings from 0 to 7. The anti-diagonal response is nearly flat (3 to 4). $X_5$'s structure runs along the main diagonal, so the anti-diagonal detector finds nothing distinctive.
+
+\textbf{A sharper design (optional but worth knowing).} An all-positive template also responds to plain brightness. A zero-sum line detector avoids this:
+\[
+K' = \begin{bmatrix}-1&-1&2\\-1&2&-1\\2&-1&-1\end{bmatrix}
+\]
+Its response equals $3\cdot(\text{anti-diagonal sum}) - (\text{window sum})$. Using $S$ from Exercise 4.2,
+\[
+3\,Y_{\text{anti}} - S = \begin{bmatrix}0&-1&1\\0&-1&2\\-1&1&1\end{bmatrix}.
+\]
+Everything is near 0, which confirms there is no anti-diagonal line in $X_5$. A flat region would give exactly 0. This is the same reason Sobel and Laplacian kernels sum to zero.
+
+% ------------------------------------------------------------
+\subsection*{Key Takeaway}
+
+A kernel is a template, each output is a dot product, and the feature map tells you \textbf{where} that template matches. Zero-sum kernels (Sobel, Laplacian, $K'$) respond to \emph{change} and ignore uniform brightness. All-positive kernels (box blur, identity, the diagonal kernel) also respond to overall intensity.
