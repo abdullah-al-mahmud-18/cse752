@@ -1,0 +1,506 @@
+% ============================================================
+% CSE752 Week 3 -- Section 3: The Convolution Operation
+% ============================================================
+
+\subsection*{3.1 One-Dimensional Cross-Correlation and Convolution}
+\addcontentsline{toc}{subsection}{3.1 One-Dimensional Cross-Correlation and Convolution}
+
+\textbf{Setup.} We have a signal $\mathbf{x} = (x_0, \ldots, x_{n-1})$ and a short kernel (filter) $\mathbf{k} = (k_0, \ldots, k_{m-1})$, with $m < n$. The kernel slides along the signal. At each position, the aligned entries are multiplied and the products are added. That sum is one output value.
+
+\subsubsection*{Cross-correlation ($\star$)}
+\[
+(x \star k)_i = \sum_{u=0}^{m-1} x_{i+u}\, k_u, \qquad i = 0, \ldots, n-m
+\]
+The kernel is laid over the signal \textbf{exactly as written}: $k_0$ sits on $x_i$, $k_1$ on $x_{i+1}$, and so on.
+
+\subsubsection*{Convolution ($*$)}
+\[
+(x * k)_i = \sum_{u=0}^{m-1} x_{i+u}\, k_{m-1-u}
+\]
+This is the same sliding and summing, but the kernel is \textbf{reversed first}. The last kernel element sits on $x_i$ and the first sits on $x_{i+m-1}$.
+
+\textbf{Output length (valid mode).} The kernel must fit entirely inside the signal, so there are $n - m + 1$ outputs.
+
+\textbf{Note on the textbook form.} Signal processing usually writes convolution as $\sum_u x_{t-u} k_u$. The minus sign means ``walk backwards through the input'', which is the same thing as reading the kernel backwards. Formula (4) in the notes is that same quantity, restricted to fully overlapping positions and re-indexed to start at 0.
+
+\subsubsection*{Worked example (Example 3.2)}
+Let $x = (1, 3, 2, 0, -1, 2)$ and $k = (1, 2, -1)$. That gives $6 - 3 + 1 = 4$ outputs.
+\begin{itemize}
+  \item \textbf{Correlation}, using $k$ as written $(1, 2, -1)$:
+  \begin{itemize}
+    \item $y_0 = 1\cdot 1 + 3\cdot 2 + 2\cdot(-1) = 5$
+    \item the full result is $x \star k = (5, 7, 3, -4)$
+  \end{itemize}
+  \item \textbf{Convolution}, using the flipped kernel $(-1, 2, 1)$:
+  \begin{itemize}
+    \item $y_0 = 1\cdot(-1) + 3\cdot 2 + 2\cdot 1 = 7$
+    \item the full result is $x * k = (7, 1, -3, 0)$
+  \end{itemize}
+\end{itemize}
+
+\subsubsection*{Full convolution}
+In \textbf{valid} mode, the kernel is only placed where it fits \textbf{completely inside} the signal, which gives $n - m + 1 = 4$ positions.
+
+In \textbf{full} mode, the kernel is placed at \textbf{every position where it overlaps the signal by at least one element}. This starts where only the kernel's last element touches $x_0$ and ends where only its first element touches $x_{n-1}$. Wherever the kernel hangs off the edge, the missing signal values are treated as $0$. In practice, this means padding the signal with $m - 1$ zeros on each side.
+
+\textbf{Length.} Padding gives $n + 2(m-1) = 6 + 4 = 10$ elements. Sliding a length-3 kernel over 10 elements gives $10 - 3 + 1 = 8 = n + m - 1$ outputs.
+
+\textbf{How the result is calculated.}
+\begin{itemize}
+  \item Padded signal: $(0, 0, 1, 3, 2, 0, -1, 2, 0, 0)$
+  \item Kernel $k = (1, 2, -1)$, so the flipped kernel is $(-1, 2, 1)$
+\end{itemize}
+Slide the flipped kernel over the padded signal, multiply the aligned entries, and add:
+
+\begin{center}
+\begin{tabular}{cccc}
+\toprule
+$t$ & window & $\times\,(-1, 2, 1)$ & result \\
+\midrule
+0 & $(0, 0, 1)$   & $0 + 0 + 1$  & $1$ \\
+1 & $(0, 1, 3)$   & $0 + 2 + 3$  & $5$ \\
+2 & $(1, 3, 2)$   & $-1 + 6 + 2$ & $7$ \\
+3 & $(3, 2, 0)$   & $-3 + 4 + 0$ & $1$ \\
+4 & $(2, 0, -1)$  & $-2 + 0 - 1$ & $-3$ \\
+5 & $(0, -1, 2)$  & $0 - 2 + 2$  & $0$ \\
+6 & $(-1, 2, 0)$  & $1 + 4 + 0$  & $5$ \\
+7 & $(2, 0, 0)$   & $-2 + 0 + 0$ & $-2$ \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+Full result: $(1, 5, 7, 1, -3, 0, 5, -2)$.
+
+\textbf{Why the middle 4 entries are the valid result.}
+\begin{itemize}
+  \item $t = 0, 1$ use left-side padding zeros, so the kernel is only partly on the signal.
+  \item $t = 6, 7$ use right-side padding zeros, for the same reason.
+  \item $t = 2$ to $5$ have the window entirely inside the real signal. These are exactly the valid outputs $(7, 1, -3, 0)$.
+\end{itemize}
+This matches the identity in the notes: valid index $i$ equals full index $i + m - 1 = i + 2$. So valid $y_0$ is full $y_2$.
+
+\textbf{Cross-check with the formula.} The signal-processing form $(x * k)_t = \sum_u x_{t-u} k_u$ gives the same numbers directly. For example, at $t = 1$: $x_1 k_0 + x_0 k_1 = 3\cdot 1 + 1\cdot 2 = 5$. Any $x$ index outside $0$ to $5$ counts as $0$.
+
+\subsubsection*{Difference between cross-correlation and convolution}
+
+\begin{center}
+\begin{tabular}{p{0.2\textwidth}p{0.36\textwidth}p{0.36\textwidth}}
+\toprule
+ & \textbf{Cross-correlation} & \textbf{Convolution} \\
+\midrule
+Kernel orientation & As written & Flipped (in 2-D: rotated $180^\circ$) \\
+Intuition & Template matching: ``how much does this patch look like $k$?'' & Mathematical convolution (signal processing, system response) \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\begin{itemize}
+  \item \textbf{They differ only when the kernel is asymmetric.} If $k_u = k_{m-1-u}$ (for example $(1, 2, 1)$), flipping changes nothing and the two operations give identical results.
+  \item \textbf{Practical point for CNNs.} PyTorch and TensorFlow \texttt{conv2d} actually compute \textbf{cross-correlation}. Because kernels are learned, this does not matter: the network simply learns the flipped version of whatever kernel it needs. The flip only matters when you plug in a hand-designed kernel (such as Sobel), check a library's output against a hand calculation, or derive the backward pass.
+\end{itemize}
+
+\subsubsection*{Relationship between the two operations}
+The relationship can be written in two directions:
+\[
+x * k = x \star \mathrm{flip}(k), \qquad x \star k = x * \mathrm{flip}(k)
+\]
+These are not two separate facts. They are two directions of the same fact. Each one says how to compute one operation using the other.
+
+\textbf{Why both hold.} Convolution is defined as correlation with a flipped kernel, so $x * k = x \star \mathrm{flip}(k)$. Flipping twice restores the original: $\mathrm{flip}(\mathrm{flip}(k)) = k$. Substituting $\mathrm{flip}(k)$ for $k$:
+\[
+x * \mathrm{flip}(k) = x \star \mathrm{flip}(\mathrm{flip}(k)) = x \star k
+\]
+That gives the other direction. One identity implies the other because flip is its own inverse.
+
+\textbf{Check with the example.} $k = (1, 2, -1)$, so $\mathrm{flip}(k) = (-1, 2, 1)$.
+\begin{itemize}
+  \item $x \star \mathrm{flip}(k)$ uses kernel $(-1, 2, 1)$ as written, which gives $(7, 1, -3, 0)$. That equals $x * k$.
+  \item $x * \mathrm{flip}(k)$ flips $(-1, 2, 1)$ back to $(1, 2, -1)$, which gives $(5, 7, 3, -4)$. That equals $x \star k$.
+\end{itemize}
+Theorem 3.4 states this same relationship in 2-D, using $\mathrm{rot180}$.
+
+% ============================================================
+
+\subsection*{3.2 Two-Dimensional Cross-Correlation and Convolution}
+\addcontentsline{toc}{subsection}{3.2 Two-Dimensional Cross-Correlation and Convolution}
+
+This is the same idea as 1-D, except the kernel is now a small matrix $K$ of size $k_h \times k_w$. It slides across the image both horizontally and vertically.
+
+\begin{itemize}
+  \item \textbf{Cross-correlation:}
+  \[
+  (X \star K)_{i,j} = \sum_{u}\sum_{v} x_{i+u,\, j+v}\, k_{u,v}
+  \]
+  \begin{itemize}
+    \item Place $K$ on the patch whose top-left corner is $(i, j)$.
+    \item Multiply the aligned entries and add them up.
+  \end{itemize}
+  \item \textbf{Convolution:} the same operation, but $K$ is flipped along \textbf{both} axes first. A flip along both axes is a \textbf{$180^\circ$ rotation}:
+  \[
+  K = \begin{bmatrix} a & b & c \\ d & e & f \\ g & h & i \end{bmatrix}
+  \qquad
+  \mathrm{rot180}(K) = \begin{bmatrix} i & h & g \\ f & e & d \\ c & b & a \end{bmatrix}
+  \]
+  \item \textbf{Output size (valid):} $(H - k_h + 1) \times (W - k_w + 1)$
+  \item \textbf{Theorem 3.4:} $X * K = X \star \mathrm{rot180}(K)$, and the reverse also holds. This is the 2-D version of the flip relationship from 3.1.
+\end{itemize}
+
+\textbf{Concrete example (Example 3.8).}
+\[
+X = \begin{bmatrix} 2 & 0 & 1 & 3 \\ 1 & 3 & 0 & 2 \\ 0 & 1 & 2 & 1 \\ 3 & 2 & 1 & 0 \end{bmatrix},
+\qquad
+K = \begin{bmatrix} 1 & 2 \\ 0 & -1 \end{bmatrix}
+\]
+The output is $(4-2+1) \times (4-2+1) = 3 \times 3$.
+\begin{itemize}
+  \item \textbf{Correlation at $(0,0)$:} the patch is $\begin{bmatrix} 2 & 0 \\ 1 & 3 \end{bmatrix}$.
+  \begin{itemize}
+    \item $2\cdot 1 + 0\cdot 2 + 1\cdot 0 + 3\cdot(-1) = -1$
+  \end{itemize}
+  \item \textbf{Convolution at $(0,0)$:} use $\mathrm{rot180}(K) = \begin{bmatrix} -1 & 0 \\ 2 & 1 \end{bmatrix}$ on the same patch.
+  \begin{itemize}
+    \item $2\cdot(-1) + 0\cdot 0 + 1\cdot 2 + 3\cdot 1 = 3$
+  \end{itemize}
+\end{itemize}
+Doing this at all 9 positions gives:
+\[
+X \star K = \begin{bmatrix} -1 & 2 & 5 \\ 6 & 1 & 3 \\ 0 & 4 & 4 \end{bmatrix},
+\qquad
+X * K = \begin{bmatrix} 3 & 6 & 1 \\ 0 & 1 & 5 \\ 8 & 4 & 0 \end{bmatrix}
+\]
+The two outputs are completely different, because $K$ is asymmetric.
+
+% ============================================================
+
+\subsection*{3.3 What Deep-Learning Libraries Compute}
+\addcontentsline{toc}{subsection}{3.3 What Deep-Learning Libraries Compute}
+
+\texttt{conv2d} in PyTorch and TensorFlow computes \textbf{cross-correlation}, even though the layer is called ``convolutional''.
+
+This is harmless because the kernel is \textbf{learned}. Suppose the ideal filter under true convolution is $K'$. A network using correlation simply learns $\mathrm{rot180}(K')$ instead, and the outputs are identical.
+
+The flip matters in only three situations:
+\begin{enumerate}
+  \item You copy a hand-designed filter (Sobel, for example) from a signal-processing textbook.
+  \item You check library output against a hand calculation.
+  \item You derive backpropagation, where both operations appear.
+\end{enumerate}
+From this point on, ``convolution'' in a CNN means cross-correlation.
+
+% ============================================================
+
+\subsection*{3.4 Properties of the Operation}
+\addcontentsline{toc}{subsection}{3.4 Properties of the Operation}
+
+\subsubsection*{Proposition 3.5: Basic properties}
+All four examples below use small 1-D numbers so the arithmetic is easy to follow. Each property holds the same way in 2-D.
+
+\textbf{(1) Linear in the input}
+
+\textbf{Statement:} $(\alpha X + \beta X') \star K = \alpha (X \star K) + \beta (X' \star K)$
+
+\textbf{In plain words:} mixing two inputs and then filtering gives the same result as filtering each input and then mixing the outputs.
+
+\textbf{Example:} $x = (1, 2, 3)$, $x' = (0, 1, 0)$, $k = (1, -1)$. With $k = (1, -1)$, each output is $x_i - x_{i+1}$.
+\begin{itemize}
+  \item $x \star k = (1-2,\ 2-3) = (-1, -1)$
+  \item $x' \star k = (0-1,\ 1-0) = (-1, 1)$
+  \item \textbf{Mix first, then filter:}
+  \begin{itemize}
+    \item $2x + x' = (2, 5, 6)$
+    \item $(2x + x') \star k = (2-5,\ 5-6) = (-3, -1)$
+  \end{itemize}
+  \item \textbf{Filter first, then mix:}
+  \begin{itemize}
+    \item $2(-1, -1) + (-1, 1) = (-3, -1)$, which matches.
+  \end{itemize}
+\end{itemize}
+\textbf{Why it holds:} every term in the sum is one input value times one kernel value. Scaling or adding inputs just passes straight through.
+
+\textbf{(2) Linear in the kernel}
+
+\textbf{Statement:} $X \star (\alpha K + \beta K') = \alpha (X \star K) + \beta (X \star K')$
+
+This is the same idea with the roles of input and kernel swapped.
+
+\textbf{Example:} $x = (1, 2, 3)$, $k = (1, -1)$, $k' = (1, 1)$.
+\begin{itemize}
+  \item $x \star k = (-1, -1)$
+  \item $x \star k' = (3, 5)$
+  \item Adding the outputs: $(-1, -1) + (3, 5) = (2, 4)$
+  \item Adding the kernels first: $k + k' = (2, 0)$
+  \begin{itemize}
+    \item $x \star (2, 0) = (2\cdot 1,\ 2\cdot 2) = (2, 4)$, which matches.
+  \end{itemize}
+\end{itemize}
+
+\textbf{What ``the output is linear in the weights'' means.} Treat the input $X$ as fixed and the kernel entries $k_{u,v}$ as the variables. Each output is then
+\[
+y_{ij} = \sum x_{i+u,\, j+v}\, k_{u,v}
+\]
+This is a plain weighted sum of the weights, where the input pixels act as fixed coefficients. There are no squares, products, or other nonlinear functions of the weights.
+
+What ``linear'' guarantees:
+\begin{itemize}
+  \item \textbf{Scaling:} doubling the kernel doubles the output, since $X \star (2K) = 2(X \star K)$.
+  \item \textbf{Adding:} using kernel $K + K'$ gives the same result as running both kernels separately and adding the outputs.
+\end{itemize}
+
+\textbf{Concrete example:} take the patch $(3, 5)$ with kernel $(k_0, k_1)$. The output is $y = 3k_0 + 5k_1$.
+\begin{itemize}
+  \item With kernel $(1, 0)$, $y = 3$.
+  \item With kernel $(0, 1)$, $y = 5$.
+  \item With kernel $(2, 1)$, $y = 2\cdot 3 + 1\cdot 5 = 11$.
+\end{itemize}
+The output responds to each weight in a straight-line way.
+
+\textbf{Why it matters for training:} the derivative is trivial.
+\begin{itemize}
+  \item $\partial y_{ij} / \partial k_{u,v} = x_{i+u,\, j+v}$. The gradient with respect to a weight is just the input pixel it multiplies.
+  \item In the example above, $\partial y / \partial k_0 = 3$ and $\partial y / \partial k_1 = 5$.
+\end{itemize}
+This is why the backward pass gives $\partial L / \partial K = X \star \delta$, a correlation of the input with the incoming gradient. The whole network is not linear in its weights, because layers and activations stack. Each single conv operation, though, is linear in its own weights.
+
+\textbf{(3) Commutativity: true for convolution, not for correlation}
+
+\textbf{Statement:} $X * K = K * X$ holds for full convolution. It does not hold for correlation.
+
+\textbf{Example:} $x = (1, 2)$, $k = (3, 4)$, in full mode.
+\begin{itemize}
+  \item \textbf{Convolution:}
+  \begin{itemize}
+    \item $x * k = (1\cdot 3,\ 1\cdot 4 + 2\cdot 3,\ 2\cdot 4) = (3, 10, 8)$
+    \item $k * x$ gives $(3, 10, 8)$ as well. Swapping the arguments changes nothing.
+    \item A useful way to see this: full convolution is polynomial multiplication. $(1 + 2z)(3 + 4z) = 3 + 10z + 8z^2$, and polynomial multiplication does not care about order.
+  \end{itemize}
+  \item \textbf{Correlation} (full mode, kernel slid as written):
+  \begin{itemize}
+    \item $x \star k = (4, 11, 6)$
+    \item $k \star x = (6, 11, 4)$
+    \item The results are \textbf{reversed}, not equal. Swapping the roles mirrors the output, which is exactly what the proof says (``evaluated at $-i$'').
+  \end{itemize}
+\end{itemize}
+
+\textbf{(4) Associativity: why CNNs need nonlinearities}
+
+\textbf{Statement:} $(X * K) * K' = X * (K * K')$
+
+\textbf{In plain words:} applying two filters one after the other is the same as applying a single combined filter.
+
+\textbf{Example:} $x = (1, 2, 4)$, $k = (1, 1)$, $k' = (1, -1)$.
+\begin{itemize}
+  \item \textbf{Two steps:}
+  \begin{itemize}
+    \item $x * k = (1, 3, 6, 4)$
+    \item $(1, 3, 6, 4) * k' = (1, 2, 3, -2, -4)$
+  \end{itemize}
+  \item \textbf{One combined kernel:}
+  \begin{itemize}
+    \item $k * k' = (1, 0, -1)$
+    \item $x * (1, 0, -1) = (1, 2, 3, -2, -4)$, which matches.
+  \end{itemize}
+\end{itemize}
+\textbf{The key consequence:} two stacked conv layers with \textbf{no activation between them} collapse into one conv layer with a bigger kernel. Here, sizes 2 and 2 combine into size $2 + 2 - 1 = 3$. The extra layer adds no expressive power. A ReLU between the layers breaks this collapse, which is why every conv layer is followed by a nonlinearity.
+
+\textbf{Does associativity hold for valid convolution?}
+
+Yes, with the right combined kernel. Stacking two valid convolutions equals one valid convolution with the combined kernel $k * k'$. That combined kernel must be computed with \textbf{full} convolution, so its size is $m + m' - 1$.
+\[
+(x *_{\text{valid}} k) *_{\text{valid}} k' = x *_{\text{valid}} (k *_{\text{full}} k')
+\]
+\textbf{The sizes match:} $n \to n - m + 1 \to n - m - m' + 2$. Applying one valid convolution with a kernel of size $m + m' - 1$ gives $n - (m + m' - 1) + 1$, which is the same.
+
+\textbf{Check:} $x = (1, 2, 4)$, $k = (1, 1)$, $k' = (1, -1)$.
+\begin{itemize}
+  \item \textbf{Two steps:}
+  \begin{itemize}
+    \item $x *_{\text{valid}} k$ uses the flipped kernel $(1, 1)$, giving $(3, 6)$.
+    \item $(3, 6) *_{\text{valid}} k'$ uses the flipped kernel $(-1, 1)$, giving $-3 + 6 = 3$.
+  \end{itemize}
+  \item \textbf{One step:}
+  \begin{itemize}
+    \item $k * k' = (1, 0, -1)$, and its flip is $(-1, 0, 1)$.
+    \item $x *_{\text{valid}} (1, 0, -1) = -1 + 0 + 4 = 3$, which matches.
+  \end{itemize}
+\end{itemize}
+The valid outputs are the middle entries of the full result $(1, 2, 3, -2, -4)$ computed above.
+
+\textbf{Does associativity hold for cross-correlation?}
+
+\textbf{The literal form $(x \star k) \star k' = x \star (k \star k')$ is false in general.} Using the same numbers:
+\begin{itemize}
+  \item \textbf{Left side:}
+  \begin{itemize}
+    \item $x \star k = (3, 6)$
+    \item $(3, 6) \star (1, -1) = 3 - 6 = -3$
+  \end{itemize}
+  \item \textbf{Right side:}
+  \begin{itemize}
+    \item $k \star k'$ in full mode $= (-1, 0, 1)$
+    \item $x \star (-1, 0, 1) = -1 + 4 = 3$, which does not match.
+  \end{itemize}
+\end{itemize}
+The two sides have opposite signs.
+
+\textbf{The correct version:} $(x \star k) \star k' = x \star (k * k')$. The combined kernel uses true convolution of the two kernels.
+\begin{itemize}
+  \item \textbf{Check:} $x \star (1, 0, -1) = 1 - 4 = -3$, which matches.
+  \item \textbf{Why it holds:}
+  \begin{itemize}
+    \item Correlation is convolution with a flipped kernel.
+    \item $\mathrm{flip}(k) * \mathrm{flip}(k') = \mathrm{flip}(k * k')$.
+    \item So the two flips merge into one flip of the combined kernel.
+  \end{itemize}
+\end{itemize}
+\textbf{The practical conclusion is unchanged.} Two stacked correlation layers (as used in PyTorch and TensorFlow) without an activation between them always reduce to one correlation layer with a larger kernel. That is why a nonlinearity is required between layers.
+
+\subsubsection*{Theorem 3.6: Translation equivariance}
+
+\textbf{Statement:} $(T X) \star K = T (X \star K)$, where $T$ shifts the image.
+
+\textbf{In plain words:} if you shift the input and then filter it, you get the same result as filtering first and then shifting the output by the same amount. \textbf{If the object moves, its response moves with it, unchanged.}
+
+\textbf{Example} (1-D, $k = (1, -1)$, so each output is $x_i - x_{i+1}$):
+\begin{itemize}
+  \item Original: $x = (0, 0, 5, 1, 0, 0, 0)$
+  \begin{itemize}
+    \item $x \star k = (0, -5, 4, 1, 0, 0)$
+  \end{itemize}
+  \item Shift $x$ right by 2: $(0, 0, 0, 0, 5, 1, 0)$
+  \begin{itemize}
+    \item $\star\, k = (0, 0, 0, -5, 4, 1)$
+  \end{itemize}
+\end{itemize}
+The pattern $(-5, 4, 1)$ is identical in both results. It has just moved right by 2.
+
+\textbf{Why it holds:} the \textbf{same kernel} is used at every position (parameter sharing). So the filter cannot tell \emph{where} a pattern sits. It only reports \emph{what} it found, and the location of that report follows the pattern.
+
+\textbf{Two important contrasts:}
+\begin{itemize}
+  \item \textbf{Dense layer:} each pixel has its own weights. A shifted cat hits completely different weights, so the output can change arbitrarily. A dense layer has no equivariance.
+  \item \textbf{Equivariance vs invariance:}
+  \begin{itemize}
+    \item Equivariant means the output \textbf{moves} with the input.
+    \item Invariant means the output \textbf{does not change} at all.
+    \item Convolution is equivariant only. Approximate invariance to small shifts comes later from pooling (Section 9).
+  \end{itemize}
+\end{itemize}
+
+% ============================================================
+
+\subsection*{3.5 A First Manual Example}
+\addcontentsline{toc}{subsection}{3.5 A First Manual Example}
+
+This section is the first hand calculation of a 2-D cross-correlation. It shows three things: the mechanics, what a kernel ``detects'', and how correlation and convolution can differ.
+
+\textbf{Example 3.7.}
+\[
+X = \begin{bmatrix} 1 & 2 & 0 \\ 1 & 0 & 1 \\ 2 & 1 & 1 \end{bmatrix},
+\qquad
+K = \begin{bmatrix} 1 & 0 \\ 0 & -1 \end{bmatrix}
+\]
+The setup uses stride 1 and no padding.
+
+\textbf{Step 1, output size:} the kernel fits at $3 - 2 + 1 = 2$ positions along each axis, so the output $Y$ is $2 \times 2$.
+
+\textbf{Step 2, compute each output:} place $K$ on each $2 \times 2$ patch, multiply the aligned entries, and add.
+\begin{itemize}
+  \item $K$ has $1$ at the top-left, $-1$ at the bottom-right, and $0$ elsewhere.
+  \item So each output is simply \textbf{top-left $-$ bottom-right}.
+\end{itemize}
+
+\begin{center}
+\begin{tabular}{cccc}
+\toprule
+position & patch & calculation & $y$ \\
+\midrule
+$(0,0)$ & $\begin{bmatrix} 1 & 2 \\ 1 & 0 \end{bmatrix}$ & $1 - 0$ & $1$ \\[8pt]
+$(0,1)$ & $\begin{bmatrix} 2 & 0 \\ 0 & 1 \end{bmatrix}$ & $2 - 1$ & $1$ \\[8pt]
+$(1,0)$ & $\begin{bmatrix} 1 & 0 \\ 2 & 1 \end{bmatrix}$ & $1 - 1$ & $0$ \\[8pt]
+$(1,1)$ & $\begin{bmatrix} 0 & 1 \\ 1 & 1 \end{bmatrix}$ & $0 - 1$ & $-1$ \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\[
+Y = X \star K = \begin{bmatrix} 1 & 1 \\ 0 & -1 \end{bmatrix}
+\]
+
+\textbf{Step 3, interpret the result:} $y_{ij} = x_{ij} - x_{i+1,\, j+1}$ is a \textbf{diagonal difference}.
+\begin{itemize}
+  \item A patch with the same brightness along the diagonal gives $0$.
+  \item A patch that gets darker toward the bottom-right gives a positive output.
+  \item A patch that gets brighter toward the bottom-right gives a negative output.
+\end{itemize}
+So the kernel is a detector for edges across the main diagonal.
+
+\textbf{Step 4, compare with true convolution:} $\mathrm{rot180}(K) = \begin{bmatrix} -1 & 0 \\ 0 & 1 \end{bmatrix} = -K$.
+\begin{itemize}
+  \item By Theorem 3.4, $X * K = X \star (-K)$.
+  \item By linearity, $X \star (-K) = -Y = \begin{bmatrix} -1 & -1 \\ 0 & 1 \end{bmatrix}$.
+  \item The magnitudes are the same but every sign is flipped. With a library correlation versus a textbook convolution, you would see the opposite sign on the edge response.
+\end{itemize}
+
+\textbf{Example 3.8} (the $4 \times 4$ case shown in 3.2) is the general situation. Its kernel is not $\pm$ its own rotation, so the two outputs are completely different, not just sign-flipped.
+
+% ============================================================
+
+\subsection*{3.6 Why Use This Operator at All?}
+\addcontentsline{toc}{subsection}{3.6 Why Use This Operator at All?}
+
+\subsubsection*{1. Local statistics}
+The patterns that matter at the lowest level (edges, corners, textures) are determined by a pixel and its \textbf{immediate neighbours}.
+\begin{itemize}
+  \item \textbf{Example:} a vertical edge at pixel $(100, 50)$ depends on pixels $(100, 49)$ and $(100, 51)$, not on a pixel in the opposite corner.
+  \item So a $3 \times 3$ kernel that sees only a small neighbourhood has all the information it needs.
+  \item Connecting each output to every pixel, as a dense layer does, adds weights that carry mostly irrelevant information.
+\end{itemize}
+
+\subsubsection*{2. Stationarity}
+The \textbf{same pattern means the same thing anywhere} in the image. An edge is an edge whether it appears top-left or bottom-right.
+\begin{itemize}
+  \item So one detector should be reused at every location, which is exactly what sliding a single kernel does.
+  \item \textbf{Example:} a Sobel kernel slid over a whole photo finds every vertical edge with just 9 weights.
+  \item A dense layer would need to learn ``edge at location A'' and ``edge at location B'' separately.
+  \item This is also what gives the translation equivariance of Theorem 3.6.
+  \item The assumption can fail. In aligned passport photos the eyes are always in the same place, so location-specific weights could help (see Exercise 2.3).
+\end{itemize}
+
+\subsubsection*{3. Composition}
+Each layer sees a small window, but stacking layers \textbf{widens the receptive field} (Section 10).
+\begin{itemize}
+  \item \textbf{Example:} two $3 \times 3$ layers mean each output depends on a $5 \times 5$ region of the input. Three layers give $7 \times 7$.
+  \item With nonlinearities between them, the layers build a hierarchy:
+  \begin{itemize}
+    \item Layer 1 detects edges.
+    \item Layer 2 combines edges into corners and curves.
+    \item Layer 3 combines those into parts such as an eye or a wheel.
+    \item Deeper layers detect whole objects.
+  \end{itemize}
+  \item Without the nonlinearities, associativity collapses the stack into one big linear filter and the hierarchy disappears. This connects directly to Proposition 3.5 (4).
+\end{itemize}
+
+\subsubsection*{4. Efficiency}
+Local connections and shared weights give \textbf{far fewer parameters} (Section 7).
+\begin{itemize}
+  \item \textbf{Example:} take a $224 \times 224$ grey image mapped to a $224 \times 224$ output.
+  \begin{itemize}
+    \item \textbf{Dense layer:} $224^2 \times 224^2 \approx 2.5$ billion weights.
+    \item \textbf{One $3 \times 3$ conv kernel:} $9$ weights plus $1$ bias, regardless of image size.
+  \end{itemize}
+  \item Fewer parameters mean less memory, faster training, and less overfitting.
+\end{itemize}
+
+\textbf{Key idea:} a conv layer is a bank of linear filters with tied (shared) weights. The nonlinearity after each layer is what turns that bank into a hierarchical pattern detector. Without the nonlinearity, associativity would collapse the whole stack into one filter.
+
+% ============================================================
+
+\subsection*{3.7 Summary}
+\addcontentsline{toc}{subsection}{3.7 Summary}
+
+\begin{itemize}
+  \item Cross-correlation: $(X \star K)_{ij} = \sum x_{i+u,\, j+v}\, k_{u,v}$. True convolution is the same with $K$ rotated $180^\circ$: $X * K = X \star \mathrm{rot180}(K)$.
+  \item Valid output size: $(H - k_h + 1) \times (W - k_w + 1)$.
+  \item Libraries compute cross-correlation. Because kernels are learned, the flip does not matter for training.
+  \item The operation is linear in both the input and the kernel, and it is translation equivariant.
+\end{itemize}
