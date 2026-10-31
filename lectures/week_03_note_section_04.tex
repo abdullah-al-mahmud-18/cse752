@@ -47,6 +47,39 @@ Feature map & $Y = X \star K + b$, taken before or after the activation. Entry $
 \end{itemize}
 Image-processing textbooks apply Sobel as a \emph{true} convolution, which rotates the kernel by $180^\circ$. They therefore see the opposite sign. This is Theorem 3.4 in action: $X * K = X \star \mathrm{rot180}(K)$.
 
+\subsubsection*{Relation Between Edges and Intensity}
+
+\textbf{Intensity} is the brightness value of a pixel, for example $0$ = black and $255$ = white in a grey-scale image.
+
+\textbf{An edge is a place where intensity changes sharply over a short distance.} Intensity is the quantity; an edge is a property of how that quantity \emph{varies} across space. In calculus terms, an edge is where the \textbf{spatial derivative (gradient) of intensity is large}.
+
+\textbf{Example (one row of pixels):}
+\[
+10 \quad 10 \quad 10 \quad 200 \quad 200 \quad 200
+\]
+\begin{itemize}[nosep]
+  \item Within the 10s or within the 200s, intensity is flat. The change is 0, so there is no edge.
+  \item Between 10 and 200 there is a jump of 190. That is an edge.
+\end{itemize}
+So a bright region is not an edge, and a dark region is not an edge. The \textbf{boundary between them} is.
+
+\textbf{How kernels measure this.} A derivative is approximated by a difference of neighbouring pixels. That is exactly what Sobel does.
+\begin{itemize}[nosep]
+  \item \textbf{Sobel-x} computes (left column $-$ right column), which is the horizontal intensity change. A large magnitude means a \textbf{vertical edge}, i.e.\ a boundary line running up--down.
+  \item \textbf{Sobel-y} computes (top row $-$ bottom row), which is the vertical intensity change. A large magnitude means a \textbf{horizontal edge}.
+  \item The \textbf{sign} tells the direction of the change. With cross-correlation, Sobel-x is positive when the left side is brighter and negative when the right side is brighter, as in the $-7$ window of Example 4.3.
+\end{itemize}
+
+\textbf{Why edge kernels sum to zero.} On a uniform patch every pixel equals some value $c$, so the output is $c \times (\text{sum of weights}) = c \times 0 = 0$. The kernel therefore ignores absolute brightness and responds only to \textbf{differences}. That is what ``edge detector'' means.
+
+\textbf{Direction naming (easy to confuse).} The edge is named by the line it forms. The change happens \emph{perpendicular} to that line:
+\begin{itemize}[nosep]
+  \item A vertical edge has intensity changing horizontally.
+  \item A horizontal edge has intensity changing vertically.
+\end{itemize}
+
+\textbf{Strength.} The magnitude of the response measures edge strength. A jump from 10 to 200 gives a much larger response than a jump from 10 to 20. A gentle gradual ramp gives a small response at each window, as in Problem 1 of the slides, where every window returned $-2$.
+
 % ------------------------------------------------------------
 \subsection*{4.2 The sliding window procedure}
 
