@@ -1,0 +1,226 @@
+\subsection*{Solutions to Exercises 3.1 to 3.5: Detailed Breakdown}
+
+These are the five exercises at the end of Section 3 (The Convolution Operation) of the Week 3 lecture notes.
+
+% ------------------------------------------------------------
+\subsubsection*{Exercise 3.1: Valid Correlation and Convolution in 1-D}
+
+\textbf{Given:} $x = (2, -1, 0, 3, 1)$, so $n = 5$. $k = (1, 0, 2)$, so $m = 3$.
+
+\textbf{Step 1: How many outputs?}
+A valid output exists only where the whole kernel fits inside the signal. That gives $n - m + 1 = 5 - 3 + 1 = 3$ outputs ($i = 0, 1, 2$).
+
+\textbf{Step 2: Cross-correlation, with the kernel as written $(1, 0, 2)$.}
+The formula is $y_i = x_i k_0 + x_{i+1} k_1 + x_{i+2} k_2$.
+
+\begin{center}
+\begin{tabular}{cccc}
+\toprule
+$i$ & window of $x$ & computation & $y_i$ \\
+\midrule
+0 & $(2, -1, 0)$ & $2\cdot 1 + (-1)\cdot 0 + 0\cdot 2$ & $\mathbf{2}$ \\
+1 & $(-1, 0, 3)$ & $(-1)\cdot 1 + 0\cdot 0 + 3\cdot 2$ & $\mathbf{5}$ \\
+2 & $(0, 3, 1)$ & $0\cdot 1 + 3\cdot 0 + 1\cdot 2$ & $\mathbf{2}$ \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+So $x \star k = (2, 5, 2)$.
+
+\textbf{Step 3: Convolution, which flips the kernel first.}
+Reversing $k = (1, 0, 2)$ gives $(2, 0, 1)$. Then the flipped kernel slides exactly as in correlation.
+
+\begin{center}
+\begin{tabular}{cccc}
+\toprule
+$i$ & window of $x$ & computation & $y_i$ \\
+\midrule
+0 & $(2, -1, 0)$ & $2\cdot 2 + (-1)\cdot 0 + 0\cdot 1$ & $\mathbf{4}$ \\
+1 & $(-1, 0, 3)$ & $(-1)\cdot 2 + 0\cdot 0 + 3\cdot 1$ & $\mathbf{1}$ \\
+2 & $(0, 3, 1)$ & $0\cdot 2 + 3\cdot 0 + 1\cdot 1$ & $\mathbf{1}$ \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+So $x * k = (4, 1, 1)$.
+
+\textbf{Why the two results differ:} $k$ is not symmetric, because $(1, 0, 2)$ reversed is $(2, 0, 1)$, which is a different kernel. Correlation and convolution give the same result only when the kernel reads the same in both directions.
+
+% ------------------------------------------------------------
+\subsubsection*{Exercise 3.2: When Correlation Equals Convolution}
+
+\textbf{Part 1: The proof.}
+\begin{itemize}
+  \item Theorem 3.4 says $X * K = X \star \mathrm{rot180}(K)$. In words, convolution is correlation with the kernel rotated by $180^\circ$.
+  \item Suppose $K = \mathrm{rot180}(K)$. Substituting that into the theorem gives $X * K = X \star K$. $\blacksquare$
+\end{itemize}
+
+Convolution differs from correlation only by the rotation, so a kernel that the rotation leaves unchanged makes the two operations identical.
+
+\textbf{Part 2: What the condition means entry by entry.}
+For a $3\times 3$ kernel, rot180 maps position $(u, v)$ to $(2-u, 2-v)$. So the condition is $k_{u,v} = k_{2-u,\,2-v}$, which means each entry must equal the entry diagonally opposite it through the centre:
+\begin{itemize}
+  \item the top-left corner equals the bottom-right corner,
+  \item the top-right corner equals the bottom-left corner,
+  \item the top-middle entry equals the bottom-middle entry,
+  \item the left-middle entry equals the right-middle entry,
+  \item the centre entry is free.
+\end{itemize}
+This property is called \textbf{point symmetry}. It is weaker than mirror symmetry about an axis.
+
+\textbf{Part 3: An example that is not symmetric about either axis.}
+\[
+K = \begin{pmatrix} 1 & 2 & 0 \\ 3 & 4 & 3 \\ 0 & 2 & 1 \end{pmatrix}
+\]
+\begin{itemize}
+  \item \textbf{rot180$(K)$:} Reverse the row order, then reverse each row. The last row $(0,2,1)$ becomes $(1,2,0)$, the middle row $(3,4,3)$ stays $(3,4,3)$, and the first row $(1,2,0)$ becomes $(0,2,1)$. The result equals $K$.
+  \item \textbf{Left-right mirror:} The first row becomes $(0,2,1)$, which differs from $(1,2,0)$. So $K$ is not symmetric about the vertical axis.
+  \item \textbf{Up-down mirror:} The first row becomes $(0,2,1)$, which again differs. So $K$ is not symmetric about the horizontal axis.
+\end{itemize}
+
+% ------------------------------------------------------------
+\subsubsection*{Exercise 3.3: A 2-D Correlation and What the Kernel Detects}
+
+\textbf{Given:}
+\[
+X = \begin{pmatrix} 0 & 1 & 2 \\ 3 & 4 & 5 \\ 6 & 7 & 8 \end{pmatrix}, \qquad
+K = \begin{pmatrix} 1 & -1 \\ 1 & -1 \end{pmatrix}
+\]
+
+\textbf{Step 1: Output size.}
+$(3 - 2 + 1) \times (3 - 2 + 1) = 2 \times 2$.
+
+\textbf{Step 2: General formula for this kernel.}
+Placing $K$ on the $2\times 2$ patch whose top-left corner is at $(i, j)$ gives
+\[
+y_{ij} = (x_{ij} + x_{i+1,j}) - (x_{i,j+1} + x_{i+1,j+1}).
+\]
+In words, this is the sum of the left column of the patch minus the sum of the right column.
+
+\textbf{Step 3: Compute each output.}
+
+\begin{center}
+\begin{tabular}{cccc}
+\toprule
+position & patch & left col $-$ right col & $y$ \\
+\midrule
+$(0,0)$ & $\begin{pmatrix} 0 & 1 \\ 3 & 4 \end{pmatrix}$ & $(0+3) - (1+4)$ & $\mathbf{-2}$ \\
+$(0,1)$ & $\begin{pmatrix} 1 & 2 \\ 4 & 5 \end{pmatrix}$ & $(1+4) - (2+5)$ & $\mathbf{-2}$ \\
+$(1,0)$ & $\begin{pmatrix} 3 & 4 \\ 6 & 7 \end{pmatrix}$ & $(3+6) - (4+7)$ & $\mathbf{-2}$ \\
+$(1,1)$ & $\begin{pmatrix} 4 & 5 \\ 7 & 8 \end{pmatrix}$ & $(4+7) - (5+8)$ & $\mathbf{-2}$ \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\[
+X \star K = \begin{pmatrix} -2 & -2 \\ -2 & -2 \end{pmatrix}
+\]
+
+\textbf{Step 4: Interpretation.}
+\begin{itemize}
+  \item The kernel measures the \textbf{horizontal change in intensity}, so it \textbf{detects vertical edges}, in the same way as Sobel-x but without the smoothing weights.
+  \item With cross-correlation, the output is positive when brightness \emph{decreases} from left to right and negative when it \emph{increases}.
+  \item In this $X$, every row increases by exactly 1 per column, so the image is a uniform left-to-right ramp. Each patch therefore has the same response, $2 \text{ rows} \times (-1) = -2$. The output is constant because the gradient is constant.
+\end{itemize}
+
+% ------------------------------------------------------------
+\subsubsection*{Exercise 3.4: Associativity of Full Convolution}
+
+\textbf{The definition used:} Full 1-D convolution is $(x * k)_t = \sum_u x_{t-u} k_u$, summed over every $u$ where the indices are valid. All sums are finite.
+
+\textbf{Step 1: Expand the left-hand side.}
+Treat $(x * k)$ as the signal and convolve it with $k'$:
+\[
+((x * k) * k')_t = \sum_s (x * k)_{t-s}\, k'_s = \sum_s \sum_u x_{t-s-u}\, k_u\, k'_s.
+\]
+
+\textbf{Step 2: Change variables.}
+Let $r = s + u$, so the total offset into $x$ is $r$, and $u = r - s$:
+\[
+= \sum_r x_{t-r} \left( \sum_s k_{r-s}\, k'_s \right).
+\]
+Swapping the order of summation is legal here because the sums are finite.
+
+\textbf{Step 3: Recognise the inner sum.}
+By the same definition, $\sum_s k_{r-s} k'_s = (k * k')_r$. Therefore
+\[
+= \sum_r x_{t-r}\, (k * k')_r = (x * (k * k'))_t. \qquad \blacksquare
+\]
+
+\textbf{Step 4: Kernel size of the merged kernel.}
+The full convolution of a length-$m$ kernel with a length-$m'$ kernel has length $m + m' - 1$. For two 3-tap kernels, the merged kernel has 5 taps.
+
+\textbf{Step 5: Conclusion about stacked layers.}
+\begin{itemize}
+  \item Two conv layers with no activation compute $x * k$, then $(x * k) * k'$, which equals $x * (k * k')$. That is \textbf{one} conv layer with kernel size $k + k' - 1$.
+  \item Biases do not change this result: $(x * k + b_1) * k' + b_2 = x * (k * k') + (b_1 \textstyle\sum k' + b_2)$. The extra term is just a new constant bias.
+  \item Libraries compute correlation rather than convolution, but correlation is convolution with a flipped kernel. A composition of flipped kernels is still a single kernel, so the conclusion still holds.
+  \item \textbf{The point of the exercise:} Without a nonlinearity between layers, extra depth adds no expressive power. The stack collapses into one linear filter. This is why ReLU or another activation sits between conv layers.
+\end{itemize}
+
+% ------------------------------------------------------------
+\subsubsection*{Exercise 3.5: Checking Translation Equivariance Numerically}
+
+\textbf{Setup from Example 3.8:}
+\[
+X = \begin{pmatrix} 2 & 0 & 1 & 3 \\ 1 & 3 & 0 & 2 \\ 0 & 1 & 2 & 1 \\ 3 & 2 & 1 & 0 \end{pmatrix}, \quad
+K = \begin{pmatrix} 1 & 2 \\ 0 & -1 \end{pmatrix}, \quad
+X \star K = \begin{pmatrix} -1 & 2 & 5 \\ 6 & 1 & 3 \\ 0 & 4 & 4 \end{pmatrix}
+\]
+
+\textbf{Step 1: Shift $X$ one column to the right.}
+Insert a zero column on the left and drop the last column so the image stays $4\times 4$:
+\[
+X' = \begin{pmatrix} 0 & 2 & 0 & 1 \\ 0 & 1 & 3 & 0 \\ 0 & 0 & 1 & 2 \\ 0 & 3 & 2 & 1 \end{pmatrix}
+\]
+
+\textbf{Step 2: Formula for this kernel.}
+\[
+y_{ij} = 1\cdot x_{ij} + 2\cdot x_{i,j+1} + 0\cdot x_{i+1,j} + (-1)\cdot x_{i+1,j+1}
+\]
+
+\textbf{Step 3: Compute the $3\times 3$ output.}
+
+\begin{center}
+\begin{tabular}{cccc}
+\toprule
+ & $j = 0$ & $j = 1$ & $j = 2$ \\
+\midrule
+$i = 0$ & $0 + 4 - 1 = \mathbf{3}$ & $2 + 0 - 3 = \mathbf{-1}$ & $0 + 2 - 0 = \mathbf{2}$ \\
+$i = 1$ & $0 + 2 - 0 = \mathbf{2}$ & $1 + 6 - 1 = \mathbf{6}$ & $3 + 0 - 2 = \mathbf{1}$ \\
+$i = 2$ & $0 + 0 - 3 = \mathbf{-3}$ & $0 + 2 - 2 = \mathbf{0}$ & $1 + 4 - 1 = \mathbf{4}$ \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\[
+X' \star K = \begin{pmatrix} 3 & -1 & 2 \\ 2 & 6 & 1 \\ -3 & 0 & 4 \end{pmatrix}
+\]
+
+\textbf{Step 4: Compare with the original output.}
+\begin{itemize}
+  \item Columns 1--2 of the new output, $(-1, 6, 0)$ and $(2, 1, 4)$, are exactly columns 0--1 of the original output. \textbf{The feature map moved one column to the right}, which is what Theorem 3.6 predicts: shifting and then correlating equals correlating and then shifting.
+  \item Column 0, $(3, 2, -3)$, is new. It comes from windows that cover the inserted zeros, so it is a \textbf{border effect}, not a violation of the theorem.
+  \item The original output's last column, $(5, 3, 4)$, disappeared because the input column that produced it was dropped.
+  \item This is why the theorem says to ``ignore borders''. Equivariance holds exactly in the interior and fails only where the padding or cropping changes the input.
+\end{itemize}
+
+\textbf{Takeaway:} The response pattern keeps its shape and simply moves with the input. That is equivariance. It is not invariance, because the output's position changes. Pooling adds approximate invariance later.
+
+% ------------------------------------------------------------
+\subsection*{Pixel Values and Brightness in Image Tensors}
+
+A higher value usually means a brighter pixel, but this is a convention, not a rule built into the tensor.
+
+\begin{itemize}
+  \item \textbf{Grayscale:} In the standard convention, 0 is black and the maximum is white. The maximum is 255 for \texttt{uint8} data, or 1.0 after scaling to $[0, 1]$. So a higher value means a brighter pixel.
+  \item \textbf{RGB:} Each channel stores the intensity of one colour. A higher value means more of that colour. Overall brightness depends on all three channels together; a common weighted formula is $\text{luminance} \approx 0.299R + 0.587G + 0.114B$. A high value in a single channel means ``more red'', for example, not ``brighter''.
+\end{itemize}
+
+\textbf{Two common exceptions:}
+\begin{itemize}
+  \item \textbf{Normalised inputs:} Pipelines often standardise each channel, for example $(x - \text{mean})/\text{std}$ as in ImageNet preprocessing. Values then become negative or positive. Higher still means brighter, but 0 now means ``average brightness'', not black.
+  \item \textbf{Inverted conventions:} Some datasets store ink as high values on a dark background. MNIST is an example: the digit strokes are near 255 and the background is 0. A higher value then means ``more ink'', which looks white when displayed but represents the dark stroke in the original writing. Some medical and scientific formats also use their own mappings.
+\end{itemize}
+
+For natural photos in \texttt{uint8} or $[0, 1]$ format, a higher value means brighter. Otherwise, check the dataset's preprocessing.

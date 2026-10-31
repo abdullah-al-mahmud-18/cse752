@@ -89,7 +89,7 @@ Create a Latex file from above conversation. Follow below rules to convert to la
 \setlength{\parskip}{0.55em}
 \setcounter{secnumdepth}{0}
 
-\title{CSE755: Generative Machine Learning}
+\title{CSE752: Deep Neural Networks}
 \author{}
 \date{}
 \setcounter{tocdepth}{1}
