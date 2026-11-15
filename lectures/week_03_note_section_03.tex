@@ -3,7 +3,6 @@
 % ============================================================
 
 \subsection*{3.1 One-Dimensional Cross-Correlation and Convolution}
-\addcontentsline{toc}{subsection}{3.1 One-Dimensional Cross-Correlation and Convolution}
 
 \textbf{Setup.} We have a signal $\mathbf{x} = (x_0, \ldots, x_{n-1})$ and a short kernel (filter) $\mathbf{k} = (k_0, \ldots, k_{m-1})$, with $m < n$. The kernel slides along the signal. At each position, the aligned entries are multiplied and the products are added. That sum is one output value.
 
@@ -122,7 +121,6 @@ Theorem 3.4 states this same relationship in 2-D, using $\mathrm{rot180}$.
 % ============================================================
 
 \subsection*{3.2 Two-Dimensional Cross-Correlation and Convolution}
-\addcontentsline{toc}{subsection}{3.2 Two-Dimensional Cross-Correlation and Convolution}
 
 This is the same idea as 1-D, except the kernel is now a small matrix $K$ of size $k_h \times k_w$. It slides across the image both horizontally and vertically.
 
@@ -173,7 +171,6 @@ The two outputs are completely different, because $K$ is asymmetric.
 % ============================================================
 
 \subsection*{3.3 What Deep-Learning Libraries Compute}
-\addcontentsline{toc}{subsection}{3.3 What Deep-Learning Libraries Compute}
 
 \texttt{conv2d} in PyTorch and TensorFlow computes \textbf{cross-correlation}, even though the layer is called ``convolutional''.
 
@@ -190,7 +187,6 @@ From this point on, ``convolution'' in a CNN means cross-correlation.
 % ============================================================
 
 \subsection*{3.4 Properties of the Operation}
-\addcontentsline{toc}{subsection}{3.4 Properties of the Operation}
 
 \subsubsection*{Proposition 3.5: Basic properties}
 All four examples below use small 1-D numbers so the arithmetic is easy to follow. Each property holds the same way in 2-D.
@@ -389,7 +385,6 @@ The pattern $(-5, 4, 1)$ is identical in both results. It has just moved right b
 % ============================================================
 
 \subsection*{3.5 A First Manual Example}
-\addcontentsline{toc}{subsection}{3.5 A First Manual Example}
 
 This section is the first hand calculation of a 2-D cross-correlation. It shows three things: the mechanics, what a kernel ``detects'', and how correlation and convolution can differ.
 
@@ -446,7 +441,6 @@ So the kernel is a detector for edges across the main diagonal.
 % ============================================================
 
 \subsection*{3.6 Why Use This Operator at All?}
-\addcontentsline{toc}{subsection}{3.6 Why Use This Operator at All?}
 
 \subsubsection*{1. Local statistics}
 The patterns that matter at the lowest level (edges, corners, textures) are determined by a pixel and its \textbf{immediate neighbours}.
@@ -496,7 +490,6 @@ Local connections and shared weights give \textbf{far fewer parameters} (Section
 % ============================================================
 
 \subsection*{3.7 Summary}
-\addcontentsline{toc}{subsection}{3.7 Summary}
 
 \begin{itemize}
   \item Cross-correlation: $(X \star K)_{ij} = \sum x_{i+u,\, j+v}\, k_{u,v}$. True convolution is the same with $K$ rotated $180^\circ$: $X * K = X \star \mathrm{rot180}(K)$.
