@@ -1,0 +1,384 @@
+% ============================================================
+% CSE752 Week 1 -- Practice Problems (same level as lecture problems)
+% ============================================================
+\section{Lecture 1: Practice Problems}
+
+\subsection*{About these problems}
+
+These problems match the level of the eight problems in the lecture notes and the four in-class problems. Each one asks for a single skill that Quiz 1 can test: an exact derivative or value, a shape or parameter count, one short chain-rule or backprop calculation, or a short verbal reason. Exact fractions are expected. A decimal is only needed when you approximate $\sigma$.
+
+\begin{center}
+\begin{tabular}{@{}l p{0.75\textwidth}@{}}
+\toprule
+Problem & Topic \\
+\midrule
+1 & Sigmoid and tanh values, derivatives, saturation \\
+2 & BCE through a sigmoid: derivation and one logistic step \\
+3 & Squared error vs.\ BCE, and the stable loss \\
+4 & Activation derivatives and the dead ReLU \\
+5 & Linear layers collapse \\
+6 & XOR / XNOR and a ReLU network \\
+7 & Shapes and parameter counting \\
+8 & Softmax cross-entropy, and two classes as a sigmoid \\
+9 & Scalar computation graph \\
+10 & Forward and backward pass, both units active, one step \\
+11 & Forward and backward pass with a dead unit \\
+12 & Board convention vs.\ NumPy batch convention \\
+13 & Short verbal answers \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\newpage
+
+% ============================================================
+\subsection*{Problem 1. Sigmoid and tanh}
+% ============================================================
+
+\begin{enumerate}[label=(\alph*)]
+\item Compute $\sigma(\ln 3)$ and $\sigma'(\ln 3)$ exactly.
+\item Compute $\sigma(-\ln 4)$ and $\sigma'(-\ln 4)$ exactly.
+\item Compute $\tanh(0)$ and $\tanh'(0)$.
+\item A sigmoid hidden unit has pre-activation $z = 6$ on a training point. Bound its backward factor $\sigma'(6)$ and say what this means for learning.
+\end{enumerate}
+
+\textbf{Solution.}
+
+\textbf{(a)} $\sigma(\ln 3) = \dfrac{1}{1 + e^{-\ln 3}} = \dfrac{1}{1 + 1/3} = \dfrac34$. Then $\sigma'(\ln 3) = \dfrac34\cdot\dfrac14 = \dfrac{3}{16}$.
+
+\textbf{(b)} $\sigma(-\ln 4) = \dfrac{1}{1 + e^{\ln 4}} = \dfrac15$. Then $\sigma'(-\ln 4) = \dfrac15\cdot\dfrac45 = \dfrac{4}{25}$.
+
+\textbf{(c)} $\tanh 0 = 0$ and $\tanh'(0) = 1 - \tanh^2 0 = 1$.
+
+\textbf{(d)} $\sigma(6)$ is very close to 1, so $1 - \sigma(6) = \dfrac{e^{-6}}{1 + e^{-6}} < e^{-6}$. Since $\sigma(6) < 1$,
+\[
+\sigma'(6) = \sigma(6)\big(1 - \sigma(6)\big) < e^{-6} \approx 2.5\times 10^{-3}.
+\]
+Every gradient that passes back through this unit is multiplied by a number below $0.0025$. The unit's incoming weights barely move, because the unit is saturated.
+
+% ============================================================
+\subsection*{Problem 2. BCE through a sigmoid, and one logistic step}
+% ============================================================
+
+\begin{enumerate}[label=(\alph*)]
+\item Starting from $L = -\big(y\log\hat y + (1-y)\log(1-\hat y)\big)$ with $\hat y = \sigma(z)$, compute $\partial L/\partial\hat y$, then multiply by $\sigma'(z)$ to show $\partial L/\partial z = \hat y - y$.
+\item A logistic neuron has $w = 1$, $b = 1$, input $x = -1$, and label $y = 0$. Compute $z$, $\hat y$, $L$, $\partial L/\partial z$, $\partial L/\partial w$, and $\partial L/\partial b$.
+\item Write the update for $w$ and $b$ with learning rate $\eta > 0$. Explain in one sentence why the update moves $\hat y$ toward the label.
+\end{enumerate}
+
+\textbf{Solution.}
+
+\textbf{(a)}
+\[
+\frac{\partial L}{\partial \hat y} = -\frac{y}{\hat y} + \frac{1-y}{1-\hat y} = \frac{-y(1-\hat y) + (1-y)\hat y}{\hat y(1-\hat y)} = \frac{\hat y - y}{\hat y(1-\hat y)}.
+\]
+Since $\sigma'(z) = \hat y(1-\hat y)$,
+\[
+\frac{\partial L}{\partial z} = \frac{\hat y - y}{\hat y(1-\hat y)}\cdot\hat y(1-\hat y) = \hat y - y.
+\]
+
+\textbf{(b)} $z = 1\cdot(-1) + 1 = 0$, so $\hat y = \sigma(0) = \tfrac12$. Since $y = 0$, $L = -\log(1 - \tfrac12) = \ln 2$. Then
+\[
+\frac{\partial L}{\partial z} = \tfrac12 - 0 = \tfrac12,\qquad \frac{\partial L}{\partial w} = \frac{\partial L}{\partial z}\,x = -\tfrac12,\qquad \frac{\partial L}{\partial b} = \tfrac12.
+\]
+
+\textbf{(c)} $w \leftarrow 1 - \eta(-\tfrac12) = 1 + \tfrac{\eta}{2}$ and $b \leftarrow 1 - \tfrac{\eta}{2}$. On this input the new score is $z = (1+\tfrac{\eta}2)(-1) + 1 - \tfrac{\eta}2 = -\eta < 0$, so $\hat y = \sigma(-\eta) < \tfrac12$. The prediction moves toward the label $0$.
+
+% ============================================================
+\subsection*{Problem 3. Squared error vs.\ BCE, and the stable loss}
+% ============================================================
+
+\begin{enumerate}[label=(\alph*)]
+\item For the neuron in Problem 2(b), compute $\partial L/\partial z$ when the loss is $L = \frac12(\hat y - y)^2$ instead of BCE.
+\item Let $y = 1$ and $z = -\ln 4$. Compute $\partial L/\partial z$ under BCE and under squared error. Which one gives the stronger correction, and why?
+\item Use $L(z,y) = \max(z,0) - yz + \log(1 + e^{-|z|})$ to evaluate the BCE at $z = \ln 3$, $y = 0$. Check the answer against the direct formula.
+\end{enumerate}
+
+\textbf{Solution.}
+
+\textbf{(a)} $\dfrac{\partial L}{\partial z} = (\hat y - y)\,\sigma'(z) = \tfrac12\cdot\tfrac14 = \tfrac18$. That is a quarter of the BCE gradient $\tfrac12$.
+
+\textbf{(b)} $\hat y = \sigma(-\ln 4) = \tfrac15$ (Problem 1b). Under BCE, $\partial L/\partial z = \tfrac15 - 1 = -\tfrac45$. Under squared error,
+\[
+\frac{\partial L}{\partial z} = \left(\tfrac15 - 1\right)\cdot\tfrac{4}{25} = -\tfrac{16}{125}.
+\]
+BCE is stronger by a factor of $\dfrac{4/5}{16/125} = \dfrac{25}{4}$. Squared error carries the extra factor $\sigma'(z)$, which is small when the prediction is confidently wrong. BCE cancels that factor.
+
+\textbf{(c)} With $z = \ln 3 > 0$ and $y = 0$: $L = \ln 3 - 0 + \log(1 + \tfrac13) = \ln 3 + \ln\tfrac43 = \ln 4$. Direct formula: $\hat y = \tfrac34$, so $L = -\log(1 - \tfrac34) = \ln 4$. The two agree.
+
+% ============================================================
+\subsection*{Problem 4. Activation derivatives and the dead ReLU}
+% ============================================================
+
+\begin{enumerate}[label=(\alph*)]
+\item Give $f'(z)$ for ReLU at $z = -2$, $z = 3$, and $z = 0$ (the value code uses).
+\item Give $f'(-2)$ for Leaky ReLU with $\alpha = 0.01$.
+\item A ReLU hidden unit has $z < 0$ on one example. List every parameter of that unit that gets zero gradient from this example, and give the reason for each.
+\item When is the unit called \emph{dead}, and how does Leaky ReLU change that?
+\end{enumerate}
+
+\textbf{Solution.}
+
+\textbf{(a)} $\mathrm{ReLU}'(-2) = 0$, $\mathrm{ReLU}'(3) = 1$, and at $z = 0$ any value in $[0,1]$ is a subgradient. Code uses $0$.
+
+\textbf{(b)} $f'(-2) = \alpha = 0.01$.
+
+\textbf{(c)} The incoming weights and the bias get zero gradient because the mask $\mathrm{ReLU}'(z) = 0$ sets $\delta = 0$ for this unit. The outgoing weight gets zero gradient because its gradient is $\delta_{\text{next}}\cdot a$, and $a = 0$.
+
+\textbf{(d)} The unit is dead when $z < 0$ on \emph{every} example in the data. Then it gets zero gradient on every step and is frozen for the rest of training. With Leaky ReLU the derivative on the negative side is $\alpha > 0$, so the unit still gets a small update and can recover.
+
+% ============================================================
+\subsection*{Problem 5. Linear layers collapse}
+% ============================================================
+
+Two layers use the identity activation:
+\[
+W^{(1)} = \begin{pmatrix}1 & 2\\ 0 & 1\end{pmatrix},\ b^{(1)} = \begin{pmatrix}1\\-1\end{pmatrix},\qquad W^{(2)} = \begin{pmatrix}2 & -1\end{pmatrix},\ b^{(2)} = 3.
+\]
+
+\begin{enumerate}[label=(\alph*)]
+\item Write the network as one affine map $\hat y = Mx + c$, and give $M$ and $c$.
+\item Evaluate both forms at $x = (1,1)^\top$ and check that they agree.
+\item Explain in one or two sentences why this network cannot separate XOR, however wide the hidden layer is made.
+\end{enumerate}
+
+\textbf{Solution.}
+
+\textbf{(a)} $M = W^{(2)}W^{(1)} = (2\cdot1 + (-1)\cdot0,\ 2\cdot 2 + (-1)\cdot 1) = (2,\ 3)$ and $c = W^{(2)}b^{(1)} + b^{(2)} = (2 + 1) + 3 = 6$. So $\hat y = 2x_1 + 3x_2 + 6$.
+
+\textbf{(b)} Two layers: $W^{(1)}x + b^{(1)} = (3,1) + (1,-1) = (4, 0)$, so $\hat y = 2\cdot 4 - 0 + 3 = 11$. One map: $2 + 3 + 6 = 11$. They agree.
+
+\textbf{(c)} An affine map of an affine map is affine. At any width the network computes a single score $w^\top x + b$, so its decision boundary is a line, and XOR is not linearly separable.
+
+% ============================================================
+\subsection*{Problem 6. XNOR and a ReLU network for XOR}
+% ============================================================
+
+\begin{enumerate}[label=(\alph*)]
+\item XNOR has labels $(0,0)\mapsto 1$, $(1,0)\mapsto 0$, $(0,1)\mapsto 0$, $(1,1)\mapsto 1$. Prove that no $w_1, w_2, b$ give $w_1x_1 + w_2x_2 + b > 0$ on class 1 and $< 0$ on class 0.
+\item Consider the network
+\[
+z^{(1)} = \begin{pmatrix}1 & -1\\ -1 & 1\end{pmatrix}\begin{pmatrix}x_1\\x_2\end{pmatrix},\quad a = \mathrm{ReLU}(z^{(1)}),\quad \hat y = a_1 + a_2.
+\]
+Fill in the table of $z_1, z_2, a_1, a_2, \hat y$ for the four inputs and show that it computes XOR.
+\item How many scalar parameters does this network have if a bias is counted for every unit (biases here are 0)?
+\end{enumerate}
+
+\textbf{Solution.}
+
+\textbf{(a)} The four conditions are
+\[
+b > 0,\qquad w_1 + b < 0,\qquad w_2 + b < 0,\qquad w_1 + w_2 + b > 0.
+\]
+The middle two give $w_1 < -b$ and $w_2 < -b$. Then $w_1 + w_2 + b < -b - b + b = -b < 0$, because $b > 0$. This contradicts the last condition.
+
+\textbf{(b)}
+\begin{center}
+\begin{tabular}{@{}ccccccc@{}}
+\toprule
+$x_1$ & $x_2$ & $z_1$ & $z_2$ & $a_1$ & $a_2$ & $\hat y$ \\
+\midrule
+0 & 0 & 0 & 0 & 0 & 0 & 0 \\
+1 & 0 & 1 & $-1$ & 1 & 0 & 1 \\
+0 & 1 & $-1$ & 1 & 0 & 1 & 1 \\
+1 & 1 & 0 & 0 & 0 & 0 & 0 \\
+\bottomrule
+\end{tabular}
+\end{center}
+The outputs $0,1,1,0$ are XOR. Each hidden unit detects one of the two ``exactly one input on'' cases.
+
+\textbf{(c)} $W^{(1)}$ has 4 entries, $b^{(1)}$ has 2, $W^{(2)}$ has 2, and $b^{(2)}$ has 1, for a total of 9.
+
+% ============================================================
+\subsection*{Problem 7. Shapes and parameter counting}
+% ============================================================
+
+\begin{enumerate}[label=(\alph*)]
+\item A network is $3\to5\to2$. Write the shapes of $W^{(1)}$, $b^{(1)}$, $W^{(2)}$, $b^{(2)}$ in the board convention (out $\times$ in), and count the parameters.
+\item A batch of 16 rows uses the code convention for the same network. Give the shapes of $X$, $W^{(1)}_{\text{code}}$, $Z^{(1)}$, $Z^{(2)}$, and $dW^{(1)}_{\text{code}}$.
+\item Count the parameters of $100\to50\to20\to5$. Which layer has the most?
+\end{enumerate}
+
+\textbf{Solution.}
+
+\textbf{(a)} $W^{(1)}\in\mathbb{R}^{5\times3}$, $b^{(1)}\in\mathbb{R}^5$, $W^{(2)}\in\mathbb{R}^{2\times5}$, $b^{(2)}\in\mathbb{R}^2$. Count: $(5\cdot 3 + 5) + (2\cdot 5 + 2) = 20 + 12 = 32$.
+
+\textbf{(b)} $X$ is $16\times 3$, $W^{(1)}_{\text{code}}$ is $3\times 5$, $Z^{(1)}$ is $16\times 5$, $Z^{(2)}$ is $16\times 2$, and $dW^{(1)}_{\text{code}}$ has the same shape as $W^{(1)}_{\text{code}}$, which is $3\times 5$.
+
+\textbf{(c)}
+\[
+100\cdot 50 + 50 = 5{,}050,\qquad 50\cdot 20 + 20 = 1{,}020,\qquad 20\cdot 5 + 5 = 105.
+\]
+The total is $6{,}175$. The first layer has the most, because the input dimension is the largest.
+
+% ============================================================
+\subsection*{Problem 8. Softmax cross-entropy}
+% ============================================================
+
+\begin{enumerate}[label=(\alph*)]
+\item Let $z = (0,\ \ln 2,\ \ln 5)$ and let the true class be class 3. Compute $p = \mathrm{softmax}(z)$, $L$, and $\nabla_z L$. Check that $p$ sums to 1 and $\nabla_z L$ sums to 0.
+\item Subtract $m = \max_j z_j$ from every logit and recompute $p$. What changes?
+\item Let $z = (\ln 2,\ 0)$ and $y = (1, 0)$. Compute $p$, $L$, and $\nabla_z L$. Identify the logit difference that makes this a sigmoid, and check that $\partial L/\partial z_1 = \sigma(z_1 - z_2) - 1$.
+\end{enumerate}
+
+\textbf{Solution.}
+
+\textbf{(a)} $e^{z} = (1, 2, 5)$ and the normalizer is $8$, so $p = (1/8,\ 1/4,\ 5/8)$, which sums to $1$. With $y = (0,0,1)$, $L = -\log\tfrac58 = \log\tfrac85$, and
+\[
+\nabla_z L = p - y = \left(\tfrac18,\ \tfrac14,\ -\tfrac38\right),
+\]
+which sums to $\tfrac{1 + 2 - 3}{8} = 0$.
+
+\textbf{(b)} With $m = \ln 5$, the shifted logits are $(-\ln 5,\ \ln\tfrac25,\ 0)$, so $e^{z - m} = (1/5,\ 2/5,\ 1)$ with normalizer $8/5$. That gives $p = (1/8, 1/4, 5/8)$ again. Nothing changes in $p$, because $e^{-m}$ cancels between numerator and denominator. The only change is that every exponential is now at most 1, so nothing overflows.
+
+\textbf{(c)} $e^{z} = (2, 1)$ and the normalizer is $3$, so $p = (2/3,\ 1/3)$, $L = -\log\tfrac23 = \log\tfrac32$, and $\nabla_z L = (-\tfrac13,\ \tfrac13)$. Since the true class is class 1, the logit difference is $z_1 - z_2 = \ln 2$. Then $\sigma(\ln 2) = \dfrac{1}{1 + 1/2} = \dfrac23$, and $\sigma(\ln 2) - 1 = -\dfrac13 = \partial L/\partial z_1$.
+
+% ============================================================
+\subsection*{Problem 9. Scalar computation graph}
+% ============================================================
+
+Let $w = 3$, $x = 2$, $y = 5$, with $u = wx$, $r = u - y$, and $L = \frac12 r^2$.
+
+\begin{enumerate}[label=(\alph*)]
+\item Compute $u$, $r$, and $L$.
+\item Write each local derivative, then compute $\partial L/\partial w$ and $\partial L/\partial x$ by multiplying along the path.
+\item Check $\partial L/\partial w$ with the closed form $L = \frac12(wx - y)^2$.
+\end{enumerate}
+
+\textbf{Solution.}
+
+\textbf{(a)} $u = 6$, $r = 1$, $L = \tfrac12$.
+
+\textbf{(b)} The local derivatives are $\partial L/\partial r = r = 1$, $\partial r/\partial u = 1$, $\partial u/\partial w = x = 2$, and $\partial u/\partial x = w = 3$. So
+\[
+\frac{\partial L}{\partial w} = 1\cdot 1\cdot 2 = 2,\qquad \frac{\partial L}{\partial x} = 1\cdot 1\cdot 3 = 3.
+\]
+
+\textbf{(c)} $\partial L/\partial w = (wx - y)\,x = (6 - 5)\cdot 2 = 2$, which matches.
+
+% ============================================================
+\subsection*{Problem 10. A $2\to2\to1$ net, both hidden units active}
+% ============================================================
+
+ReLU hidden layer, sigmoid output, binary cross-entropy. One example:
+\[
+x = \begin{pmatrix}2\\1\end{pmatrix},\ y = 0,\quad W^{(1)} = \begin{pmatrix}1 & -1\\ 0 & 1\end{pmatrix},\ b^{(1)} = \begin{pmatrix}0\\1/2\end{pmatrix},\quad W^{(2)} = \begin{pmatrix}1 & -2/3\end{pmatrix},\ b^{(2)} = 0.
+\]
+
+\begin{enumerate}[label=(\alph*)]
+\item Compute $z^{(1)}$, $a^{(1)}$, $z^{(2)}$, $\hat y$, and $L$.
+\item Compute $\delta^{(2)}$, $\nabla_{W^{(2)}}L$, $\nabla_{b^{(2)}}L$, $\delta^{(1)}$, $\nabla_{W^{(1)}}L$, and $\nabla_{b^{(1)}}L$.
+\item With $\eta = 1/10$, update $W^{(2)}$ and $b^{(2)}$ only. Recompute $z^{(2)}$ using the same $a^{(1)}$, and show that the new $\hat y$ is smaller than $1/2$.
+\end{enumerate}
+
+\textbf{Solution.}
+
+\textbf{(a)}
+\[
+z^{(1)} = \begin{pmatrix}2 - 1\\ 1\end{pmatrix} + \begin{pmatrix}0\\1/2\end{pmatrix} = \begin{pmatrix}1\\3/2\end{pmatrix},\qquad a^{(1)} = \begin{pmatrix}1\\3/2\end{pmatrix}.
+\]
+Both units are active, so $\mathrm{ReLU}'(z^{(1)}) = (1,1)^\top$. Then $z^{(2)} = 1\cdot1 - \tfrac23\cdot\tfrac32 + 0 = 0$, $\hat y = \tfrac12$, and $L = -\log(1 - \tfrac12) = \ln 2$.
+
+\textbf{(b)} $\delta^{(2)} = \hat y - y = \tfrac12$.
+\[
+\nabla_{W^{(2)}}L = \tfrac12\begin{pmatrix}1 & 3/2\end{pmatrix} = \begin{pmatrix}1/2 & 3/4\end{pmatrix},\qquad \nabla_{b^{(2)}}L = \tfrac12.
+\]
+\[
+\delta^{(1)} = \left((W^{(2)})^\top\delta^{(2)}\right)\odot\begin{pmatrix}1\\1\end{pmatrix} = \begin{pmatrix}1\\-2/3\end{pmatrix}\cdot\tfrac12 = \begin{pmatrix}1/2\\-1/3\end{pmatrix}.
+\]
+\[
+\nabla_{W^{(1)}}L = \delta^{(1)}x^\top = \begin{pmatrix}1/2\\-1/3\end{pmatrix}\begin{pmatrix}2 & 1\end{pmatrix} = \begin{pmatrix}1 & 1/2\\ -2/3 & -1/3\end{pmatrix},\qquad \nabla_{b^{(1)}}L = \begin{pmatrix}1/2\\-1/3\end{pmatrix}.
+\]
+No entry is zero: both units are active and both input coordinates are nonzero.
+
+\textbf{(c)}
+\[
+W^{(2)} \leftarrow \begin{pmatrix}1 & -\tfrac23\end{pmatrix} - \tfrac1{10}\begin{pmatrix}\tfrac12 & \tfrac34\end{pmatrix} = \begin{pmatrix}\tfrac{19}{20} & -\tfrac{89}{120}\end{pmatrix},\qquad b^{(2)} \leftarrow 0 - \tfrac1{10}\cdot\tfrac12 = -\tfrac1{20}.
+\]
+\[
+z^{(2)} = \tfrac{19}{20}\cdot 1 - \tfrac{89}{120}\cdot\tfrac32 - \tfrac1{20} = \tfrac{76}{80} - \tfrac{89}{80} - \tfrac{4}{80} = -\tfrac{17}{80} < 0.
+\]
+So $\hat y = \sigma(-17/80) < \sigma(0) = \tfrac12$, which moves the prediction toward the label $y = 0$.
+
+% ============================================================
+\subsection*{Problem 11. A dead unit}
+% ============================================================
+
+ReLU hidden layer, sigmoid output, binary cross-entropy:
+\[
+x = \begin{pmatrix}1\\2\end{pmatrix},\ y = 1,\quad W^{(1)} = I_2,\ b^{(1)} = \begin{pmatrix}0\\-3\end{pmatrix},\quad W^{(2)} = \begin{pmatrix}-1 & 4\end{pmatrix},\ b^{(2)} = 1.
+\]
+
+\begin{enumerate}[label=(\alph*)]
+\item Compute $z^{(1)}$, $a^{(1)}$, $z^{(2)}$, $\hat y$, and $L$.
+\item Compute $\delta^{(2)}$, $\nabla_{W^{(2)}}L$, $\nabla_{b^{(2)}}L$, $\delta^{(1)}$, $\nabla_{W^{(1)}}L$, and $\nabla_{b^{(1)}}L$.
+\item Which hidden unit is dead? List the gradient entries that are zero because of it, and give the reason for each.
+\end{enumerate}
+
+\textbf{Solution.}
+
+\textbf{(a)}
+\[
+z^{(1)} = \begin{pmatrix}1\\2\end{pmatrix} + \begin{pmatrix}0\\-3\end{pmatrix} = \begin{pmatrix}1\\-1\end{pmatrix},\qquad a^{(1)} = \begin{pmatrix}1\\0\end{pmatrix}.
+\]
+Then $z^{(2)} = -1\cdot 1 + 4\cdot 0 + 1 = 0$, $\hat y = \tfrac12$, and $L = -\log\tfrac12 = \ln 2$.
+
+\textbf{(b)} $\delta^{(2)} = \tfrac12 - 1 = -\tfrac12$.
+\[
+\nabla_{W^{(2)}}L = -\tfrac12\begin{pmatrix}1 & 0\end{pmatrix} = \begin{pmatrix}-1/2 & 0\end{pmatrix},\qquad \nabla_{b^{(2)}}L = -\tfrac12.
+\]
+\[
+(W^{(2)})^\top\delta^{(2)} = \begin{pmatrix}1/2\\-2\end{pmatrix},\qquad \mathrm{ReLU}'(z^{(1)}) = \begin{pmatrix}1\\0\end{pmatrix},\qquad \delta^{(1)} = \begin{pmatrix}1/2\\0\end{pmatrix}.
+\]
+\[
+\nabla_{W^{(1)}}L = \begin{pmatrix}1/2\\0\end{pmatrix}\begin{pmatrix}1 & 2\end{pmatrix} = \begin{pmatrix}1/2 & 1\\0 & 0\end{pmatrix},\qquad \nabla_{b^{(1)}}L = \begin{pmatrix}1/2\\0\end{pmatrix}.
+\]
+
+\textbf{(c)} Unit 2 is dead because $z^{(1)}_2 = -1 < 0$. Its upstream signal $-2$ is nonzero, but the mask 0 blocks it. That zero sets the second row of $\nabla_{W^{(1)}}L$ and the second entry of $\nabla_{b^{(1)}}L$ to zero. The second entry of $\nabla_{W^{(2)}}L$ is also zero, for a different reason: $a^{(1)}_2 = 0$. On this example the dead unit's incoming weights, bias, and outgoing weight do not move. Unit 1 still learns.
+
+% ============================================================
+\subsection*{Problem 12. Board convention vs.\ NumPy batch convention}
+% ============================================================
+
+\begin{enumerate}[label=(\alph*)]
+\item In Problem 10, the board gradient is $\nabla_{W^{(2)}}L = (1/2,\ 3/4)$. With $n = 1$, what is $dW^{(2)}_{\text{code}}$, and what is its shape?
+\item A batch of $n = 2$ has predictions $\hat Y = (1/2,\ 3/4)^\top$ and labels $Y = (1,\ 0)^\top$, with a mean loss. Compute $dZ^{(2)}$ and $db^{(2)}$.
+\item For the network $2\to2\to1$ in the code convention, write the shapes of $dZ^{(2)}$, $dA^{(1)}$, and $dZ^{(1)}$ for this batch. Write the formula for $dZ^{(1)}$.
+\end{enumerate}
+
+\textbf{Solution.}
+
+\textbf{(a)} $dW^{(2)}_{\text{code}} = (A^{(1)})^\top dZ^{(2)} = (1/2,\ 3/4)^\top$, a $2\times 1$ column. It is the transpose of the board row and describes the same linear map.
+
+\textbf{(b)}
+\[
+dZ^{(2)} = \frac{\hat Y - Y}{n} = \frac12\begin{pmatrix}-1/2\\3/4\end{pmatrix} = \begin{pmatrix}-1/4\\3/8\end{pmatrix},\qquad db^{(2)} = -\tfrac14 + \tfrac38 = \tfrac18.
+\]
+
+\textbf{(c)} $dZ^{(2)}$ is $2\times 1$, $dA^{(1)} = dZ^{(2)}(W^{(2)}_{\text{code}})^\top$ is $2\times 2$, and $dZ^{(1)} = dA^{(1)}\odot\mathbf 1[Z^{(1)} > 0]$ is $2\times 2$. The mask is built from $Z^{(1)}$.
+
+% ============================================================
+\subsection*{Problem 13. Short verbal answers}
+% ============================================================
+
+Answer each in two to four sentences.
+
+\begin{enumerate}[label=(\alph*)]
+\item Why does the forward pass cache $z^{(1)}$ and not only $a^{(1)}$?
+\item Why is the binary output head sigmoid plus BCE rather than sigmoid plus squared error?
+\item Random initialization on a balanced binary problem gives an initial loss near $0.69$. Explain the number.
+\item Every hidden unit is dead on one example. What is $\nabla_{W^{(1)}}L$ on that example? What if this happens on every example in the batch?
+\item State the universal approximation theorem informally, and name one thing it does \emph{not} promise.
+\end{enumerate}
+
+\textbf{Solution.}
+
+\textbf{(a)} The ReLU backward mask is $\mathbf 1[z > 0]$. When $a = 0$, the pre-activation could have been negative or exactly zero, and $a$ cannot tell these apart. Those two cases are exactly where the subgradient choice matters. Storing $z$ makes the mask exact.
+
+\textbf{(b)} With BCE, $\partial L/\partial z = \hat y - y$, because the $\sigma'(z)$ factor cancels. With squared error, $\partial L/\partial z = (\hat y - y)\sigma'(z)$, and $\sigma'(z) \approx 0$ when the sigmoid saturates. A confidently wrong prediction would then get almost no update. BCE avoids that.
+
+\textbf{(c)} With small random weights, $z \approx 0$, so $\hat y \approx \tfrac12$. The loss is then $-\log\tfrac12 = \ln 2 \approx 0.693$ for either label, which is the loss of a coin flip.
+
+\textbf{(d)} $f'(z^{(1)}) = 0$, so $\delta^{(1)} = 0$ and $\nabla_{W^{(1)}}L = \delta^{(1)}x^\top = 0$, and $\nabla_{b^{(1)}}L = 0$ as well. The example teaches the first layer nothing. If it happens on every example in the batch, the first-layer update is the zero matrix.
+
+\textbf{(e)} A single hidden layer of sigmoids with enough units can approximate any continuous function on a compact set to any uniform tolerance. It is an existence result only. It does not give the width or the weights, and it does not promise that training will find them or that the network will be easy to optimize.

@@ -1,0 +1,315 @@
+\subsection*{Week 1 Slides, Pages 26--44: Backpropagation, Practice Problems and Solutions}
+
+\textbf{Context.} The earlier slides built a tiny network and ran it \textbf{forward} (input $\to$ prediction $\to$ loss). From page 26 on, the slides run it \textbf{backward}. That means working out how much each weight was to blame for the error, nudging the weights, and checking that the loss went down. After that come four practice problems and their solutions.
+
+% ------------------------------------------------------------
+\subsection*{Page 26 --- The $\delta$ (Delta) Recursion}
+
+This page is the core recipe for backpropagation.
+
+\textbf{Symbols}
+\begin{itemize}[leftmargin=*]
+  \item $\delta^{(\ell)}$ (``delta at layer $\ell$''): the error signal at layer $\ell$. It says how much the loss would change if you nudged that layer's raw scores $z^{(\ell)}$.
+  \item $\hat{y}$: the network's prediction. $y$: the true label (0 or 1).
+  \item $W^{(\ell+1)}$: the weights of the next layer up, the one closer to the output.
+  \item $\top$ (transpose): flips a matrix, so rows become columns.
+  \item $\odot$: multiply two lists entry by entry (1st $\times$ 1st, 2nd $\times$ 2nd, \ldots).
+  \item $f'(z^{(\ell)})$: the slope of the activation function at the score each unit had. For ReLU this is 1 if the unit was on ($z>0$) and 0 if it was off.
+  \item $a^{(\ell-1)}$: the outputs of the layer below, i.e.\ what fed into this layer.
+\end{itemize}
+
+\subsubsection*{Equation 1: Output Error Signal}
+\[
+\delta^{(L)} = \hat{y} - y
+\]
+At the output, the error signal is just ``prediction minus truth''.
+\begin{itemize}[leftmargin=*]
+  \item \textbf{Condition:} this only holds for a sigmoid output with binary cross-entropy loss. With other pairs you'd get extra factors.
+  \item \textbf{Special values:} if $\hat{y}=y$, the signal is 0 and nothing changes. If $\hat{y}>y$ (predicted too high), it's positive, so the weights get pushed down. If $\hat{y}<y$, it's negative, so they get pushed up. It can never be bigger than 1 in size.
+\end{itemize}
+
+\subsubsection*{Equation 2: Passing the Error Back One Layer}
+\[
+\delta^{(\ell)} = \left( \left(W^{(\ell+1)}\right)^{\top} \delta^{(\ell+1)} \right) \odot f'(z^{(\ell)})
+\]
+This passes the blame one layer down. It works in two steps:
+\begin{enumerate}[leftmargin=*]
+  \item $\left(W^{(\ell+1)}\right)^{\top} \delta^{(\ell+1)}$: send the error back along the same connections it came through. A unit gets more blame if it had a large weight into the next layer.
+  \item $\odot\, f'(z^{(\ell)})$: scale each unit's blame by how responsive it was. A ReLU unit that was off ($f'=0$) gets zero blame. That's the ``dead unit'' idea in Problem 3.
+\end{enumerate}
+\begin{itemize}[leftmargin=*]
+  \item \textbf{Condition:} the activation must act on each unit separately (ReLU, sigmoid, tanh). Softmax doesn't, so this formula doesn't apply to it (explained below).
+  \item \textbf{Special values:} if $f'=0$ (ReLU off), that unit's $\delta$ is 0. If $f'$ is tiny (a sigmoid with a very large $|z|$), the blame almost vanishes. If a weight is 0, no blame flows back along that link.
+\end{itemize}
+
+\textbf{Why the transpose?} $W$ is shaped (next layer size $\times$ this layer size). Flipping it turns a ``next-layer-sized'' list back into a ``this-layer-sized'' list, so the shapes line up.
+
+\subsubsection*{What a Unit Is, and Why Softmax Does Not Fit Equation 2}
+
+A \textbf{unit} is one neuron in a layer, one ``box'' in the network diagram. A layer with 3 units has 3 raw scores, $z=(z_1,z_2,z_3)$, and 3 outputs, $a=(a_1,a_2,a_3)$.
+
+\textbf{Acting on each unit separately} means each unit's output depends only on its own score:
+\begin{itemize}[leftmargin=*]
+  \item ReLU: $a_1 = \max(0, z_1)$, and $z_2$ and $z_3$ play no part.
+  \item Sigmoid and tanh work the same way: $a_2 = \sigma(z_2)$, and so on.
+\end{itemize}
+So if you change $z_1$, only $a_1$ changes. Because of this, each unit has a single slope, $f'(z_i)$, and the $\odot$ in Equation 2 can multiply each unit's blame by its own slope.
+
+\textbf{Softmax doesn't work this way.} It computes
+\[
+p_i = \frac{e^{z_i}}{e^{z_1} + e^{z_2} + e^{z_3}},
+\]
+and the bottom of that fraction includes every unit's score. So each output depends on all the scores. Raise $z_1$, and $p_1$ goes up while $p_2$ and $p_3$ go down, since the three must still add to 1.
+
+\textbf{Example.} Take $z=(\ln 2, 0, 0)$, which gives $p=(\tfrac12, \tfrac14, \tfrac14)$. Now change only $z_1$, to $\ln 6$. The totals become $6, 1, 1$, so $p=(\tfrac34, \tfrac18, \tfrac18)$. Units 2 and 3 changed even though their own scores didn't.
+
+\textbf{Why this breaks Equation 2.} With softmax, one slope per unit isn't enough. You need the effect of every score on every output: how $z_1$ moves $p_1$, $p_2$ and $p_3$, how $z_2$ moves each of them, and so on. That's a full grid of slopes (a matrix), not a single list, so entry-by-entry multiplication with $\odot$ can't capture it.
+
+This is why softmax is only used at the output layer, paired with cross-entropy loss. When you combine the two, all those cross-effects cancel out and leave the simple result $\delta = p - y$ (lecture notes, Proposition 4.1). So you never need the $\odot f'$ step for softmax at all.
+
+\subsubsection*{Equation 3: Weight and Bias Gradients}
+\[
+\nabla_{W^{(\ell)}} L = \delta^{(\ell)} \left(a^{(\ell-1)}\right)^{\top}, \qquad \nabla_{b^{(\ell)}} L = \delta^{(\ell)}
+\]
+This gives the gradient, meaning the ``which way and how much to change'' for each weight and bias.
+\begin{itemize}[leftmargin=*]
+  \item The weight from input $j$ into unit $i$ gets (blame on unit $i$) $\times$ (value of input $j$). So a weight changes a lot only if both its unit was blamed and its input was large.
+  \item The bias always acts like it sees an input of 1, so its gradient is just the blame itself.
+  \item \textbf{Special values:} if an input is 0, every weight reading from it gets gradient 0 on this example. It had no effect, so it gets no blame.
+\end{itemize}
+
+% ------------------------------------------------------------
+\subsection*{Page 27 --- Backward Pass on the Running Example}
+
+Recall from the forward pass: $\hat{y}=\tfrac12$, $y=1$, $a^{(1)}=(1, \tfrac12)^{\top}$, both hidden units were on, so the ReLU slopes are $(1,1)$.
+
+\begin{enumerate}[leftmargin=*]
+  \item \textbf{Output signal:} $\delta^{(2)} = \tfrac12 - 1 = -\tfrac12$. It's negative, meaning the prediction was too low.
+  \item \textbf{Output weights:} $\nabla_{W^{(2)}} L = -\tfrac12 \times (1, \tfrac12) = (-\tfrac12, -\tfrac14)$. Output bias gradient $= -\tfrac12$.
+  \item \textbf{Send blame back:} $\left(W^{(2)}\right)^{\top}\delta^{(2)} = (\tfrac12, -1)^{\top} \times (-\tfrac12) = (-\tfrac14, \tfrac12)^{\top}$.
+  \item \textbf{Apply ReLU mask:} the mask is $(1,1)$, so nothing changes. $\delta^{(1)} = (-\tfrac14, \tfrac12)^{\top}$.
+\end{enumerate}
+
+In plain words: hidden unit 1 connects to the output with a positive weight, so it gets a negative signal, which means ``increase me''. Hidden unit 2 has a negative weight ($-1$), so it gets a positive signal, which means ``decrease me''. Both moves push the output up toward 1.
+
+\subsubsection*{The ReLU Mask: Where, Why and How It Is Applied}
+
+\textbf{Where.} It's the second half of Equation 2 on page 26, applied to the hidden layer:
+\[
+\delta^{(1)} = \left( \left(W^{(2)}\right)^{\top} \delta^{(2)} \right) \odot \mathrm{ReLU}'(z^{(1)})
+\]
+The last factor is the mask. On page 27, the first part has already been computed: $\left(W^{(2)}\right)^{\top}\delta^{(2)} = (-\tfrac14, \tfrac12)$. The mask is the final step that turns this into $\delta^{(1)}$.
+
+\textbf{Why.} Each hidden unit does two things in a row:
+\[
+z \text{ (raw score)} \;\to\; \mathrm{ReLU} \;\to\; a \text{ (output)} \;\to\; \text{next layer}
+\]
+When the blame comes back from the output, the first part, $(-\tfrac14, \tfrac12)$, is blame on the \textbf{outputs} $a^{(1)}$. It answers: ``if $a_1$ or $a_2$ changed, how would the loss change?''
+
+The weights and bias of layer 1 don't touch $a$ directly, though. They set $z$. So we need blame on $z$, and to get it we have to step back through the ReLU. The question there is: ``if $z$ changes a little, does $a$ change?''
+\begin{itemize}[leftmargin=*]
+  \item If the unit is \textbf{on} ($z>0$), then $a=z$. A change in $z$ passes straight through, so the slope is 1.
+  \item If the unit is \textbf{off} ($z<0$), then $a=0$ whatever $z$ does. A change in $z$ does nothing, so the slope is 0.
+\end{itemize}
+So the mask records which units passed changes through. A unit that was off had no effect on the loss, so it gets zero blame.
+
+\textbf{How.}
+\begin{enumerate}[leftmargin=*]
+  \item Take $z^{(1)}$ from the forward-pass cache: $z^{(1)} = (1, \tfrac12)$.
+  \item Build the mask by checking each entry: is it greater than 0? $1>0$ gives 1, and $\tfrac12>0$ gives 1, so the mask is $(1,1)$.
+  \item Multiply entry by entry: $(-\tfrac14 \times 1,\; \tfrac12 \times 1) = (-\tfrac14, \tfrac12)$.
+\end{enumerate}
+Both units were on, so the mask kept everything and $\delta^{(1)}$ is the same as the blame we started with. That's what ``nothing changes'' means.
+
+\textbf{Contrast with Problem 3.} There $z^{(1)} = (\tfrac12, -1)$, so the mask is $(1, 0)$. The blame coming back is $(1,1)$, and after the mask it becomes $(1, 0)$. Unit 2 was off, so it gets no blame and its weights don't update.
+
+This is also why the cache stores $z$ and not just $a$. The mask is built from $z$.
+
+% ------------------------------------------------------------
+\subsection*{Page 28 --- Gradients at Layer 1}
+
+\[
+\nabla_{W^{(1)}} L = \delta^{(1)} x^{\top} = \begin{pmatrix} -1/4 \\ 1/2 \end{pmatrix} \begin{pmatrix} 1 & 0 \end{pmatrix} = \begin{pmatrix} -1/4 & 0 \\ 1/2 & 0 \end{pmatrix}, \qquad \nabla_{b^{(1)}} L = \begin{pmatrix} -1/4 \\ 1/2 \end{pmatrix}
+\]
+
+\textbf{The key lesson (``Read the zeros'').} The second column is zero because the input $x_2 = 0$. Those weights multiplied a zero, so they couldn't have affected anything on this example. This is not a dead ReLU. Compare the two kinds of zero:
+\begin{itemize}[leftmargin=*]
+  \item \textbf{Input is zero} $\to$ a \textbf{column} of zeros. This is normal, and the weights will learn from other examples.
+  \item \textbf{Dead ReLU} $\to$ a \textbf{row} of zeros. That unit's slope is 0, so it's frozen even when its inputs are non-zero. Problem 3 shows this.
+\end{itemize}
+
+% ------------------------------------------------------------
+\subsection*{Page 29 --- One Gradient Step, and the Loss Falls}
+
+\textbf{Update rule:}
+\[
+\text{new weight} = \text{old weight} - \eta \times \text{gradient}, \qquad \eta = \tfrac{1}{10}
+\]
+Here $\eta$ is the learning rate (the step size). Subtracting a negative gradient makes a weight bigger, and subtracting a positive one makes it smaller:
+\begin{itemize}[leftmargin=*]
+  \item $W^{(2)}$: $(\tfrac12, -1) \to (\tfrac{11}{20}, -\tfrac{39}{40}) = (0.55, -0.975)$
+  \item $b^{(2)}$: $0 \to \tfrac{1}{20}$
+  \item $W^{(1)}$ first column: $(1,1) \to (\tfrac{41}{40}, \tfrac{19}{20})$. The second column is unchanged because its gradient was 0.
+  \item $b^{(1)}$: $(0, -\tfrac12) \to (\tfrac{1}{40}, -\tfrac{11}{20})$
+\end{itemize}
+
+\textbf{Forward again on the same input:} $z^{(1)} = (\tfrac{21}{20}, \tfrac25)$, both still positive. Then $z^{(2)} = \tfrac{19}{80} \approx 0.2375$ and $\hat{y} \approx 0.559$, up from 0.5. The loss drops from $0.693$ to $0.581$.
+
+The point is that one small step moved the prediction toward the right answer.
+
+% ------------------------------------------------------------
+\subsection*{Page 30 --- From One Example to a Batch (Board vs.\ Code)}
+
+On the board, one example is a \textbf{column} and $W$ is (outputs $\times$ inputs). In the NumPy assignment, a batch of $n$ examples is stacked as \textbf{rows}, and the code's weight matrix is the board's $W$ flipped (inputs $\times$ outputs). Nothing new is happening; the same math is just rearranged:
+
+\begin{center}
+\begin{tabular}{lll}
+\toprule
+What & Board & Code \\
+\midrule
+Forward & $z = Wx + b$ & $Z = X W_{\text{code}} + b$ \\
+Output error & $\hat{y} - y$ & $(\hat{Y} - Y)/n$ \\
+Weight gradient & $\delta a^{\top}$ & $A^{\top} dZ$ \\
+Send back & $W^{\top}\delta$ & $dZ\, W_{\text{code}}^{\top}$ \\
+ReLU & $\delta \odot \mathbf{1}[z>0]$ & $dA \odot \mathbf{1}[Z>0]$ \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\textbf{Why divide by $n$?} The loss is averaged over the batch, so each example's gradient gets weight $1/n$. If you forget the $1/n$, your effective learning rate becomes $n$ times bigger without you noticing.
+
+% ------------------------------------------------------------
+\subsection*{Page 31 --- The Training Loop You Will Write}
+
+The loop repeats three steps: run forward (and save the cache), compute gradients by hand, then update weights with $w - \eta g$. The practical tips:
+\begin{itemize}[leftmargin=*]
+  \item \textbf{Save $Z$ (the raw scores), not only $A$.} You need $Z$ to know which ReLUs were on.
+  \item \textbf{Check shapes first.} A bias of shape $(h,)$ versus $(1, h)$ is the classic first bug.
+  \item \textbf{Compare your gradients with PyTorch's.} They should agree to a relative error below $10^{-5}$ before you start training.
+  \item \textbf{If the loss doesn't move}, the usual causes are a dead hidden layer, $\eta = 0$, or a forgotten $1/n$.
+\end{itemize}
+
+% ------------------------------------------------------------
+\subsection*{Page 32 --- In-Class Problem List}
+
+There are four problems: sigmoid facts, counting parameters, a dead ReLU, and softmax. The lecture notes have eight; these four overlap with notes problems P1, P4, P6 and P5.
+
+% ------------------------------------------------------------
+\subsection*{Problem 1 (Page 33) and Solution (Page 40) --- Sigmoid}
+
+\textbf{Q1: $\sigma(0)$ and $\sigma'(0)$.}
+\[
+\sigma(0) = \frac{1}{1 + e^{0}} = \frac12, \qquad \sigma'(0) = \sigma(0)\left(1 - \sigma(0)\right) = \frac12 \cdot \frac12 = \frac14
+\]
+
+\textbf{Q2: Why is $\sigma'(z) \le \tfrac14$ always?}
+Let $s = \sigma(z)$, which is always between 0 and 1. Then $\sigma'(z) = s(1-s)$, the product of two numbers that add up to 1. That product is largest when they're equal ($\tfrac12 \times \tfrac12 = \tfrac14$), and smaller otherwise; compare $0.9 \times 0.1 = 0.09$. And $s = \tfrac12$ only happens at $z = 0$.
+\begin{itemize}[leftmargin=*]
+  \item \textbf{Special values:} as $z \to \pm\infty$, $s \to 1$ or $0$, so $\sigma'(z) \to 0$.
+\end{itemize}
+
+\textbf{Q3: $z = 8$, what's the backward factor?}
+$\sigma(8)$ is extremely close to 1, so $1 - \sigma(8)$ is tiny, less than $e^{-8} \approx 0.00034$. So
+\[
+\sigma'(8) < e^{-8} \approx 3.4 \times 10^{-4}.
+\]
+Any error passing back through this unit gets multiplied by less than 0.001, so its incoming weights barely learn. This is called \textbf{saturation}. It's also why stacking many sigmoid layers was hard: each layer multiplies the signal by at most $\tfrac14$, so it shrinks fast.
+
+% ------------------------------------------------------------
+\subsection*{Problem 2 (Page 34) and Solution (Page 41) --- Shapes and Parameter Count}
+
+The network is 4 inputs $\to$ 3 hidden $\to$ 2 outputs.
+
+\textbf{Formula:} a layer with $n_{\text{in}}$ inputs and $n_{\text{out}}$ outputs has
+\[
+n_{\text{out}} \cdot n_{\text{in}} + n_{\text{out}}
+\]
+parameters. That's one weight per connection plus one bias per output unit.
+
+\begin{enumerate}[leftmargin=*]
+  \item Board shapes: $W^{(1)} \in \mathbb{R}^{3\times4}$, $b^{(1)} \in \mathbb{R}^{3}$, $W^{(2)} \in \mathbb{R}^{2\times3}$, $b^{(2)} \in \mathbb{R}^{2}$.
+  \item Count: $(3\cdot4 + 3) + (2\cdot3 + 2) = 15 + 8 = 23$.
+  \item Code shapes, batch of 32: $X \in \mathbb{R}^{32\times4}$ (32 rows, 4 features), $W^{(1)}_{\text{code}} \in \mathbb{R}^{4\times3}$ (the flipped board matrix), $Z^{(1)} \in \mathbb{R}^{32\times3}$ (3 hidden scores for each of the 32 examples).
+\end{enumerate}
+
+% ------------------------------------------------------------
+\subsection*{Problem 3 (Page 35) and Solutions (Pages 42--43) --- The Dead Unit}
+
+\textbf{Setup:}
+\[
+x = \begin{pmatrix} 1 \\ 1 \end{pmatrix},\; y = 0,\; W^{(1)} = I_2,\; b^{(1)} = \begin{pmatrix} -1/2 \\ -3/2 \end{pmatrix},\; W^{(2)} = \begin{pmatrix} 2 & 2 \end{pmatrix},\; b^{(2)} = -1.
+\]
+$W^{(1)} = I_2$ is the identity, so each hidden unit just copies one input.
+
+\subsubsection*{Forward Pass (Page 42)}
+\begin{itemize}[leftmargin=*]
+  \item $z^{(1)} = (1 - \tfrac12,\; 1 - \tfrac32) = (\tfrac12, -1)$
+  \item $a^{(1)} = \mathrm{ReLU}(z^{(1)}) = (\tfrac12, 0)$. Unit 2 is off.
+  \item $z^{(2)} = 2\cdot\tfrac12 + 2\cdot0 - 1 = 0$, so $\hat{y} = \tfrac12$
+  \item Since $y = 0$, the loss uses only the second term: $L = -\log(1 - \tfrac12) = \ln 2 \approx 0.693$
+\end{itemize}
+
+\subsubsection*{Backward Pass (Page 43)}
+\begin{itemize}[leftmargin=*]
+  \item $\delta^{(2)} = \tfrac12 - 0 = \tfrac12$. It's positive: predicted too high, so push down.
+  \item $\nabla_{W^{(2)}} L = \tfrac12 \times (\tfrac12, 0) = (\tfrac14, 0)$, and the bias gradient is $\tfrac12$.
+  \item Blame sent back: $(2, 2)^{\top} \times \tfrac12 = (1, 1)^{\top}$
+  \item ReLU mask: $(1, 0)$, so $\delta^{(1)} = (1, 0)^{\top}$
+  \item Layer 1 gradients:
+  \[
+  \nabla_{W^{(1)}} L = \begin{pmatrix} 1 \\ 0 \end{pmatrix} \begin{pmatrix} 1 & 1 \end{pmatrix} = \begin{pmatrix} 1 & 1 \\ 0 & 0 \end{pmatrix}, \qquad \nabla_{b^{(1)}} L = \begin{pmatrix} 1 \\ 0 \end{pmatrix}
+  \]
+  The second row (all zeros) belongs to the dead unit.
+\end{itemize}
+
+\subsubsection*{What the Dead Unit Freezes}
+Notice that the inputs are both 1 (not zero), yet unit 2 still gets nothing. Three things stop moving:
+\begin{enumerate}[leftmargin=*]
+  \item Its \textbf{incoming weights} (row 2 of $\nabla_{W^{(1)}} L$), because the mask is 0.
+  \item Its \textbf{bias}, for the same reason.
+  \item Its \textbf{outgoing weight} (2nd entry of $\nabla_{W^{(2)}} L$), for a separate reason: its output $a_2 = 0$ contributed nothing.
+\end{enumerate}
+Unit 1 still learns normally. If a unit is off for \textbf{every} example in the data, it never recovers. That's a truly dead ReLU, and Leaky ReLU exists to prevent it.
+
+% ------------------------------------------------------------
+\subsection*{Problem 4 (Page 36) and Solution (Page 44) --- Softmax}
+
+\textbf{Softmax formula:}
+\[
+p_i = \frac{e^{z_i}}{\sum_{j} e^{z_j}}
+\]
+\begin{itemize}[leftmargin=*]
+  \item $z_i$ is the raw score (logit) for class $i$, and $p_i$ is the probability for class $i$.
+  \item \textbf{What it does:} it makes every score positive (with $e^{z}$), then divides by the total so the probabilities add to 1. A higher score gives a higher probability.
+  \item \textbf{Special values:} if all scores are equal, every class gets $1/K$. If one score $\to \infty$, its probability $\to 1$. Adding the same number to every score changes nothing, which is why code subtracts the max for safety.
+\end{itemize}
+
+\textbf{Solution}
+\begin{enumerate}[leftmargin=*]
+  \item $z = (0, \ln 3)$, so $e^{z} = (1, 3)$, the total is 4, and $p = (\tfrac14, \tfrac34)$. The true class is 2, so $L = -\log\tfrac34 = \log\tfrac43 \approx 0.288$. That's lower than $\ln 2$ because the model already favours the right class.
+  \item $\nabla_z L = p - y = (\tfrac14 - 0,\; \tfrac34 - 1) = (\tfrac14, -\tfrac14)$. In words: lower class 1's score, raise class 2's.
+  \item Checks: $\tfrac14 + \tfrac34 = 1$ and $\tfrac14 - \tfrac14 = 0$. The gradient always sums to 0 because both $p$ and $y$ sum to 1. This is a handy bug test.
+  \item \textbf{Two-class softmax is the same as a sigmoid.} With two classes, only the gap between the scores matters: $p_2 = \sigma(z_2 - z_1)$. Here the gap is $\ln 3$, and
+  \[
+  \sigma(\ln 3) = \frac{1}{1 + 1/3} = \frac34,
+  \]
+  which matches $p_2$. Also $\sigma(\ln 3) - 1 = -\tfrac14$, which matches $\partial L/\partial z_2$. So logistic regression and two-class softmax are one model written two ways.
+\end{enumerate}
+
+% ------------------------------------------------------------
+\subsection*{Pages 37--39 --- Wrap-Up}
+
+\begin{itemize}[leftmargin=*]
+  \item \textbf{To do:} read Prince Ch.\ 3--4, then Goodfellow Ch.\ 6. The assignment is a $2 \to 16 \to 1$ NumPy net on the two-moons data, with gradients checked against PyTorch.
+  \item \textbf{Quiz 1} can ask for a derivative, a shape, a chain-rule step, or a short reason (for example, why you cache $z$, or why sigmoid with cross-entropy simplifies). The four problems are the right practice.
+  \item \textbf{Page 38: the six equations to memorise:}
+  \begin{align*}
+    z^{(\ell)} &= W^{(\ell)} a^{(\ell-1)} + b^{(\ell)} \\
+    \sigma'(z) &= \sigma(z)\left(1 - \sigma(z)\right) \\
+    \frac{\partial L_{\text{BCE}}}{\partial z} &= \sigma(z) - y \\
+    \nabla_z L_{\text{CE}} &= \mathrm{softmax}(z) - y \\
+    \delta^{(\ell)} &= \left( \left(W^{(\ell+1)}\right)^{\top} \delta^{(\ell+1)} \right) \odot f'(z^{(\ell)}) \\
+    \nabla_{W^{(\ell)}} L &= \delta^{(\ell)} \left(a^{(\ell-1)}\right)^{\top}
+  \end{align*}
+  \item \textbf{Page 39 note:} the universal approximation theorem says a wide enough single hidden layer \emph{can} represent any smooth function. It doesn't say how wide the layer must be, or that training will find the right weights.
+\end{itemize}
