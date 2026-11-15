@@ -1,0 +1,386 @@
+\subsection*{Layer Recursion (Page 15)}
+
+\textbf{The idea.} A deep network is the same two steps repeated, one layer after another:
+\begin{enumerate}
+  \item Take what the previous layer produced, multiply it by weights and add a bias. This gives a ``raw score''.
+  \item Pass that raw score through an activation function. This gives the layer's output.
+\end{enumerate}
+Each layer's output becomes the next layer's input.
+
+\textbf{Equations.}
+\[
+z^{(\ell)} = W^{(\ell)} a^{(\ell-1)} + b^{(\ell)}, \qquad a^{(\ell)} = f^{(\ell)}\big(z^{(\ell)}\big)
+\]
+
+\textbf{Symbols.}
+\begin{itemize}
+  \item $\ell$: the layer number (1, 2, 3, \dots).
+  \item $a^{(0)} = x$: the input data. Layer ``0'' is the input itself.
+  \item $a^{(\ell-1)}$: the output of the previous layer.
+  \item $W^{(\ell)}$: the weight matrix of layer $\ell$. It says how strongly each input feeds each unit.
+  \item $b^{(\ell)}$: the bias vector of layer $\ell$, one offset per unit.
+  \item $z^{(\ell)}$: the raw score before the activation (the ``pre-activation'').
+  \item $f^{(\ell)}$: the activation function of layer $\ell$ (ReLU, sigmoid, \dots), applied to each number separately.
+  \item $a^{(\ell)}$: the layer's final output.
+\end{itemize}
+
+\textbf{What it says.} Mix the previous outputs with weights, shift them, then bend the result with $f$. Repeat until the last layer.
+
+\textbf{The last layer depends on the task.}
+
+\begin{tabular}{lll}
+\toprule
+Task & Last activation & Loss \\
+\midrule
+Predict a number (e.g.\ house price) & none (identity) & squared error \\
+Yes/no (e.g.\ spam or not) & sigmoid $\to$ a value between 0 and 1 & binary cross-entropy \\
+One of $K$ classes (e.g.\ digits 0--9) & softmax $\to$ $K$ probabilities & cross-entropy \\
+\bottomrule
+\end{tabular}
+
+\textbf{Shapes.} If layer $\ell$ has $n_\ell$ units and the previous layer has $n_{\ell-1}$, then $W^{(\ell)}$ is $n_\ell \times n_{\ell-1}$ (outputs $\times$ inputs). $z$, $a$ and $b$ are each a column of $n_\ell$ numbers.
+
+\textbf{Example.} For a layer with 3 inputs and 5 units, $W$ is $5\times 3$. Each of the 5 rows holds one unit's 3 weights.
+
+\subsection*{Counting Parameters (Page 16)}
+
+\textbf{Formula.}
+\[
+\text{parameters} = n_{\text{out}} \cdot n_{\text{in}} + n_{\text{out}}
+\]
+
+\textbf{Symbols.}
+\begin{itemize}
+  \item $n_{\text{in}}$: number of inputs to the layer.
+  \item $n_{\text{out}}$: number of units in the layer.
+  \item $n_{\text{out}} \cdot n_{\text{in}}$: the entries of the weight matrix. Every output connects to every input.
+  \item $+\,n_{\text{out}}$: the biases, one per unit.
+\end{itemize}
+
+\textbf{What it says.} A fully connected layer has one weight for every input-output pair, plus one bias per output.
+
+\textbf{Special case.} If $n_{\text{in}} = 0$ there are no weights, only biases. Real networks never do this; it's just a sanity check on the formula.
+
+\textbf{MNIST example ($784 \to 128 \to 64 \to 10$).} Each image is $28\times 28 = 784$ pixels, and there are 10 digit classes.
+\begin{align*}
+784 \cdot 128 + 128 &= 100{,}480\\
+128 \cdot 64 + 64 &= 8{,}256\\
+64 \cdot 10 + 10 &= 650\\
+\text{Total} &= 109{,}386
+\end{align*}
+
+\textbf{Takeaway.} About 92\% of the parameters sit in the first layer, because the input is so large. Biases add almost nothing to the count. The slide says to expect this as a quiz question: write the formula first, then the arithmetic.
+
+\subsection*{Three Losses (Page 17)}
+
+A loss is a single number that measures how wrong the prediction is. Training tries to make it smaller.
+
+\subsubsection*{1. Regression}
+\[
+L = \tfrac{1}{2}(\hat{y} - y)^2
+\]
+\begin{itemize}
+  \item $\hat{y}$: the prediction. $y$: the true value.
+  \item \textbf{What it says:} Square the error, so negatives don't cancel positives and big mistakes cost much more. The $\tfrac12$ is there only so the derivative comes out clean.
+  \item \textbf{Gradient:} $\partial L/\partial \hat{y} = \hat{y} - y$, which is simply ``how far off you are''.
+  \item \textbf{Special values:} If $\hat{y} = y$, then $L = 0$. As the error grows toward infinity, $L$ grows toward infinity, and quadratically (an error twice as big costs four times as much).
+\end{itemize}
+
+\subsubsection*{2. Binary Classification}
+\[
+L = -\big[\, y \log \hat{y} + (1-y)\log(1-\hat{y}) \,\big]
+\]
+\begin{itemize}
+  \item $y$: 0 or 1. $\hat{y} = \sigma(z)$: the predicted probability of class 1. $z$: the raw score before the sigmoid.
+  \item \textbf{What it says:} Only one term is active at a time. If $y=1$, $L = -\log \hat{y}$. If $y = 0$, $L = -\log(1-\hat{y})$. In both cases it punishes giving a low probability to the true answer.
+  \item \textbf{Special values:} If $\hat{y} \to$ the correct label, $L \to 0$. If $\hat{y} \to$ the wrong label (confident and wrong), $L \to \infty$. If $\hat{y} = 0.5$, $L = \ln 2 \approx 0.693$, which is the loss of a coin flip.
+  \item \textbf{Gradient:} $\partial L/\partial z = \hat{y} - y$.
+\end{itemize}
+
+\subsubsection*{3. $K$-Class Classification}
+\[
+L = -\sum_{k=1}^{K} y_k \log p_k
+\]
+\begin{itemize}
+  \item $K$: number of classes. $p = \mathrm{softmax}(z)$: the predicted probabilities. $y$: one-hot, meaning a 1 for the true class and 0 elsewhere.
+  \item \textbf{What it says:} Because $y$ is one-hot, the sum keeps only one term: $L = -\log(\text{probability of the true class})$.
+  \item \textbf{Gradient:} $\nabla_z L = p - y$.
+\end{itemize}
+
+\textbf{The pattern to notice.} All three gradients have the form ``prediction $-$ truth''. That is why these losses are paired with these output activations.
+
+\textbf{Batch warning.} If you average the loss over $n$ examples, every gradient gets divided by $n$. Your code and your hand derivation must both average or both sum. Otherwise the effective learning rate is silently off by a factor of $n$.
+
+\subsection*{Softmax and Its Gradient (Page 18)}
+
+\textbf{Formula.}
+\[
+p_i = \frac{e^{z_i}}{\sum_{j=1}^{K} e^{z_j}}
+\]
+
+\textbf{Symbols.}
+\begin{itemize}
+  \item $z_i$: the raw score (``logit'') for class $i$.
+  \item $e^{z_i}$: exponentiating makes every score positive, and bigger scores grow much faster.
+  \item $\sum_j e^{z_j}$: the sum over all $K$ classes, called the ``normalizer''.
+  \item $p_i$: the probability of class $i$.
+\end{itemize}
+
+\textbf{What it says.} Make every score positive, then divide by the total so the probabilities add up to 1. The largest score gets the largest share.
+
+\textbf{Conditions.} The logits can be any real numbers. The outputs are always between 0 and 1 and always sum to 1.
+
+\textbf{Special values.}
+\begin{itemize}
+  \item If all $z_i$ are equal, every class gets $1/K$.
+  \item If one $z_i \to \infty$, that class gets probability $\to 1$ and the others $\to 0$.
+  \item Adding the same constant to every logit changes nothing. Page 19 uses this.
+\end{itemize}
+
+\textbf{Worked example.} $z = (\ln 2, 0, 0) \Rightarrow e^z = (2,1,1)$, total 4 $\Rightarrow p = (\tfrac12, \tfrac14, \tfrac14)$. If the true class is 1: $L = -\log\tfrac12 = \ln 2$, and the gradient is $p - y = (-\tfrac12, \tfrac14, \tfrac14)$.
+
+\textbf{Reading the gradient.} A negative value means ``raise this score'' (the true class). Positive values mean ``lower these scores'' (the wrong classes).
+
+\textbf{Debug check.} The gradient always sums to 0, because $p$ sums to 1 and $y$ sums to 1. If your code's output-layer error doesn't sum to about 0, there's a bug.
+
+\subsubsection*{Why a Negative Gradient Raises the True-Class Score and a Positive One Lowers the Wrong Classes}
+
+It comes from two facts: how gradient descent uses the gradient, and the shape of $p - y$.
+
+\textbf{1. Gradient descent moves each score against its gradient.} The update rule is
+\[
+z \leftarrow z - \eta \cdot \text{gradient}
+\]
+\begin{itemize}
+  \item $\eta$ is the learning rate, a small positive number.
+  \item If the gradient is \textbf{negative}, subtracting it \emph{adds} to $z$, so the score goes \textbf{up}.
+  \item If the gradient is \textbf{positive}, subtracting it takes away from $z$, so the score goes \textbf{down}.
+\end{itemize}
+The sign of the gradient tells you which way that score will move.
+
+\textbf{2. $p - y$ is always negative for the true class and positive for the wrong ones.} The label $y$ is one-hot: a 1 for the true class and 0 for all others.
+\begin{itemize}
+  \item \textbf{True class:} gradient $= p - 1$. Since any probability is below 1, this is always \textbf{negative}, so its score always goes up.
+  \item \textbf{Wrong class:} gradient $= p - 0 = p$. Since any probability is above 0, this is always \textbf{positive}, so its score always goes down.
+\end{itemize}
+The sign doesn't depend on the specific numbers in the example. It always comes out this way.
+
+\textbf{3. Why that is the right direction.} The loss is $L = -\log(\text{probability of the true class})$. To make the loss smaller, the true class's probability has to go up. Softmax gives a bigger share to bigger scores, so you raise the true class's score and lower the others. Both changes push its probability up.
+
+\textbf{Applied to the page 18 example} ($\eta = 1$, to make the change easy to see):
+
+\begin{tabular}{llll}
+\toprule
+ & Class 1 (true) & Class 2 & Class 3 \\
+\midrule
+Score before & $\ln 2 \approx 0.69$ & 0 & 0 \\
+Gradient & $-\tfrac12$ & $+\tfrac14$ & $+\tfrac14$ \\
+Score after & 1.19 & $-0.25$ & $-0.25$ \\
+Probability before & 0.50 & 0.25 & 0.25 \\
+Probability after & $\approx 0.81$ & $\approx 0.10$ & $\approx 0.10$ \\
+\bottomrule
+\end{tabular}
+
+The true class went from 50\% to about 81\%, so the loss fell from 0.69 to about 0.22.
+
+\textbf{The size matters too.}
+\begin{itemize}
+  \item For the true class, the gradient is $-(1 - p)$. The less confident the network is in the right answer, the bigger the push. If $p$ is already close to 1, the push is close to 0.
+  \item A wrong class gets a push equal to its own probability. The more probability the network wrongly gave it, the harder its score is pushed down.
+\end{itemize}
+
+\subsection*{Stable Binary Loss and Stable Softmax (Page 19)}
+
+\textbf{The problem.} Computers can't store very large or very tiny numbers exactly. With $z = 1000$, $e^{1000}$ overflows. With $z = -1000$, $\sigma(z)$ rounds to exactly 0, and $\log 0 = -\infty$, so the loss becomes infinite or NaN.
+
+\textbf{Stable formula.}
+\[
+L(z, y) = \max(z, 0) - yz + \log\big(1 + e^{-|z|}\big)
+\]
+
+\textbf{Symbols.} $z$ is the raw score, $y$ is the label (0 or 1), and $|z|$ is the absolute value of $z$.
+
+\textbf{What it says.} This is mathematically the same binary cross-entropy, rearranged so it works on $z$ directly. Because $e^{-|z|}$ has a negative exponent, it is always between 0 and 1, so it can never overflow.
+
+\textbf{Check.} With $z = 0$, it gives $0 - 0 + \log 2 = \ln 2$, which matches the earlier result.
+
+\textbf{Special values.} For large positive $z$ with $y = 1$, $L \to 0$, as it should. For large positive $z$ with $y = 0$, $L \approx z$, which is large but finite instead of infinite.
+
+\textbf{In practice.} The home assignment uses a simpler fix: clip $\hat{y}$ into $[\varepsilon, 1-\varepsilon]$ so $\log$ never sees 0. PyTorch's \texttt{binary\_cross\_entropy\_with\_logits} uses the formula above.
+
+\textbf{Stable softmax.}
+\[
+p_i = \frac{e^{z_i - m}}{\sum_j e^{z_j - m}}, \qquad m = \max_j z_j
+\]
+\begin{itemize}
+  \item $m$ is the largest logit.
+  \item \textbf{Why it works:} Subtracting $m$ multiplies the top and bottom by the same $e^{-m}$, which cancels, so $p$ doesn't change.
+  \item \textbf{Why it helps:} The largest exponent becomes $e^0 = 1$, so nothing overflows. Example: logits $(1000, 999)$ become $(0, -1)$.
+\end{itemize}
+
+\subsection*{Running Example: A $2 \to 2 \to 1$ Network}
+
+\subsubsection*{Setup (Page 20)}
+
+This page sets up a tiny network that the following slides compute by hand:
+\begin{itemize}
+  \item \textbf{2 inputs:} $x = (1, 0)$, true label $y = 1$.
+  \item \textbf{2 hidden units} with ReLU: $W^{(1)} = \begin{pmatrix} 1 & -1 \\ 1 & 1 \end{pmatrix}$, $b^{(1)} = (0, -\tfrac12)$.
+  \item \textbf{1 output} with sigmoid: $W^{(2)} = \begin{pmatrix} \tfrac12 & -1 \end{pmatrix}$, $b^{(2)} = 0$.
+  \item \textbf{Loss:} binary cross-entropy.
+\end{itemize}
+The numbers are chosen so that both hidden units stay ``alive'' (positive), which means every step of the backward pass actually shows up. The plan: forward pass, then all the gradients, then one update step.
+
+\subsubsection*{Forward Pass, Layer 1 (Page 21)}
+
+\textbf{Computation.} $z^{(1)} = W^{(1)} x + b^{(1)}$
+\begin{itemize}
+  \item Unit 1: $1\cdot 1 + (-1)\cdot 0 + 0 = 1$
+  \item Unit 2: $1 \cdot 1 + 1 \cdot 0 - \tfrac12 = \tfrac12$
+\end{itemize}
+Both values are positive, so ReLU (which turns negatives into 0 and leaves positives alone) leaves them unchanged: $a^{(1)} = (1, \tfrac12)$.
+
+$\mathrm{ReLU}'(z^{(1)}) = (1, 1)$: the slope of ReLU is 1 where the input was positive and 0 where it was negative. This is called the ``mask''.
+
+\textbf{Key lesson: store $z$, not just $a$.} The backward pass needs to know which units were active. If a unit outputs 0, you can't tell from $a$ alone whether its $z$ was $-5$ or exactly 0. So you keep $z^{(1)}$ in the cache.
+
+\subsubsection*{Forward Pass, Layer 2 and the Loss (Page 22)}
+
+\begin{itemize}
+  \item $z^{(2)} = \tfrac12 \cdot 1 + (-1)\cdot \tfrac12 + 0 = 0$
+  \item $\hat{y} = \sigma(0) = \tfrac12$
+  \item $L = -\log\tfrac12 = \ln 2 \approx 0.693$
+\end{itemize}
+So the network is currently undecided: it is guessing 50/50.
+
+\textbf{What to cache for backprop.} $x$, $z^{(1)}$, $a^{(1)}$, $z^{(2)}$. Anything you can recompute from these is optional, but $z^{(1)}$ is mandatory because of the ReLU mask.
+
+\subsection*{Computation Graphs and the Chain Rule}
+
+\subsubsection*{Scalar Computation Graph (Page 23)}
+
+This is a warm-up: backprop on plain numbers, before any matrices.
+
+\textbf{Setup.}
+\[
+u = wx, \qquad r = u - y, \qquad L = \tfrac12 r^2
+\]
+\begin{itemize}
+  \item $w = 2$: the weight. $x = 3$: the input. $y = 4$: the target.
+  \item $u$: the prediction. $r$: the error (``residual''). $L$: the loss.
+\end{itemize}
+
+\textbf{Forward.} $u = 6$, $r = 2$, $L = 2$.
+
+\textbf{Backward.} Start at $L$ and work backwards. At each step, multiply by the local slope.
+\begin{itemize}
+  \item $\partial L/\partial r = r = 2$. How much $L$ changes per unit change in $r$.
+  \item $\partial L/\partial u = 2 \cdot 1 = 2$. Since $r = u - y$, raising $u$ by 1 raises $r$ by 1.
+  \item $\partial L/\partial w = 2 \cdot x = 6$. Since $u = wx$, raising $w$ by 1 raises $u$ by $x$.
+  \item $\partial L/\partial x = 2 \cdot w = 4$.
+\end{itemize}
+
+\textbf{What it means.} Increasing $w$ slightly increases the loss 6 times as fast, so gradient descent will decrease $w$. That moves the prediction from 6 toward the target 4, which is correct.
+
+\textbf{Check.} Writing it all as one formula, $L = \tfrac12(wx - y)^2$, and differentiating gives $(wx - y)\cdot x = 2 \cdot 3 = 6$, the same answer.
+
+\textbf{Special values.} If $wx = y$, then $r = 0$ and every gradient is 0. The prediction is perfect, so there is nothing to learn.
+
+\subsubsection*{The Same Graph, as a Picture (Page 24)}
+
+\begin{itemize}
+  \item \textbf{Each arrow} carries a local slope: $\partial u/\partial w = x$, $\partial r/\partial u = 1$, $\partial L/\partial r = r$.
+  \item \textbf{The total derivative} is the product of these local slopes along the path from the variable to $L$.
+  \item \textbf{When there is more than one path:} if a variable reaches $L$ through two routes, you compute each route's product and \textbf{add} them. That is the multivariate chain rule.
+\end{itemize}
+
+\textbf{Neural network example.} One hidden unit feeds 3 output units. Its gradient is the sum of the 3 path products, one through each output. Page 25 does exactly this with matrices.
+
+\subsection*{Outer Products Are the Chain Rule (Page 25)}
+
+\textbf{Setup.} One layer, $z = Wx + b$. You already know $\delta = \nabla_z L$, how much the loss changes with each output $z$. This page shows how to get the gradients for $W$, $b$ and $x$ from $\delta$.
+
+\textbf{Symbols.}
+\begin{itemize}
+  \item $x$: the input, $d$ numbers.
+  \item $z$: the output scores, $m$ numbers.
+  \item $W$: an $m \times d$ matrix. $W_{ij}$ connects input $j$ to output $i$.
+  \item $b$: the biases, $m$ numbers.
+  \item $\delta$ (delta): the error signal arriving at $z$ from above, one number per output unit.
+\end{itemize}
+
+\textbf{One entry.}
+\[
+z_i = \sum_{j=1}^{d} W_{ij} x_j + b_i \quad\Longrightarrow\quad \frac{\partial L}{\partial W_{ij}} = \delta_i \, x_j
+\]
+
+\textbf{What it says.} Weight $W_{ij}$ only affects output $i$, and its effect is scaled by input $x_j$. So its gradient is ``error at the output'' $\times$ ``size of the input''.
+
+\textbf{The three formulas to memorize.}
+
+\begin{tabular}{>{\raggedright\arraybackslash}p{0.18\textwidth}>{\raggedright\arraybackslash}p{0.76\textwidth}}
+\toprule
+Formula & What it means \\
+\midrule
+$\nabla_W L = \delta x^\top$ & Outer product: an $m\times 1$ column times a $1 \times d$ row gives an $m \times d$ matrix, the same shape as $W$. Every weight's gradient is the error at its output times its input. \\
+$\nabla_b L = \delta$ & The bias is added directly to $z$, so its slope is 1 and its gradient is just $\delta$. \\
+$\nabla_x L = W^\top \delta$ & Passes the error back to the previous layer. Each input collects error from every output it feeds, weighted and summed. This is the ``add the paths'' rule from page 24. $W^\top$ turns an $m$-length vector back into a $d$-length one. \\
+\bottomrule
+\end{tabular}
+
+\textbf{Special values.}
+\begin{itemize}
+  \item $x_j = 0$ $\Rightarrow$ the whole column $j$ of $\nabla_W L$ is 0. That input contributed nothing, so its weights get no blame. (Page 28 shows this.)
+  \item $\delta_i = 0$ $\Rightarrow$ the whole row $i$ is 0. That output was already correct, or its unit is dead.
+  \item Large $x$ $\Rightarrow$ large gradients, which is one reason inputs are usually normalized.
+\end{itemize}
+
+\textbf{Why this matters.} Every fully connected layer's backward step in the course is these three lines, plus multiplying by the activation's slope $f'$.
+
+\subsubsection*{What an Outer Product Is}
+
+An \textbf{outer product} takes two lists of numbers and builds a grid (a matrix) by multiplying \textbf{every number in the first list by every number in the second}.
+
+\textbf{How it works.} Take a column $\delta$ with $m$ numbers and a row $x^\top$ with $d$ numbers. The outer product $\delta x^\top$ is an $m \times d$ matrix. The entry in row $i$, column $j$ is $\delta_i \cdot x_j$.
+
+\textbf{Small example.} $\delta = (2, 3)$, $x = (4, 5, 6)$:
+
+\begin{tabular}{cccc}
+\toprule
+ & $x_1 = 4$ & $x_2 = 5$ & $x_3 = 6$ \\
+\midrule
+$\delta_1 = 2$ & 8 & 10 & 12 \\
+$\delta_2 = 3$ & 12 & 15 & 18 \\
+\bottomrule
+\end{tabular}
+
+It's a multiplication table: one list goes down the side, the other across the top.
+
+\textbf{Outer product vs.\ inner product (dot product).}
+
+\begin{tabular}{lll}
+\toprule
+ & Inner product $x^\top \delta$ & Outer product $\delta x^\top$ \\
+\midrule
+What it does & multiplies matching pairs, then adds them up & multiplies every pair, adds nothing \\
+Result & a single number & a matrix \\
+Lengths & must be equal & can differ \\
+\bottomrule
+\end{tabular}
+
+\textbf{Why page 25 uses it.} The gradient of weight $W_{ij}$ is $\delta_i \cdot x_j$: the error at output $i$ times the input at $j$. Writing that for \emph{every} $i$ and $j$ is exactly the multiplication table above. So ``$\nabla_W L = \delta x^\top$'' is a compact way to say ``compute $\delta_i \cdot x_j$ for every weight at once.''
+
+It also produces the right shape automatically. $\delta$ has $m$ entries (outputs) and $x$ has $d$ entries (inputs), so $\delta x^\top$ is $m \times d$, the same shape as $W$. Each weight gets its own gradient in the matching position.
+
+\textbf{On the running example (page 28).} $\delta^{(1)} = (-\tfrac14, \tfrac12)$, $x = (1, 0)$:
+
+\begin{tabular}{ccc}
+\toprule
+ & $x_1 = 1$ & $x_2 = 0$ \\
+\midrule
+$\delta_1 = -\tfrac14$ & $-\tfrac14$ & 0 \\
+$\delta_2 = \tfrac12$ & $\tfrac12$ & 0 \\
+\bottomrule
+\end{tabular}
+
+The second column is all zeros because $x_2 = 0$. That input contributed nothing to the outputs, so its weights get no blame and no update.
