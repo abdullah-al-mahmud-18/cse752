@@ -33,12 +33,11 @@ Create a Latex file from above conversation. Follow below rules to convert to la
 \usepackage{array}
 \usepackage{graphicx}
 \usepackage[expansion=false]{microtype}
-\usepackage[hidelinks]{hyperref}
 \usepackage{parskip}
 \usepackage{titlesec}
 \usepackage{enumitem}
 \usepackage{xcolor}
-
+\usepackage[hidelinks]{hyperref} % load last so unnumbered sections get anchors
 
 \setlength{\parindent}{0pt}
 \setlength{\parskip}{0.55em}
@@ -80,11 +79,11 @@ Create a Latex file from above conversation. Follow below rules to convert to la
 \usepackage{array}
 \usepackage{graphicx}
 \usepackage[expansion=false]{microtype}
-\usepackage[hidelinks]{hyperref}
 \usepackage{parskip}
 \usepackage{titlesec}
 \usepackage{enumitem}
 \usepackage{xcolor}
+\usepackage[hidelinks]{hyperref} % load last so unnumbered sections get anchors
 
 
 \setlength{\parindent}{0pt}

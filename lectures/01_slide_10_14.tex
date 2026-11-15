@@ -1,0 +1,209 @@
+\subsection*{Three Activations and Their Derivatives}
+
+\textbf{Why this matters.} Every hidden-layer step in backprop multiplies by $f'(z)$:
+\[
+\delta^{(\ell)} = \left( (W^{(\ell+1)})^\top \delta^{(\ell+1)} \right) \odot f'(z^{(\ell)})
+\]
+So the size of $f'$ decides whether the gradient gets through a layer or shrinks to nothing. The key column is ``where the gradient is tiny''.
+
+\subsubsection*{Sigmoid: $\sigma(z) = \frac{1}{1+e^{-z}}$}
+\begin{itemize}
+  \item \textbf{Derivative:} $\sigma'(z) = \sigma(z)(1-\sigma(z))$. You don't need anything new to compute it, just the forward output.
+  \item \textbf{Peak:} the largest value is $\frac{1}{4}$, at $z=0$ ($\sigma(0)=\frac{1}{2}$, so $\frac{1}{2}\cdot\frac{1}{2}$). It is below $\frac{1}{4}$ everywhere else.
+  \item \textbf{Vanishing:} when $|z|$ is large, $\sigma$ is close to 0 or 1, so $\sigma' \approx 0$ and the unit is \emph{saturated}. Example: $\sigma'(8) < e^{-8} \approx 3.4 \times 10^{-4}$.
+  \item \textbf{Consequence:} a deep stack of sigmoids multiplies many factors that are each $\le \frac{1}{4}$. The gradient shrinks exponentially with depth, which is one reason early deep nets were hard to train.
+\end{itemize}
+
+\subsubsection*{tanh}
+\begin{itemize}
+  \item \textbf{Derivative:} $1 - \tanh^2 z$. Like sigmoid, it is built from the forward output.
+  \item \textbf{Peak:} 1 at $z=0$. That is $4\times$ better than sigmoid's $\frac{1}{4}$.
+  \item \textbf{Range:} $(-1, 1)$, so outputs are centered on zero, unlike sigmoid's $(0,1)$.
+  \item \textbf{Vanishing:} it still saturates when $|z|$ is large ($\tanh \to \pm 1$, derivative $\to 0$). It has the same problem as sigmoid, just less severe.
+\end{itemize}
+
+\subsubsection*{ReLU: $\max(0, z)$}
+\begin{itemize}
+  \item \textbf{Derivative:} $\mathbf{1}[z > 0]$, which is 1 when active and 0 otherwise.
+  \item \textbf{Active side:} the derivative is exactly 1, so ReLU does not shrink the gradient by itself. That is the main reason it replaced sigmoid in hidden layers.
+  \item \textbf{Negative side:} the gradient is 0 across the whole half-line $z < 0$. If a unit's pre-activation is negative for the inputs it sees, it gets no gradient and stops learning. This is a \textbf{dead unit}: it freezes its incoming weights, its bias and its outgoing weight.
+  \item \textbf{At $z=0$:} ReLU has a kink there, so it isn't classically differentiable. Any value in $[0,1]$ is a valid subgradient. In code, use 0.
+  \item \textbf{Implementation link:} because the mask is $\mathbf{1}[z>0]$, the backward pass needs $z$ in the cache, not just $a$. An activation of 0 can't tell you whether $z$ was negative or exactly 0.
+\end{itemize}
+
+\subsubsection*{Related Notes}
+\begin{itemize}
+  \item \textbf{Leaky ReLU:} $f(z) = \max(\alpha z, z)$ with $\alpha = 0.01$. It keeps a small slope (gradient $0.01$) for $z<0$, so units can't die completely.
+  \item \textbf{Softmax is different:} it maps $\mathbb{R}^K \to \mathbb{R}^K$ and is used on the whole output layer for $K$-class classification. It is not an elementwise activation for hidden units.
+\end{itemize}
+
+\subsubsection*{Quick Comparison}
+\begin{center}
+\begin{tabular}{lccc}
+\toprule
+ & Max $f'$ & Gradient dies when & Output range \\
+\midrule
+Sigmoid & $\frac{1}{4}$ ($z=0$) & $|z|$ large & $(0,1)$ \\
+tanh & $1$ ($z=0$) & $|z|$ large & $(-1,1)$ \\
+ReLU & $1$ (all $z>0$) & $z<0$ & $[0,\infty)$ \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\textbf{Quiz-likely points:} $\sigma' = \sigma(1-\sigma)$ with a maximum of $\frac{1}{4}$; why ReLU's cache stores $z$; the dead-ReLU gradient pattern; and that ReLU's derivative at 0 is set to 0 in code.
+
+% ------------------------------------------------------------
+
+\subsection*{XOR Is Not Linearly Separable}
+
+\textbf{The data:}
+\begin{center}
+\begin{tabular}{ccc}
+\toprule
+$x_1$ & $x_2$ & label \\
+\midrule
+0 & 0 & 0 \\
+1 & 0 & 1 \\
+0 & 1 & 1 \\
+1 & 1 & 0 \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\textbf{Claim:} no line (affine score $w^\top x + b$) puts class 1 on the positive side and class 0 on the negative side.
+
+\textbf{Proof by contradiction.} Suppose some $w_1, w_2, b$ work. Plugging in each point gives four inequalities:
+\begin{enumerate}
+  \item $(0,0) \to$ class 0: $b < 0$
+  \item $(1,0) \to$ class 1: $w_1 + b > 0$, so $w_1 > -b$
+  \item $(0,1) \to$ class 1: $w_2 + b > 0$, so $w_2 > -b$
+  \item $(1,1) \to$ class 0: $w_1 + w_2 + b < 0$
+\end{enumerate}
+
+Add (2) and (3), then add $b$ to both sides:
+\[
+w_1 + w_2 + b > (-b) + (-b) + b = -b
+\]
+From (1), $b < 0$, so $-b > 0$. That means $w_1 + w_2 + b > 0$, which contradicts (4). So no such line exists.
+
+\textbf{Takeaway:} without a hidden nonlinearity, any number of layers collapses into one affine map:
+\[
+W_2(W_1 x + b_1) + b_2 = (W_2 W_1)x + (W_2 b_1 + b_2)
+\]
+So a model with no nonlinearity can't represent XOR, however many layers it has.
+
+\subsubsection*{Why $b < 0$ and Not $b = 0$ for $(0,0)$}
+
+Because the proof assumes \textbf{strict} separation: score $> 0$ means class 1 and score $< 0$ means class 0. At $(0,0)$ the score is $w_1 \cdot 0 + w_2 \cdot 0 + b = b$, so classifying $(0,0)$ as class 0 requires $b < 0$.
+
+\textbf{Why $b = 0$ doesn't count:} a score of exactly 0 puts the point on the decision boundary, which assigns it to neither class. A separating line has to put every point strictly on one side or the other.
+
+\textbf{The proof still works if you allow ties.} Suppose you use the convention ``score $\le 0$ means class 0'', so $b \le 0$ is allowed:
+\begin{itemize}
+  \item From (2) and (3): $w_1 > -b$ and $w_2 > -b$
+  \item Then $w_1 + w_2 + b > (-b) + (-b) + b = -b \ge 0$
+  \item So $w_1 + w_2 + b > 0$, which contradicts $(1,1)$ needing $w_1 + w_2 + b \le 0$.
+\end{itemize}
+Either way XOR can't be separated by a line. The strict version is just the standard definition of linear separability, and it keeps the algebra clean.
+
+\subsubsection*{Adding Inequalities (2) and (3), Step by Step}
+
+The step rests on one rule: if $a > c$ and $d > e$, then $a + d > c + e$. You can add two inequalities that point the same way.
+
+\textbf{Step 1: Start from the two class-1 conditions}
+\begin{itemize}
+  \item (2): $w_1 + b > 0$
+  \item (3): $w_2 + b > 0$
+\end{itemize}
+
+\textbf{Step 2: Add them}
+\[
+(w_1 + b) + (w_2 + b) > 0 + 0 \quad\Longrightarrow\quad w_1 + w_2 + 2b > 0
+\]
+
+\textbf{Step 3: Subtract $b$ from both sides.} Subtracting the same number from both sides keeps the inequality true:
+\[
+w_1 + w_2 + b > -b
+\]
+
+\textbf{Step 4: Use $b < 0$.} From (1), $b < 0$, so $-b > 0$. Chaining the two:
+\[
+w_1 + w_2 + b > -b > 0 \quad\Longrightarrow\quad w_1 + w_2 + b > 0
+\]
+
+\textbf{Step 5: Compare with condition (4).} (4) needs $w_1 + w_2 + b < 0$, but Step 4 shows it must be $> 0$. Both can't hold, so no such $w_1, w_2, b$ exist.
+
+\textbf{How the slide writes it:} it first rearranges (2) and (3) to $w_1 > -b$ and $w_2 > -b$, then writes $w_1 + w_2 + b > (-b) + (-b) + b$. That is the same addition: replace $w_1$ and $w_2$ with something smaller, then add $b$. Both routes reach $w_1 + w_2 + b > -b$.
+
+\textbf{Intuition:} each input on its own pushes the score above 0. When both are on, you get both pushes but pay the negative bias $b$ only once, so the score must be even more positive. Yet XOR needs it negative.
+
+% ------------------------------------------------------------
+
+\subsection*{A Two-Unit ReLU Network That Realizes XOR}
+
+\textbf{The construction:}
+\[
+z^{(1)} = \begin{pmatrix} 1 & 1 \\ 1 & 1 \end{pmatrix} \begin{pmatrix} x_1 \\ x_2 \end{pmatrix} + \begin{pmatrix} 0 \\ -1 \end{pmatrix}, \qquad a = \mathrm{ReLU}(z^{(1)}), \qquad y = a_1 - 2a_2
+\]
+That is, $z_1 = x_1 + x_2$, $z_2 = x_1 + x_2 - 1$, and the output has no sigmoid.
+
+\textbf{Checking every input:}
+\begin{center}
+\begin{tabular}{ccccccc}
+\toprule
+$x_1$ & $x_2$ & $z_1$ & $z_2$ & $a_1$ & $a_2$ & $y = a_1 - 2a_2$ \\
+\midrule
+0 & 0 & 0 & $-1$ & 0 & 0 & 0 \\
+1 & 0 & 1 & 0 & 1 & 0 & 1 \\
+0 & 1 & 1 & 0 & 1 & 0 & 1 \\
+1 & 1 & 2 & 1 & 2 & 1 & $2 - 2 = 0$ \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\textbf{How it works:}
+\begin{itemize}
+  \item \textbf{Unit 1} counts how many inputs are on (0, 1 or 2). On its own it gets three of the four points right, but it outputs 2 at $(1,1)$ where the label is 0.
+  \item \textbf{Unit 2} turns on only when both inputs are 1. The bias $-1$ together with ReLU clips everything else to 0. It is an AND detector.
+  \item \textbf{Output weight $-2$} subtracts 2 in exactly that case, cancelling unit 1's count of 2.
+\end{itemize}
+
+\textbf{Why ReLU is essential:} without it, $z_2$ would be $-1$ at $(0,0)$ and would leak into the output. The ReLU's clipping (the kink at 0) is the nonlinearity that lets the model bend its decision surface. Depth is doing something a line cannot do.
+
+% ------------------------------------------------------------
+
+\subsection*{The XOR Network Diagram and Parameter Count}
+
+\textbf{The picture:} 2 inputs ($x_1, x_2$), 2 hidden units ($h_1, h_2$), 1 output ($\hat{y}$).
+
+\textbf{Key definitions:}
+\begin{itemize}
+  \item \textbf{Fully connected layer:} every hidden unit receives every input, so all $2 \times 2$ arrows are present.
+  \item \textbf{Biases:} each one is an extra arrow from a constant input of 1. They are left out of the drawing but kept in the formulas.
+\end{itemize}
+
+\textbf{Parameter count:}
+\begin{center}
+\begin{tabular}{lcc}
+\toprule
+Parameter & Shape (out $\times$ in) & Count \\
+\midrule
+$W^{(1)}$ & $2 \times 2$ & 4 \\
+$b^{(1)}$ & $2$ & 2 \\
+$W^{(2)}$ & $1 \times 2$ & 2 \\
+$b^{(2)}$ & $1$ & 1 \\
+\midrule
+\textbf{Total} & & \textbf{9} \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+This uses the general rule: a fully connected layer has $n_{\text{out}} \cdot n_{\text{in}} + n_{\text{out}}$ parameters. Here that is $(2 \cdot 2 + 2) + (1 \cdot 2 + 1) = 6 + 3 = 9$.
+
+\textbf{Quiz-likely points:}
+\begin{itemize}
+  \item The four-inequality XOR contradiction.
+  \item Why stacking linear layers without an activation doesn't help.
+  \item Explaining the role of each hidden unit in the XOR net.
+  \item Counting parameters with the $n_{\text{out}} \cdot n_{\text{in}} + n_{\text{out}}$ formula.
+\end{itemize}
