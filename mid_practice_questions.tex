@@ -26,6 +26,7 @@
 \newcommand{\seeconcept}[3]{(see \hyperref[#1]{\textit{#2}}, Question~#3)}
 \newcommand{\relu}{\operatorname{ReLU}}
 \newcommand{\rot}{\operatorname{rot180}}
+\newcommand{\hlq}[1]{{\setlength{\fboxsep}{1.5pt}\colorbox{yellow}{#1}}}
 
 \begin{document}
 \maketitle
@@ -36,7 +37,7 @@
 \newpage
 
 % ============================================================
-\section{How to use this set}
+\phantomsection\section{How to use this set}
 
 \textbf{Syllabus covered.} Week 1 slides and lecture notes (all of it); Week 3 slides pages 1--37 and the matching parts of the Week 3 lecture notes; the RNN slides (\texttt{rnn\_beamer}); the BPTT slides (\texttt{CSE425\_RNN\_BPTT}). Nothing beyond Week 3 slide 37 is used: no receptive-field recursion, no backprop through a conv layer, no ReLU-on-Sobel or average-pool examples, no depthwise/separable convolutions, no ResNet details.
 
@@ -67,17 +68,138 @@ Total & 29 questions & about 8 h 35 min \\
 \end{tabular}
 \end{center}
 
-If you are short on time, do these first, because they test the most marks per minute: Questions 3, 6, 8, 10, 15, 16, 18, 20, 25, 26.
+If you are short on time, do the \hlq{yellow} minimum set first: it covers every syllabus topic in about 7.5 hours (see the next section).
 
 \textbf{Notation.} Board convention (slides): one example is a column, $z^{(\ell)} = W^{(\ell)} a^{(\ell-1)} + b^{(\ell)}$, and $W^{(\ell)}$ has shape (outputs $\times$ inputs). Code convention (NumPy homework): a batch is a matrix with one example per row, $Z = X W_{\text{code}} + b$, and $W_{\text{code}} = (W^{(\ell)})^\top$ has shape (inputs $\times$ outputs). $\odot$ means multiply entry by entry. $\star$ is cross-correlation, $*$ is true convolution. $\log$ means the natural log $\ln$.
 
 \newpage
 % ============================================================
+\phantomsection\section{The minimum set: every syllabus topic, fewest questions}
+
+\textbf{How to read the highlights.} A \hlq{yellow} question title (for example \hlq{Question 20}) means the question is in the minimum set. If only the title is yellow, do the whole question. If some part letters are also yellow (for example \hlq{(b)}), do only those parts; the yellow letters appear both in the question list and in the solution. Questions with no yellow are optional extra practice.
+
+\textbf{How the set was chosen.} I listed every topic in the mid-term syllabus (Week 1 slides and notes, Week 3 slides 1--37 and the matching notes, the RNN slides, the BPTT slides). For each topic I picked the question part that tests it most directly, then dropped every part whose topics were already covered by a part already picked. The tables below show where each topic is covered, so you can check that nothing is missing.
+
+\textbf{Result.} 16 whole questions plus selected parts of 11 more. Two questions (7 and 9) are fully covered by others and can be skipped: the ``add the paths'' rule of Question~7 is tested in Question~26(b,c) and the chain rule in Question~3(b); the tanh slope and identity + squared-error head of Question~9 are tested in Questions~2(b) and 26. Most questions stay in because each one was written for a different topic, so the saving comes from skipping parts, not whole questions. Estimated time: about 7.5 hours (instead of 8.5).
+
+\begin{center}
+\begin{tabular}{@{}lll@{}}
+\toprule
+Part & Whole questions & Only these parts\\
+\midrule
+I & 2, 3, 8, 10 & 1(a,d,e), 4(b,c,d), 5(a,b,d,f), 6(a,b,c,e,f), 11(a,c,d,e)\\
+II & 12, 13, 15, 16, 18, 19 & 14(b,c,d), 17(a,b,c,d), 20(a,b,d), 21(a,b,d)\\
+III & 22, 24, 25 & 23(a,b,c,d)\\
+IV & 26, 27, 28 & 29(a,c,d,e)\\
+\midrule
+Skip & 7, 9 & \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\subsection*{Topic coverage: Week 1 (slides and lecture notes)}
+\begin{center}
+\begin{tabular}{@{}>{\raggedright\arraybackslash}p{0.62\textwidth}l@{}}
+\toprule
+Topic & Covered by\\
+\midrule
+Neuron = affine score + activation; stacked affine layers collapse & 1(a,d)\\
+Output activation and loss for regression / binary / $K$-class & 1(e)\\
+Sigmoid values, $\sigma'=\sigma(1-\sigma)$, proof that $\sigma'\le\tfrac14$ & 2(a,c)\\
+tanh and $\tanh'=1-\tanh^2$ & 2(b)\\
+Saturation; why a deep sigmoid stack shrinks gradients & 2(d,e)\\
+ReLU slope, value at 0 in code, Leaky ReLU & 2(f)\\
+Logistic neuron forward pass, BCE, ``coin-flip'' loss $\ln2$ & 3(a), 11(a)\\
+Derivation of $\partial L/\partial z=\hat y-y$; one gradient step & 3(b,c,d)\\
+Squared error vs.\ BCE with a sigmoid (the leftover $\sigma'$) & 3(e)\\
+Numerically stable BCE & 3(f)\\
+XOR is not linearly separable; a ReLU network that solves it & 4(b,c,d)\\
+Layer shapes (board convention) and parameter counting & 5(a,b)\\
+Code (row-batch) shapes; most parameters sit in the first layer & 5(d,f)\\
+Softmax, cross-entropy, $\nabla_zL=p-y$, sum-to-zero check & 6(a,b)\\
+Stable softmax (subtract the max) & 6(c)\\
+Two-class softmax is a sigmoid of the logit difference & 6(e)\\
+Softmax acts on the whole output layer, not per unit & 6(f)\\
+Chain rule; computation graph; several paths add & 3(b), 8, 26(b,c)\\
+$\delta$ recursion, outer products $\delta a^\top$, $W^\top\delta$, full backprop & 8(a,b)\\
+Dead ReLU (zero row) vs.\ zero input (zero column); cache $z$ & 8(a,c,d)\\
+One update step, loss falls & 8(e)\\
+NumPy batch layout, $1/n$, mask from $Z$, board $\leftrightarrow$ code transpose & 10\\
+All hidden units dead on an example & 11(c)\\
+Universal approximation theorem & 11(d)\\
+Gradient check against PyTorch ($<10^{-5}$), common bugs & 11(e)\\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\subsection*{Topic coverage: Week 3 (slides 1--37 and matching notes)}
+\begin{center}
+\begin{tabular}{@{}>{\raggedright\arraybackslash}p{0.62\textwidth}l@{}}
+\toprule
+Topic & Covered by\\
+\midrule
+Images as tensors, flattening, NCHW vs.\ NHWC & 12(e,f)\\
+Dense vs.\ local vs.\ shared weight counts; sharing saves params not MACs & 12(a--d)\\
+Equivariance vs.\ invariance & 12(g)\\
+Three MLP failures and the three CNN choices & 21(a)\\
+1-D correlation vs.\ convolution, valid and full length, symmetric kernels & 13(a--e)\\
+Libraries compute cross-correlation; when the flip matters & 13(f)\\
+2-D correlation, $\rot(K)$, true convolution, $\rot(K)=-K$ case & 14(b,c,d)\\
+Kernel as template; Sobel-x and the sign of an edge & 15(a)\\
+Padding (zero, replicate; valid/same/full) and fake border edges & 15(b,e)\\
+Stride, stride = subsampling, cost saving & 15(c,d,f)\\
+Output-size formula, its proof, the floor, dilation & 16\\
+Same padding needs odd $k$; only at stride 1 & 16(d), 21(b)\\
+Max pooling: values, no parameters, per channel, overlapping, dropped rows & 17(a--d)\\
+Multi-channel conv, parameter and MAC formulas & 18(a,b,c)\\
+im2col; conv as a sparse, tied dense layer & 18(d,e)\\
+Params independent of image size, MACs are not & 19(a,b)\\
+Stacked $3\times3$ vs.\ one large kernel; why a ReLU is needed between & 19(c,d)\\
+conv $\to$ BN $\to$ ReLU and the redundant bias & 19(e)\\
+Where parameters hide (dense head); global average pooling & 19(f), 20(b)\\
+Architecture ledger: shapes, params, activation memory & 20(a)\\
+SmallCNN (assignment network) & 20(d)\\
+When sharing is a poor assumption (aligned faces) & 21(d)\\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\subsection*{Topic coverage: RNN and BPTT slides}
+\begin{center}
+\begin{tabular}{@{}>{\raggedright\arraybackslash}p{0.62\textwidth}l@{}}
+\toprule
+Topic & Covered by\\
+\midrule
+Why RNNs; vanilla RNN equations and shapes; forward pass; memory & 22\\
+Folded vs.\ unrolled view & 22(e)\\
+Parameter count, independent of length; LSTM and GRU counts & 23(a,b,c)\\
+Stacked RNNs and their parameter count & 23(d), 24(f)\\
+Parameter sharing across time; why a nonlinearity; why tanh & 24(a,b,c)\\
+RNN types, bidirectional RNNs, example applications & 24(d,e)\\
+Language modelling: chain rule, next-token softmax & 25(a,e)\\
+Temperature, greedy, top-$k$, top-$p$ & 25(b,c)\\
+Teacher forcing, cross-entropy, perplexity, generation loop & 25(d,e,f)\\
+BPTT forward pass, two paths into $h_1$, local derivatives & 26(a,b,c)\\
+BPTT recurrence; shared-weight gradients summed over time & 26(c,d)\\
+Head weights, $h_0=0$, one update & 26(d,e,f), 29(c)\\
+Unfolded recurrence, product of Jacobians, vanishing/exploding & 27(b,c,e)\\
+Exact linear-cell BPTT (slide practice problem 3) & 27(a--d)\\
+Gradient clipping and gated cells as fixes & 27(e)\\
+Vector BPTT: outer products and transposes & 28\\
+$W_h=0$ thought experiment (slide practice problem 2) & 29(a)\\
+Order of work; truncated BPTT & 29(d,e)\\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\newpage
+
+% ============================================================
 \part{Foundations: neurons, losses and backpropagation}
 % ============================================================
 
 % ------------------------------------------------------------
-\section{Question 1. Why a network needs an activation function}
+\phantomsection\section[Question 1. Why a network needs an activation function]{\hlq{Question 1}. Why a network needs an activation function}
 % ------------------------------------------------------------
 \subsection*{Question}
 A network has 2 inputs, one hidden layer with 2 units, and 1 output. At first both layers use the identity activation (no activation at all):
@@ -86,11 +208,11 @@ W^{(1)}=\begin{bmatrix}2&-1\\1&3\end{bmatrix},\quad b^{(1)}=\begin{bmatrix}0\\1\
 W^{(2)}=\begin{bmatrix}1&-2\end{bmatrix},\quad b^{(2)}=1 .
 \]
 \begin{enumerate}[label=(\alph*)]
-\item Write the whole network as one affine map $\hat y = Mx + c$. Give $M$ and $c$.
-\item Evaluate the network at $x=(0,1)^\top$ in the two-layer form and in the one-map form. Check that they agree.
-\item Now put a ReLU after the hidden layer and keep everything else the same. Compute $\hat y$ at $x=(0,1)^\top$ and at $x=(1,2)^\top$. Explain why the ReLU network can no longer be replaced by a single affine map.
-\item A classmate says: ``If I stack 50 layers with identity activations, the network will be able to learn XOR.'' Is that right? Answer in two or three sentences.
-\item For each task, give the output-layer activation and the loss: (i) predicting a house price, (ii) spam or not spam, (iii) recognising a digit 0--9.
+\item[\hlq{(a)}] Write the whole network as one affine map $\hat y = Mx + c$. Give $M$ and $c$.
+\item[(b)] Evaluate the network at $x=(0,1)^\top$ in the two-layer form and in the one-map form. Check that they agree.
+\item[(c)] Now put a ReLU after the hidden layer and keep everything else the same. Compute $\hat y$ at $x=(0,1)^\top$ and at $x=(1,2)^\top$. Explain why the ReLU network can no longer be replaced by a single affine map.
+\item[\hlq{(d)}] A classmate says: ``If I stack 50 layers with identity activations, the network will be able to learn XOR.'' Is that right? Answer in two or three sentences.
+\item[\hlq{(e)}] For each task, give the output-layer activation and the loss: (i) predicting a house price, (ii) spam or not spam, (iii) recognising a digit 0--9.
 \end{enumerate}
 
 \subsection*{What the question is asking}
@@ -148,7 +270,7 @@ One of $K$ classes & softmax, $K$ units & cross-entropy \\
 The hidden sizes are a free choice; the input size comes from the data and the output size comes from the task.
 
 \subsection*{Solution}
-\textbf{(a)} Multiply out the two layers \seeconcept{c:collapse}{Stacked affine layers collapse into one}{1}.
+\hlq{\textbf{(a)}} Multiply out the two layers \seeconcept{c:collapse}{Stacked affine layers collapse into one}{1}.
 \[
 M = W^{(2)}W^{(1)} = \begin{bmatrix}1&-2\end{bmatrix}\begin{bmatrix}2&-1\\1&3\end{bmatrix}
 = \begin{bmatrix}1\cdot2+(-2)\cdot1 & \;1\cdot(-1)+(-2)\cdot3\end{bmatrix} = \begin{bmatrix}0&-7\end{bmatrix},
@@ -173,13 +295,13 @@ At $x=(1,2)^\top$: $z^{(1)} = (2-2+0,\;1+6+1) = (0,8)$, so $a^{(1)}=(0,8)$ and $
 
 Why it is no longer one affine map: at $(1,2)$ no hidden value was negative, so ReLU did nothing and the network matched $Mx+c$. At $(0,1)$ unit 1 was negative and ReLU clipped it to 0, so the network used a different rule. A single affine map uses the same rule everywhere; the ReLU network switches rules depending on which units are switched on. That switching is the bend that lets a network draw curved (piecewise straight) boundaries.
 
-\textbf{(d)} No. With identity activations, 50 layers collapse into one affine map $Mx+c$ \seeconcept{c:collapse}{Stacked affine layers collapse into one}{1}. One affine map can only separate classes with a straight line, and XOR cannot be separated by any straight line (proved in Question~4). Depth only helps when there is a nonlinearity between the layers.
+\hlq{\textbf{(d)}} No. With identity activations, 50 layers collapse into one affine map $Mx+c$ \seeconcept{c:collapse}{Stacked affine layers collapse into one}{1}. One affine map can only separate classes with a straight line, and XOR cannot be separated by any straight line (proved in Question~4). Depth only helps when there is a nonlinearity between the layers.
 
-\textbf{(e)} \seeconcept{c:outputs}{Choosing the output layer from the task}{1}
+\hlq{\textbf{(e)}} \seeconcept{c:outputs}{Choosing the output layer from the task}{1}
 (i) House price: identity output, squared error. (ii) Spam: one sigmoid unit, binary cross-entropy. (iii) Digit 0--9: ten units with softmax, cross-entropy.
 
 % ------------------------------------------------------------
-\section{Question 2. Sigmoid, tanh and ReLU: values, slopes and vanishing gradients}
+\phantomsection\section[Question 2. Sigmoid, tanh and ReLU: values, slopes and vanishing gradients]{\hlq{Question 2}. Sigmoid, tanh and ReLU: values, slopes and vanishing gradients}
 % ------------------------------------------------------------
 \subsection*{Question}
 \begin{enumerate}[label=(\alph*)]
@@ -267,7 +389,7 @@ So the signal reaching the first layer is at most about one thousandth of what l
 \textbf{(f)} $\relu'(-3)=0$, $\relu'(2)=1$, $\relu'(0)=0$ in code. Leaky ReLU at $z=-3$: slope $\alpha=0.01$ \seeconcept{c:reluderiv}{ReLU slope, dead units and Leaky ReLU}{2}.
 
 % ------------------------------------------------------------
-\section{Question 3. One logistic neuron: binary cross-entropy, one update, and why not squared error}
+\phantomsection\section[Question 3. One logistic neuron: binary cross-entropy, one update, and why not squared error]{\hlq{Question 3}. One logistic neuron: binary cross-entropy, one update, and why not squared error}
 % ------------------------------------------------------------
 \subsection*{Question}
 A logistic neuron has $w=0.5$, $b=-1$. One training example has $x=4$ and label $y=0$. Use $\sigma(1)\approx0.7311$.
@@ -371,20 +493,20 @@ BCE pushes about 57 times harder. The neuron is badly wrong, so it should learn 
 
 \textbf{(f)} With $z=1>0$ and $y=0$: $\max(1,0)-0\cdot1+\log(1+e^{-1})=1+\log(1.3679)=1+0.3133=1.3133$, the same as (a). Libraries use it because it never computes $\log 0$ or $e^{\text{huge}}$: for $z=1000$, $y=0$ it returns about 1000 (large but finite) instead of infinity or NaN \seeconcept{c:stablebce}{Numerically stable BCE}{3}.
 % ------------------------------------------------------------
-\section{Question 4. Linear separability and a ReLU network for XOR}
+\phantomsection\section[Question 4. Linear separability and a ReLU network for XOR]{\hlq{Question 4}. Linear separability and a ReLU network for XOR}
 % ------------------------------------------------------------
 \subsection*{Question}
 \begin{enumerate}[label=(\alph*)]
-\item AND has labels $(0,0)\mapsto0$, $(1,0)\mapsto0$, $(0,1)\mapsto0$, $(1,1)\mapsto1$. Find $w_1,w_2,b$ so that $w_1x_1+w_2x_2+b>0$ on class 1 and $<0$ on class 0. Do the same for OR.
-\item XOR has labels $0,1,1,0$ on the same four points. Prove that no $w_1,w_2,b$ can do this.
-\item Consider the network
+\item[(a)] AND has labels $(0,0)\mapsto0$, $(1,0)\mapsto0$, $(0,1)\mapsto0$, $(1,1)\mapsto1$. Find $w_1,w_2,b$ so that $w_1x_1+w_2x_2+b>0$ on class 1 and $<0$ on class 0. Do the same for OR.
+\item[\hlq{(b)}] XOR has labels $0,1,1,0$ on the same four points. Prove that no $w_1,w_2,b$ can do this.
+\item[\hlq{(c)}] Consider the network
 \[
 z^{(1)}=\begin{bmatrix}1&1\\1&1\end{bmatrix}\begin{bmatrix}x_1\\x_2\end{bmatrix}+\begin{bmatrix}-1/2\\-3/2\end{bmatrix},\qquad a=\relu(z^{(1)}),\qquad \hat y=2a_1-6a_2 .
 \]
 Fill in $z_1,z_2,a_1,a_2,\hat y$ for the four inputs and show that it computes XOR.
-\item Explain in words what each hidden unit detects and why the output weights are $2$ and $-6$.
-\item Remove the ReLU (identity activation). Compute the four outputs and explain why the network fails.
-\item How many scalar parameters does the network in (c) have, counting the output bias (which is 0)?
+\item[\hlq{(d)}] Explain in words what each hidden unit detects and why the output weights are $2$ and $-6$.
+\item[(e)] Remove the ReLU (identity activation). Compute the four outputs and explain why the network fails.
+\item[(f)] How many scalar parameters does the network in (c) have, counting the output bias (which is 0)?
 \end{enumerate}
 
 \subsection*{What the question is asking}
@@ -406,7 +528,7 @@ A ReLU unit with a negative bias acts like a switch: it outputs 0 until its weig
 
 OR: take $w_1=w_2=1$, $b=-0.5$. Scores: $-0.5,\;0.5,\;0.5,\;1.5$. Only $(0,0)$ is negative. Correct. Both are linearly separable; only the threshold differs.
 
-\textbf{(b)} Suppose some $w_1,w_2,b$ work \seeconcept{c:separable}{Linear separability}{4}. Write one condition per point:
+\hlq{\textbf{(b)}} Suppose some $w_1,w_2,b$ work \seeconcept{c:separable}{Linear separability}{4}. Write one condition per point:
 \begin{enumerate}[nosep,label=(\arabic*)]
 \item $(0,0)$, class 0: $b<0$.
 \item $(1,0)$, class 1: $w_1+b>0$.
@@ -417,7 +539,7 @@ Add (2) and (3) \seeconcept{c:addineq}{Adding inequalities}{4}: $w_1+w_2+2b>0$. 
 
 Intuition: each input alone pushes the score above 0. With both inputs on you get both pushes but pay the negative bias only once, so the score must be even more positive, yet XOR needs it negative.
 
-\textbf{(c)} Here $z_1=x_1+x_2-\tfrac12$ and $z_2=x_1+x_2-\tfrac32$.
+\hlq{\textbf{(c)}} Here $z_1=x_1+x_2-\tfrac12$ and $z_2=x_1+x_2-\tfrac32$.
 \begin{center}
 \begin{tabular}{@{}cc|cc|cc|c@{}}
 \toprule
@@ -432,7 +554,7 @@ $x_1$&$x_2$&$z_1$&$z_2$&$a_1$&$a_2$&$\hat y=2a_1-6a_2$\\
 \end{center}
 The outputs $0,1,1,0$ are exactly XOR.
 
-\textbf{(d)} Unit 1 switches on as soon as at least one input is on (threshold $\tfrac12$). It is an ``OR-like'' unit whose output grows with the number of inputs on: $0,\,0.5,\,0.5,\,1.5$. Unit 2 has threshold $\tfrac32$, so it only switches on when both inputs are on: it is an AND detector ($0,0,0,0.5$). The weight 2 turns unit 1's $0.5$ into 1 for the single-input cases. At $(1,1)$ unit 1 gives $2\cdot1.5=3$, which is too big, so the output subtracts $6\cdot0.5=3$ from unit 2 to cancel it exactly \seeconcept{c:detectors}{Hidden units as detectors}{4}.
+\hlq{\textbf{(d)}} Unit 1 switches on as soon as at least one input is on (threshold $\tfrac12$). It is an ``OR-like'' unit whose output grows with the number of inputs on: $0,\,0.5,\,0.5,\,1.5$. Unit 2 has threshold $\tfrac32$, so it only switches on when both inputs are on: it is an AND detector ($0,0,0,0.5$). The weight 2 turns unit 1's $0.5$ into 1 for the single-input cases. At $(1,1)$ unit 1 gives $2\cdot1.5=3$, which is too big, so the output subtracts $6\cdot0.5=3$ from unit 2 to cancel it exactly \seeconcept{c:detectors}{Hidden units as detectors}{4}.
 
 \textbf{(e)} Without ReLU, $a=z$. Let $s=x_1+x_2$. Then
 \[
@@ -443,17 +565,17 @@ Outputs: $(0,0)\to8$, $(1,0)\to4$, $(0,1)\to4$, $(1,1)\to0$. The output is a str
 \textbf{(f)} $W^{(1)}$: $2\times2=4$; $b^{(1)}$: 2; $W^{(2)}$: $1\times2=2$; $b^{(2)}$: 1. Total $4+2+2+1=9$.
 
 % ------------------------------------------------------------
-\section{Question 5. Shapes and parameter counting for an MLP}
+\phantomsection\section[Question 5. Shapes and parameter counting for an MLP]{\hlq{Question 5}. Shapes and parameter counting for an MLP}
 % ------------------------------------------------------------
 \subsection*{Question}
 A 3-class classifier on tabular data with 6 numeric features uses the network $6\to10\to8\to3$ with ReLU hidden layers.
 \begin{enumerate}[label=(\alph*)]
-\item Give the shapes of $W^{(1)},b^{(1)},W^{(2)},b^{(2)},W^{(3)},b^{(3)}$ in the board convention (out $\times$ in).
-\item Count the parameters of each layer and the total.
-\item Which activation and loss go on the output? Why does the output layer have 3 units?
-\item The code uses batches of 64 rows. Give the shapes of $X$, $W^{(1)}_{\text{code}}$, $Z^{(1)}$, $A^{(2)}$, $Z^{(3)}$ and $dW^{(2)}_{\text{code}}$.
-\item If the batch size is changed from 64 to 256, how does the number of parameters change?
-\item An MLP for $32\times32\times3$ images is $3072\to512\to10$. Count its parameters and give the fraction that sits in the first layer.
+\item[\hlq{(a)}] Give the shapes of $W^{(1)},b^{(1)},W^{(2)},b^{(2)},W^{(3)},b^{(3)}$ in the board convention (out $\times$ in).
+\item[\hlq{(b)}] Count the parameters of each layer and the total.
+\item[(c)] Which activation and loss go on the output? Why does the output layer have 3 units?
+\item[\hlq{(d)}] The code uses batches of 64 rows. Give the shapes of $X$, $W^{(1)}_{\text{code}}$, $Z^{(1)}$, $A^{(2)}$, $Z^{(3)}$ and $dW^{(2)}_{\text{code}}$.
+\item[(e)] If the batch size is changed from 64 to 256, how does the number of parameters change?
+\item[\hlq{(f)}] An MLP for $32\times32\times3$ images is $3072\to512\to10$. Count its parameters and give the fraction that sits in the first layer.
 \end{enumerate}
 
 \subsection*{What the question is asking}
@@ -476,43 +598,43 @@ Z=XW_{\text{code}}+b\quad(\text{bias added to every row}).
 Every activation matrix is then ($n\times$ units of that layer). A gradient always has the same shape as the thing it is the gradient of, so $dW_{\text{code}}$ has the shape of $W_{\text{code}}$.
 
 \subsection*{Solution}
-\textbf{(a)} Shape rule: (units in this layer) $\times$ (units in the previous layer) \seeconcept{c:layer}{A layer, and the matrix form}{1}.
+\hlq{\textbf{(a)}} Shape rule: (units in this layer) $\times$ (units in the previous layer) \seeconcept{c:layer}{A layer, and the matrix form}{1}.
 \[
 W^{(1)}\in\mathbb R^{10\times6},\ b^{(1)}\in\mathbb R^{10};\quad
 W^{(2)}\in\mathbb R^{8\times10},\ b^{(2)}\in\mathbb R^{8};\quad
 W^{(3)}\in\mathbb R^{3\times8},\ b^{(3)}\in\mathbb R^{3}.
 \]
 
-\textbf{(b)} \seeconcept{c:paramcount}{Counting parameters}{5}
+\hlq{\textbf{(b)}} \seeconcept{c:paramcount}{Counting parameters}{5}
 \[
 10\cdot6+10=70,\qquad 8\cdot10+8=88,\qquad 3\cdot8+3=27,\qquad\text{total }=185 .
 \]
 
 \textbf{(c)} Softmax over 3 units with cross-entropy loss. There is one output unit per class, because softmax produces one probability per class and they must add to 1 \seeconcept{c:outputs}{Choosing the output layer}{1}.
 
-\textbf{(d)} \seeconcept{c:boardcode}{Board versus code convention}{5}
+\hlq{\textbf{(d)}} \seeconcept{c:boardcode}{Board versus code convention}{5}
 $X$: $64\times6$. $W^{(1)}_{\text{code}}$: $6\times10$ (the transpose of the board $10\times6$). $Z^{(1)}$: $64\times10$. $A^{(2)}$: $64\times8$. $Z^{(3)}$: $64\times3$. $dW^{(2)}_{\text{code}}$: same shape as $W^{(2)}_{\text{code}}$, which is $10\times8$.
 
 \textbf{(e)} It does not change. The batch size only changes how many rows flow through the network at once; every row uses the same 185 parameters.
 
-\textbf{(f)}
+\hlq{\textbf{(f)}}
 \[
 3072\cdot512+512=1{,}573{,}376,\qquad 512\cdot10+10=5{,}130,\qquad\text{total }=1{,}578{,}506 .
 \]
 The first layer holds $1{,}573{,}376/1{,}578{,}506\approx99.7\%$ of the parameters. The input dimension (3072 numbers) is what makes it huge. (This waste is the starting point of Week 3: see Question~12.)
 
 % ------------------------------------------------------------
-\section{Question 6. Softmax cross-entropy, a step on the logits, and the two-class case}
+\phantomsection\section[Question 6. Softmax cross-entropy, a step on the logits, and the two-class case]{\hlq{Question 6}. Softmax cross-entropy, a step on the logits, and the two-class case}
 % ------------------------------------------------------------
 \subsection*{Question}
 A 4-class output layer produces logits $z=(\ln3,\ 0,\ \ln2,\ \ln2)$. The true class is class 3, so $y=(0,0,1,0)$.
 \begin{enumerate}[label=(\alph*)]
-\item Compute $p=\operatorname{softmax}(z)$ and the cross-entropy $L$ exactly.
-\item Compute $\nabla_zL=p-y$. Check that $p$ sums to 1 and $\nabla_zL$ sums to 0.
-\item Subtract $m=\max_j z_j$ from every logit and recompute $p$. What changes, and why is this done in code? Illustrate with logits $(1000, 998)$.
-\item Take one gradient step directly on the logits with $\eta=1$: $z\leftarrow z-\nabla_zL$. Compute the new probability of the true class and the new loss. Explain the sign of each entry of $\nabla_zL$.
-\item Two classes: $z=(\ln5,0)$ and $y=(1,0)$. Compute $p$, $L$ and $\partial L/\partial z_1$, and check that $\partial L/\partial z_1=\sigma(z_1-z_2)-1$.
-\item Why can the hidden-layer rule $\delta=\bigl(W^\top\delta_{\text{next}}\bigr)\odot f'(z)$ not be used ``through'' a softmax layer?
+\item[\hlq{(a)}] Compute $p=\operatorname{softmax}(z)$ and the cross-entropy $L$ exactly.
+\item[\hlq{(b)}] Compute $\nabla_zL=p-y$. Check that $p$ sums to 1 and $\nabla_zL$ sums to 0.
+\item[\hlq{(c)}] Subtract $m=\max_j z_j$ from every logit and recompute $p$. What changes, and why is this done in code? Illustrate with logits $(1000, 998)$.
+\item[(d)] Take one gradient step directly on the logits with $\eta=1$: $z\leftarrow z-\nabla_zL$. Compute the new probability of the true class and the new loss. Explain the sign of each entry of $\nabla_zL$.
+\item[\hlq{(e)}] Two classes: $z=(\ln5,0)$ and $y=(1,0)$. Compute $p$, $L$ and $\partial L/\partial z_1$, and check that $\partial L/\partial z_1=\sigma(z_1-z_2)-1$.
+\item[\hlq{(f)}] Why can the hidden-layer rule $\delta=\bigl(W^\top\delta_{\text{next}}\bigr)\odot f'(z)$ not be used ``through'' a softmax layer?
 \end{enumerate}
 
 \subsection*{What the question is asking}
@@ -549,18 +671,18 @@ p_1=\frac{e^{z_1}}{e^{z_1}+e^{z_2}}=\frac{1}{1+e^{-(z_1-z_2)}}=\sigma(z_1-z_2).
 Only the gap between the two logits matters. Logistic regression and two-class softmax are the same model written two ways.
 
 \subsection*{Solution}
-\textbf{(a)} $e^z=(3,1,2,2)$, total $8$, so \seeconcept{c:softmax}{Softmax}{6}
+\hlq{\textbf{(a)}} $e^z=(3,1,2,2)$, total $8$, so \seeconcept{c:softmax}{Softmax}{6}
 \[
 p=\Bigl(\frac38,\ \frac18,\ \frac14,\ \frac14\Bigr),\qquad L=-\log\frac14=\ln4\approx1.386 .
 \]
 
-\textbf{(b)} \seeconcept{c:pminusy}{The softmax + cross-entropy gradient}{6}
+\hlq{\textbf{(b)}} \seeconcept{c:pminusy}{The softmax + cross-entropy gradient}{6}
 \[
 \nabla_zL=p-y=\Bigl(\frac38,\ \frac18,\ \frac14-1,\ \frac14\Bigr)=\Bigl(\frac38,\ \frac18,\ -\frac34,\ \frac14\Bigr).
 \]
 Checks: $\tfrac38+\tfrac18+\tfrac14+\tfrac14=1$. In eighths the gradient is $3+1-6+2=0$.
 
-\textbf{(c)} $m=\ln3$. Shifted logits: $(0,\,-\ln3,\,\ln\tfrac23,\,\ln\tfrac23)$, so $e^{z-m}=(1,\tfrac13,\tfrac23,\tfrac23)$ with total $\tfrac83$, and $p=(\tfrac38,\tfrac18,\tfrac14,\tfrac14)$ again. Nothing changes in $p$; only the size of the numbers the computer handles changes. For $(1000,998)$, $e^{1000}$ overflows to infinity. After subtracting $1000$ the logits are $(0,-2)$: $e^0=1$, $e^{-2}\approx0.1353$, so $p\approx(0.8808,\ 0.1192)$ with no overflow \seeconcept{c:stablesoftmax}{Stable softmax}{6}.
+\hlq{\textbf{(c)}} $m=\ln3$. Shifted logits: $(0,\,-\ln3,\,\ln\tfrac23,\,\ln\tfrac23)$, so $e^{z-m}=(1,\tfrac13,\tfrac23,\tfrac23)$ with total $\tfrac83$, and $p=(\tfrac38,\tfrac18,\tfrac14,\tfrac14)$ again. Nothing changes in $p$; only the size of the numbers the computer handles changes. For $(1000,998)$, $e^{1000}$ overflows to infinity. After subtracting $1000$ the logits are $(0,-2)$: $e^0=1$, $e^{-2}\approx0.1353$, so $p\approx(0.8808,\ 0.1192)$ with no overflow \seeconcept{c:stablesoftmax}{Stable softmax}{6}.
 
 \textbf{(d)} New logits $z-\nabla_zL$:
 \[
@@ -570,12 +692,12 @@ Softmax of these gives $p\approx(0.2360,\ 0.1010,\ 0.4847,\ 0.1783)$. The true c
 
 Signs: class 3 (true) has gradient $-\tfrac34<0$, so its logit went up. The wrong classes have positive gradients, so their logits went down; class 1, which wrongly had the most probability ($\tfrac38$), was pushed down the hardest.
 
-\textbf{(e)} $e^z=(5,1)$, total 6, so $p=(\tfrac56,\tfrac16)$, $L=-\log\tfrac56=\ln\tfrac65\approx0.182$, and $\partial L/\partial z_1=p_1-1=-\tfrac16$. The gap is $z_1-z_2=\ln5$, and $\sigma(\ln5)=\tfrac{5}{6}$ \seeconcept{c:twoclass}{Two-class softmax is a sigmoid}{6}, so $\sigma(z_1-z_2)-1=-\tfrac16$. It matches: this is exactly the sigmoid + BCE result ``$\hat y-y$'' with label 1.
+\hlq{\textbf{(e)}} $e^z=(5,1)$, total 6, so $p=(\tfrac56,\tfrac16)$, $L=-\log\tfrac56=\ln\tfrac65\approx0.182$, and $\partial L/\partial z_1=p_1-1=-\tfrac16$. The gap is $z_1-z_2=\ln5$, and $\sigma(\ln5)=\tfrac{5}{6}$ \seeconcept{c:twoclass}{Two-class softmax is a sigmoid}{6}, so $\sigma(z_1-z_2)-1=-\tfrac16$. It matches: this is exactly the sigmoid + BCE result ``$\hat y-y$'' with label 1.
 
-\textbf{(f)} That rule multiplies each unit's blame by that unit's own slope $f'(z_i)$, which only makes sense when each output depends on its own input alone (ReLU, sigmoid, tanh). Each softmax output depends on \emph{all} the logits through the shared denominator: raise $z_1$ and $p_2,p_3,\dots$ all drop. One slope per unit cannot describe that; you would need a full grid of slopes. In practice softmax is only used at the output with cross-entropy, where all the cross-effects cancel and leave $\delta=p-y$ directly.
+\hlq{\textbf{(f)}} That rule multiplies each unit's blame by that unit's own slope $f'(z_i)$, which only makes sense when each output depends on its own input alone (ReLU, sigmoid, tanh). Each softmax output depends on \emph{all} the logits through the shared denominator: raise $z_1$ and $p_2,p_3,\dots$ all drop. One slope per unit cannot describe that; you would need a full grid of slopes. In practice softmax is only used at the output with cross-entropy, where all the cross-effects cancel and leave $\delta=p-y$ directly.
 
 % ------------------------------------------------------------
-\section{Question 7. A computation graph where one variable has two paths}
+\phantomsection\section{Question 7. A computation graph where one variable has two paths}
 % ------------------------------------------------------------
 \subsection*{Question}
 Let $w=2$, $x=3$, $y=4$ and
@@ -618,7 +740,7 @@ Path 1, $w\to u\to v\to r\to L$: $3\cdot1\cdot1\cdot4=12$. Path 2, $w\to v\to r\
 
 \textbf{(e)} (1) A hidden unit feeds every unit of the next layer, so its gradient adds one path per next-layer unit; that sum is the $W^\top\delta$ in backprop (Question~8). (2) In an RNN the hidden state $h_t$ is used by the output at step $t$ and by the next step, so $\partial L/\partial h_t$ is a ``direct path + future path'' sum (Question~26).
 % ------------------------------------------------------------
-\section{Question 8. Full forward and backward pass: a dead unit and a zero input together}
+\phantomsection\section[Question 8. Full forward and backward pass: a dead unit and a zero input together]{\hlq{Question 8}. Full forward and backward pass: a dead unit and a zero input together}
 % ------------------------------------------------------------
 \subsection*{Question}
 A $2\to3\to1$ network has ReLU hidden units, a sigmoid output and binary cross-entropy loss. One example:
@@ -722,7 +844,7 @@ z^{(2)}=1.05\cdot1.25+0-0.95\cdot0.75+0.05=1.3125-0.7125+0.05=0.65,
 The loss fell from $0.693$ to $0.420$ and $\hat y$ moved towards 1. Unit 2 is unchanged: none of its parameters moved, and its $z$ is still $-1$. On this example it is still off. If it were off for every training example, it would be dead for good; Leaky ReLU would give it a small slope so it could recover.
 
 % ------------------------------------------------------------
-\section{Question 9. Backprop with a tanh hidden layer and a regression output}
+\phantomsection\section{Question 9. Backprop with a tanh hidden layer and a regression output}
 % ------------------------------------------------------------
 \subsection*{Question}
 A $2\to2\to1$ regression network uses tanh in the hidden layer, an identity output, and the loss $L=\tfrac12(\hat y-y)^2$. Use $\tanh(\ln2)=\tfrac35$ and $\tanh(\ln3)=\tfrac45$.
@@ -792,7 +914,7 @@ Forward again: $z^{(1)}\approx(1.0131+0.32,\ 1.0086-0.09)=(1.3331,\ 0.9186)$, $a
 The loss dropped from 2 to about $0.032$; the prediction moved from 1 to about $2.75$, close to the target 3.
 
 % ------------------------------------------------------------
-\section{Question 10. Backprop on a batch in the NumPy (row) layout}
+\phantomsection\section[Question 10. Backprop on a batch in the NumPy (row) layout]{\hlq{Question 10}. Backprop on a batch in the NumPy (row) layout}
 % ------------------------------------------------------------
 \subsection*{Question}
 A $2\to2\to1$ network (ReLU hidden, sigmoid output) is trained with the \emph{mean} BCE over a batch of $n=3$ rows, in the code convention. Use $\sigma(-2)\approx0.1192$ and $\sigma(1)\approx0.7311$.
@@ -882,17 +1004,17 @@ Row $i$ is hidden unit $i$, column $j$ is input $j$, as on the board.
 \textbf{(f)} Every gradient would be 3 times too big, which is the same as using a learning rate 3 times larger than intended \seeconcept{c:meansum}{Mean versus sum}{10}. With batches of 64 it would be 64 times too big, which can make training diverge. It would also fail the PyTorch gradient check.
 
 % ------------------------------------------------------------
-\section{Question 11. Short answers on Week 1}
+\phantomsection\section[Question 11. Short answers on Week 1]{\hlq{Question 11}. Short answers on Week 1}
 % ------------------------------------------------------------
 \subsection*{Question}
 Answer each in two to four sentences.
 \begin{enumerate}[label=(\alph*)]
-\item A balanced binary classifier with small random weights starts with loss near $0.693$. A 10-class softmax classifier with small random weights starts near what loss? Explain both numbers.
-\item Why does the forward pass cache $z^{(1)}$ and not only $a^{(1)}$?
-\item On one example every hidden unit of a one-hidden-layer ReLU net is dead. What is $\nabla_{W^{(1)}}L$ for that example? What if it happens for every example in the batch?
-\item What does the universal approximation theorem say, and name two things it does \emph{not} promise.
-\item You implement backprop by hand in NumPy. How do you check it is right, what threshold is used, and name three common bugs.
-\item Why is the sigmoid still used at the output of a binary classifier, even though ReLU is preferred in hidden layers?
+\item[\hlq{(a)}] A balanced binary classifier with small random weights starts with loss near $0.693$. A 10-class softmax classifier with small random weights starts near what loss? Explain both numbers.
+\item[(b)] Why does the forward pass cache $z^{(1)}$ and not only $a^{(1)}$?
+\item[\hlq{(c)}] On one example every hidden unit of a one-hidden-layer ReLU net is dead. What is $\nabla_{W^{(1)}}L$ for that example? What if it happens for every example in the batch?
+\item[\hlq{(d)}] What does the universal approximation theorem say, and name two things it does \emph{not} promise.
+\item[\hlq{(e)}] You implement backprop by hand in NumPy. How do you check it is right, what threshold is used, and name three common bugs.
+\item[(f)] Why is the sigmoid still used at the output of a binary classifier, even though ReLU is preferred in hidden layers?
 \end{enumerate}
 
 \subsection*{What the question is asking}
@@ -908,15 +1030,15 @@ A network with a single hidden layer of sigmoid units, if it has enough units, c
 Copy your NumPy weights into PyTorch, run the same forward expression, call \texttt{loss.backward()}, and compare every parameter's gradient with yours. The relative error should be below $10^{-5}$ before you start training.
 
 \subsection*{Solution}
-\textbf{(a)} Small random weights give logits near 0. For binary, $\hat y\approx\sigma(0)=\tfrac12$, so $L\approx-\log\tfrac12=\ln2\approx0.693$ for either label: a coin flip. For 10 classes, equal logits give $p_k=\tfrac1{10}$, so $L\approx-\log\tfrac1{10}=\ln10\approx2.303$. A starting loss far from these values (say 50) usually means a bug.
+\hlq{\textbf{(a)}} Small random weights give logits near 0. For binary, $\hat y\approx\sigma(0)=\tfrac12$, so $L\approx-\log\tfrac12=\ln2\approx0.693$ for either label: a coin flip. For 10 classes, equal logits give $p_k=\tfrac1{10}$, so $L\approx-\log\tfrac1{10}=\ln10\approx2.303$. A starting loss far from these values (say 50) usually means a bug.
 
 \textbf{(b)} The ReLU backward mask is $\mathbf 1[z>0]$. When $a=0$, $z$ could have been negative or exactly 0, and $a$ cannot tell these apart; those are exactly the cases where the slope choice matters. Storing $z$ makes the mask exact.
 
-\textbf{(c)} All masks are 0, so $\delta^{(1)}=0$, hence $\nabla_{W^{(1)}}L=\delta^{(1)}x^\top=0$ and $\nabla_{b^{(1)}}L=0$: the example teaches the first layer nothing. (The outgoing weights also get zero gradient because all $a^{(1)}=0$.) If it happens on every example in the batch, the first-layer update is the zero matrix and that layer does not move.
+\hlq{\textbf{(c)}} All masks are 0, so $\delta^{(1)}=0$, hence $\nabla_{W^{(1)}}L=\delta^{(1)}x^\top=0$ and $\nabla_{b^{(1)}}L=0$: the example teaches the first layer nothing. (The outgoing weights also get zero gradient because all $a^{(1)}=0$.) If it happens on every example in the batch, the first-layer update is the zero matrix and that layer does not move.
 
-\textbf{(d)} \seeconcept{c:uat}{Universal approximation}{11} One wide enough hidden layer can approximate any continuous function on a bounded region to any accuracy. It does not say how wide the layer must be, it does not give the weights, and it does not promise that gradient descent will find them or that training will be easy. It also disproves the claim ``a hidden layer cannot represent XOR''.
+\hlq{\textbf{(d)}} \seeconcept{c:uat}{Universal approximation}{11} One wide enough hidden layer can approximate any continuous function on a bounded region to any accuracy. It does not say how wide the layer must be, it does not give the weights, and it does not promise that gradient descent will find them or that training will be easy. It also disproves the claim ``a hidden layer cannot represent XOR''.
 
-\textbf{(e)} \seeconcept{c:gradcheck}{Gradient checking}{11} Compare against PyTorch autograd on the same weights; the relative error must be below $10^{-5}$ on every parameter. Common bugs: a missing $1/n$, a bias gradient summed over the wrong axis (or a bias of shape \texttt{(h,)} versus \texttt{(1,h)}), and a ReLU mask built from $A$ instead of $Z$. Check shapes before values.
+\hlq{\textbf{(e)}} \seeconcept{c:gradcheck}{Gradient checking}{11} Compare against PyTorch autograd on the same weights; the relative error must be below $10^{-5}$ on every parameter. Common bugs: a missing $1/n$, a bias gradient summed over the wrong axis (or a bias of shape \texttt{(h,)} versus \texttt{(1,h)}), and a ReLU mask built from $A$ instead of $Z$. Check shapes before values.
 
 \textbf{(f)} The output must be a probability between 0 and 1, which the sigmoid gives and ReLU does not. And sigmoid paired with BCE gives the clean gradient $\hat y-y$: the saturating slope cancels, so the output does not suffer from the vanishing slope that hurts sigmoid in hidden layers.
 % ============================================================
@@ -924,7 +1046,7 @@ Copy your NumPy weights into PyTorch, run the same forward expression, call \tex
 % ============================================================
 
 % ------------------------------------------------------------
-\section{Question 12. Dense versus local versus shared: why not flatten the image?}
+\phantomsection\section[Question 12. Dense versus local versus shared: why not flatten the image?]{\hlq{Question 12}. Dense versus local versus shared: why not flatten the image?}
 % ------------------------------------------------------------
 \subsection*{Question}
 An RGB input has size $64\times64\times3$. We want an output of 32 feature maps, each $64\times64$. Count weights \emph{excluding biases} unless told otherwise.
@@ -984,7 +1106,7 @@ Sizes first: the input has $64\cdot64\cdot3=12{,}288$ numbers; the output has $6
 \textbf{(g)} Suppose a ``cat-ear'' filter fires at position $(10,10)$ of the feature map. Move the cat 5 pixels right and the same filter now fires at $(10,15)$, with the same strength and the same pattern: the response moved with the cat. That is equivariance. Invariance would mean the output does not move or change at all, which convolution alone does not give \seeconcept{c:equivariance}{Equivariance versus invariance}{12}.
 
 % ------------------------------------------------------------
-\section{Question 13. One-dimensional cross-correlation versus convolution}
+\phantomsection\section[Question 13. One-dimensional cross-correlation versus convolution]{\hlq{Question 13}. One-dimensional cross-correlation versus convolution}
 % ------------------------------------------------------------
 \subsection*{Question}
 Let $x=(3,\,1,\,-2,\,0,\,4,\,1)$ and $k=(2,\,-1,\,1)$.
@@ -1065,18 +1187,18 @@ Full result $(6,-1,-2,3,6,-2,3,1)$, length $6+3-1=8$. Entries $t=2,\dots,5$ use 
 \textbf{(f)} Cross-correlation. It does no harm because kernels are learned; the network just learns the flipped kernel. It matters when pasting a hand-designed filter, checking against a hand calculation, or deriving backprop \seeconcept{c:libcorr}{What libraries compute}{13}.
 
 % ------------------------------------------------------------
-\section{Question 14. Two-dimensional correlation, true convolution and what a kernel detects}
+\phantomsection\section[Question 14. Two-dimensional correlation, true convolution and what a kernel detects]{\hlq{Question 14}. Two-dimensional correlation, true convolution and what a kernel detects}
 % ------------------------------------------------------------
 \subsection*{Question}
 \[
 X=\begin{bmatrix}1&0&2&1\\3&1&0&2\\0&2&1&1\\1&1&3&0\end{bmatrix},\qquad K=\begin{bmatrix}2&-1\\0&1\end{bmatrix},\qquad\text{stride }1,\ \text{no padding}.
 \]
 \begin{enumerate}[label=(\alph*)]
-\item What is the output size?
-\item Compute $X\star K$. Show entry $(0,0)$ in full.
-\item Write $\rot(K)$ and compute the true convolution $X*K$. Show entry $(0,0)$ in full.
-\item Explain why $X*K=X\star\rot(K)$, and give a $2\times2$ kernel for which the two outputs are just negatives of each other.
-\item Apply $K_2=\begin{bmatrix}1&1\\-1&-1\end{bmatrix}$ to $R=\begin{bmatrix}1&1&1\\3&3&3\\5&5&5\end{bmatrix}$ (correlation). What does $K_2$ detect, and what does the sign of the answer tell you?
+\item[(a)] What is the output size?
+\item[\hlq{(b)}] Compute $X\star K$. Show entry $(0,0)$ in full.
+\item[\hlq{(c)}] Write $\rot(K)$ and compute the true convolution $X*K$. Show entry $(0,0)$ in full.
+\item[\hlq{(d)}] Explain why $X*K=X\star\rot(K)$, and give a $2\times2$ kernel for which the two outputs are just negatives of each other.
+\item[(e)] Apply $K_2=\begin{bmatrix}1&1\\-1&-1\end{bmatrix}$ to $R=\begin{bmatrix}1&1&1\\3&3&3\\5&5&5\end{bmatrix}$ (correlation). What does $K_2$ detect, and what does the sign of the answer tell you?
 \end{enumerate}
 
 \subsection*{What the question is asking}
@@ -1103,19 +1225,19 @@ Each output is a dot product between the kernel and the patch. It is large and p
 \subsection*{Solution}
 \textbf{(a)} $(4-2+1)\times(4-2+1)=3\times3$.
 
-\textbf{(b)} Entry $(0,0)$: patch $\begin{bmatrix}1&0\\3&1\end{bmatrix}$, so $1\cdot2+0\cdot(-1)+3\cdot0+1\cdot1=3$. With $K$, each output is $2x_{i,j}-x_{i,j+1}+x_{i+1,j+1}$. All nine \seeconcept{c:corr2d}{2-D cross-correlation}{14}:
+\hlq{\textbf{(b)}} Entry $(0,0)$: patch $\begin{bmatrix}1&0\\3&1\end{bmatrix}$, so $1\cdot2+0\cdot(-1)+3\cdot0+1\cdot1=3$. With $K$, each output is $2x_{i,j}-x_{i,j+1}+x_{i+1,j+1}$. All nine \seeconcept{c:corr2d}{2-D cross-correlation}{14}:
 \[
 X\star K=\begin{bmatrix}3&-2&5\\7&3&-1\\-1&6&1\end{bmatrix}.
 \]
 (Check one more: $(1,0)$ uses patch $\begin{bmatrix}3&1\\0&2\end{bmatrix}$: $6-1+0+2=7$.)
 
-\textbf{(c)} $\rot(K)=\begin{bmatrix}1&0\\-1&2\end{bmatrix}$. Entry $(0,0)$ on the same patch: $1\cdot1+0\cdot0+3\cdot(-1)+1\cdot2=0$. All nine (each is $x_{i,j}-x_{i+1,j}+2x_{i+1,j+1}$):
+\hlq{\textbf{(c)}} $\rot(K)=\begin{bmatrix}1&0\\-1&2\end{bmatrix}$. Entry $(0,0)$ on the same patch: $1\cdot1+0\cdot0+3\cdot(-1)+1\cdot2=0$. All nine (each is $x_{i,j}-x_{i+1,j}+2x_{i+1,j+1}$):
 \[
 X*K=X\star\rot(K)=\begin{bmatrix}0&-1&6\\7&1&1\\1&7&-2\end{bmatrix}.
 \]
 Not related in any simple way to (b), because $K$ is not symmetric under rotation.
 
-\textbf{(d)} Convolution reads the kernel backwards along both axes, which is exactly correlation with the rotated kernel \seeconcept{c:rot180}{True convolution rotates the kernel}{14}. For $K=\begin{bmatrix}1&0\\0&-1\end{bmatrix}$, $\rot(K)=\begin{bmatrix}-1&0\\0&1\end{bmatrix}=-K$, so $X*K=X\star(-K)=-(X\star K)$: same size of response, opposite sign.
+\hlq{\textbf{(d)}} Convolution reads the kernel backwards along both axes, which is exactly correlation with the rotated kernel \seeconcept{c:rot180}{True convolution rotates the kernel}{14}. For $K=\begin{bmatrix}1&0\\0&-1\end{bmatrix}$, $\rot(K)=\begin{bmatrix}-1&0\\0&1\end{bmatrix}=-K$, so $X*K=X\star(-K)=-(X\star K)$: same size of response, opposite sign.
 
 \textbf{(e)} $K_2$ computes (top row of the patch) $-$ (bottom row). On $R$, every $2\times2$ patch has top row $(a,a)$ and bottom row $(a+2,a+2)$, so every output is $2a-2(a+2)=-4$:
 \[
@@ -1123,7 +1245,7 @@ R\star K_2=\begin{bmatrix}-4&-4\\-4&-4\end{bmatrix}.
 \]
 $K_2$ detects \emph{horizontal} edges (brightness changing from top to bottom). The negative sign means brightness \emph{increases} going down. All entries are equal because the image is a uniform ramp: the change is the same everywhere \seeconcept{c:template}{A kernel is a template}{14}.
 % ------------------------------------------------------------
-\section{Question 15. Sobel-x on a two-tone image, with padding and stride}
+\phantomsection\section[Question 15. Sobel-x on a two-tone image, with padding and stride]{\hlq{Question 15}. Sobel-x on a two-tone image, with padding and stride}
 % ------------------------------------------------------------
 \subsection*{Question}
 A $6\times6$ grey image has value 1 in its left three columns and 5 in its right three columns (every row is $1,1,1,5,5,5$). Apply the Sobel-x kernel by cross-correlation, bias 0:
@@ -1214,7 +1336,7 @@ Y^{\text{replicate}}=\begin{bmatrix}0&0&-16&-16&0&0\end{bmatrix}\ \text{in every
 \textbf{(f)} ``Convolve at stride 1, then keep every second row and column'' computes $s^2=4$ times more outputs than it keeps. The strided convolution only computes the kept outputs, so it does about $1/s^2=1/4$ of the multiply--adds for the same result.
 
 % ------------------------------------------------------------
-\section{Question 16. The output-size formula, dilation, and the floor}
+\phantomsection\section[Question 16. The output-size formula, dilation, and the floor]{\hlq{Question 16}. The output-size formula, dilation, and the floor}
 % ------------------------------------------------------------
 \subsection*{Question}
 \begin{enumerate}[label=(\alph*)]
@@ -1293,7 +1415,7 @@ The same formula works for width, and for pooling (pooling has $d=1$). $\lfloor\
 \textbf{(f)} The formula only counts where a window can start along one spatial axis. A batch is just many images processed side by side, and the channels are summed inside each window (conv) or handled one at a time (pool); neither changes how many positions fit along the height or width.
 
 % ------------------------------------------------------------
-\section{Question 17. Max pooling}
+\phantomsection\section[Question 17. Max pooling]{\hlq{Question 17}. Max pooling}
 % ------------------------------------------------------------
 \subsection*{Question}
 \[
@@ -1301,12 +1423,12 @@ A=\begin{bmatrix}2&0&1&4\\3&1&5&2\\0&6&1&1\\2&2&0&3\end{bmatrix},\qquad
 B=\begin{bmatrix}1&3&0&2&4\\2&0&5&1&1\\0&4&2&3&0\\6&1&0&2&1\\1&2&3&0&5\end{bmatrix}.
 \]
 \begin{enumerate}[label=(\alph*)]
-\item Apply $2\times2$ max pooling with stride 2 to $A$. How many learnable parameters does the pooling layer have?
-\item If $A$ were one channel of a $4\times4\times16$ feature volume, what is the output shape after the same pooling?
-\item Apply overlapping $3\times3$ max pooling with stride 2 (as in AlexNet) to $B$. Give the size and values.
-\item Apply $2\times2$, stride-2 max pooling to $B$. Which entries of $B$ are never looked at?
-\item In $A$, move the 6 from position $(2,1)$ to $(3,0)$ (swap it with the 2 there). Does the pooled output change? What if you move it to $(1,1)$ instead? Use this to explain ``local translation invariance''.
-\item In the ledger network of the slides, pool1 ($3\times3$, $s=2$) takes a $112\times112$ map. What is the output size?
+\item[\hlq{(a)}] Apply $2\times2$ max pooling with stride 2 to $A$. How many learnable parameters does the pooling layer have?
+\item[\hlq{(b)}] If $A$ were one channel of a $4\times4\times16$ feature volume, what is the output shape after the same pooling?
+\item[\hlq{(c)}] Apply overlapping $3\times3$ max pooling with stride 2 (as in AlexNet) to $B$. Give the size and values.
+\item[\hlq{(d)}] Apply $2\times2$, stride-2 max pooling to $B$. Which entries of $B$ are never looked at?
+\item[(e)] In $A$, move the 6 from position $(2,1)$ to $(3,0)$ (swap it with the 2 there). Does the pooled output change? What if you move it to $(1,1)$ instead? Use this to explain ``local translation invariance''.
+\item[(f)] In the ledger network of the slides, pool1 ($3\times3$, $s=2$) takes a $112\times112$ map. What is the output size?
 \end{enumerate}
 
 \subsection*{What the question is asking}
@@ -1331,15 +1453,15 @@ P_{ij}=\max_{0\le u,v<k}a_{si+u,\,sj+v}.
 Max pooling asks ``is the feature present anywhere in this window?'' If the strongest response moves to another position \emph{inside the same window}, the output does not change. Convolution gives equivariance (the map moves with the input); pooling adds a little invariance (small moves are ignored). Moving a feature into a different window does change the output.
 
 \subsection*{Solution}
-\textbf{(a)} The four windows: top-left $\{2,0,3,1\}\to3$; top-right $\{1,4,5,2\}\to5$; bottom-left $\{0,6,2,2\}\to6$; bottom-right $\{1,1,0,3\}\to3$.
+\hlq{\textbf{(a)}} The four windows: top-left $\{2,0,3,1\}\to3$; top-right $\{1,4,5,2\}\to5$; bottom-left $\{0,6,2,2\}\to6$; bottom-right $\{1,1,0,3\}\to3$.
 \[
 \text{maxpool}(A)=\begin{bmatrix}3&5\\6&3\end{bmatrix}.
 \]
 Zero learnable parameters \seeconcept{c:maxpool}{Max pooling}{17}.
 
-\textbf{(b)} Each of the 16 channels is pooled separately: $2\times2\times16$.
+\hlq{\textbf{(b)}} Each of the 16 channels is pooled separately: $2\times2\times16$.
 
-\textbf{(c)} Size $\lfloor(5-3)/2\rfloor+1=2$, so $2\times2$. Windows start at rows/columns 0 and 2, so neighbouring windows share a row or a column.
+\hlq{\textbf{(c)}} Size $\lfloor(5-3)/2\rfloor+1=2$, so $2\times2$. Windows start at rows/columns 0 and 2, so neighbouring windows share a row or a column.
 \begin{itemize}[nosep]
 \item $(0,0)$: rows 0--2, cols 0--2: $\{1,3,0,2,0,5,0,4,2\}\to5$.
 \item $(0,1)$: rows 0--2, cols 2--4: $\{0,2,4,5,1,1,2,3,0\}\to5$.
@@ -1351,7 +1473,7 @@ Zero learnable parameters \seeconcept{c:maxpool}{Max pooling}{17}.
 \]
 The 5 at $(1,2)$ is the winner of two windows, because both contain it.
 
-\textbf{(d)} Size $\lfloor(5-2)/2\rfloor+1=2$. Windows cover rows/columns 0--1 and 2--3 only:
+\hlq{\textbf{(d)}} Size $\lfloor(5-2)/2\rfloor+1=2$. Windows cover rows/columns 0--1 and 2--3 only:
 \[
 \text{maxpool}_{2\times2,s=2}(B)=\begin{bmatrix}3&5\\6&3\end{bmatrix}.
 \]
@@ -1362,7 +1484,7 @@ Row 4 and column 4 are never looked at: the entries $4,1,0,1$ (column 4, rows 0-
 \textbf{(f)} $\lfloor(112-3)/2\rfloor+1=\lfloor109/2\rfloor+1=54+1=55$.
 
 % ------------------------------------------------------------
-\section{Question 18. A multi-channel convolution by hand, and im2col}
+\phantomsection\section[Question 18. A multi-channel convolution by hand, and im2col]{\hlq{Question 18}. A multi-channel convolution by hand, and im2col}
 % ------------------------------------------------------------
 \subsection*{Question}
 A $3\times3\times2$ input (two channels) is convolved (cross-correlation) with two filters of size $2\times2\times2$, stride 1, no padding.
@@ -1435,7 +1557,7 @@ Row 1 reshaped to $2\times2$ is $O^{(1)}$ and row 2 is $O^{(2)}$, as in (c).
 
 \textbf{(e)} $C_{\text{in}}k^2=64\cdot9=576$ and $H_{\text{out}}W_{\text{out}}=32\cdot32=1024$, so $W_{\text{mat}}$ is $128\times576$ and $X_{\text{col}}$ is $576\times1024$. As one dense matrix on the flattened input it would be $(32\cdot32\cdot128)\times(32\cdot32\cdot64)=131{,}072\times65{,}536$, but each row has only $576$ nonzeros (the patch), and those 576 numbers are the same in every row of one output channel.
 % ------------------------------------------------------------
-\section{Question 19. Parameters, MACs, and why depth beats a wide kernel}
+\phantomsection\section[Question 19. Parameters, MACs, and why depth beats a wide kernel]{\hlq{Question 19}. Parameters, MACs, and why depth beats a wide kernel}
 % ------------------------------------------------------------
 \subsection*{Question}
 \begin{enumerate}[label=(\alph*)]
@@ -1489,7 +1611,7 @@ Conv layers are cheap in parameters but do most of the computation. The dense la
 \textbf{(f)} Most parameters sit in the fully connected head; most MACs happen in the conv layers \seeconcept{c:gap}{Where parameters hide}{19}. Global average pooling (one number per channel) followed by a small linear layer removes the big dense head.
 
 % ------------------------------------------------------------
-\section{Question 20. Fill a CNN architecture ledger}
+\phantomsection\section[Question 20. Fill a CNN architecture ledger]{\hlq{Question 20}. Fill a CNN architecture ledger}
 % ------------------------------------------------------------
 \subsection*{Question}
 A network takes $128\times128\times3$ images and has 10 classes. Fill in the output shape, the parameters and the activation memory (float32, in KB) for every row, then the total.
@@ -1511,10 +1633,10 @@ fc2 (output) & \multicolumn{4}{c}{$256\to10$}\\
 \end{tabular}
 \end{center}
 \begin{enumerate}[label=(\alph*)]
-\item Complete the ledger.
-\item What fraction of the parameters sits in the two fully connected layers?
-\item Replace ``flatten + fc1 + fc2'' by global average pooling followed by one linear layer $128\to10$. What is the new total?
-\item The slides' SmallCNN is: conv $3\to32$, conv $32\to32$, pool, conv $32\to64$, conv $64\to64$, pool, flatten, Linear$(\cdot,128)$, Linear$(128,10)$, all convs $3\times3$ with $p=1$, pools $2\times2$, $s=2$, on $32\times32\times3$. If the \emph{first} conv is changed to stride 2 (still $p=1$), what is the flatten length, the size of the first linear layer, and the new total? (Original total: 591{,}274.)
+\item[\hlq{(a)}] Complete the ledger.
+\item[\hlq{(b)}] What fraction of the parameters sits in the two fully connected layers?
+\item[(c)] Replace ``flatten + fc1 + fc2'' by global average pooling followed by one linear layer $128\to10$. What is the new total?
+\item[\hlq{(d)}] The slides' SmallCNN is: conv $3\to32$, conv $32\to32$, pool, conv $32\to64$, conv $64\to64$, pool, flatten, Linear$(\cdot,128)$, Linear$(128,10)$, all convs $3\times3$ with $p=1$, pools $2\times2$, $s=2$, on $32\times32\times3$. If the \emph{first} conv is changed to stride 2 (still $p=1$), what is the flatten length, the size of the first linear layer, and the new total? (Original total: 591{,}274.)
 \end{enumerate}
 
 \subsection*{What the question is asking}
@@ -1534,7 +1656,7 @@ Output size \seeconcept{c:outsize}{The output-size formula}{16}; conv parameters
 Exam tip from the slides: do all spatial sizes first, then parameters row by row, then add.
 
 \subsection*{Solution}
-\textbf{(a)} Spatial sizes first:
+\hlq{\textbf{(a)}} Spatial sizes first:
 \begin{itemize}[nosep]
 \item conv1: $\lfloor(128+4-5)/1\rfloor+1=128$.
 \item pool1: $\lfloor(128-2)/2\rfloor+1=64$.
@@ -1565,24 +1687,24 @@ Total & & & $1{,}703{,}242$ & \\
 \end{center}
 Example memory row: conv1 $=128\cdot128\cdot32\cdot4/1024=2048$ KB. Two details: conv3 has stride 2, so it halves the map by itself; and pool3 uses the floor: its windows start at rows $0,2,\dots,12$, the last one covers rows 12--14, so row 15 (and column 15) of the $16\times16$ map is never looked at.
 
-\textbf{(b)} Conv layers: $2432+18{,}496+73{,}856=94{,}784$. FC: $1{,}605{,}888+2{,}570=1{,}608{,}458$, which is $1{,}608{,}458/1{,}703{,}242\approx94.4\%$ of all parameters, almost all of it in fc1. Same pattern as AlexNet and VGG.
+\hlq{\textbf{(b)}} Conv layers: $2432+18{,}496+73{,}856=94{,}784$. FC: $1{,}605{,}888+2{,}570=1{,}608{,}458$, which is $1{,}608{,}458/1{,}703{,}242\approx94.4\%$ of all parameters, almost all of it in fc1. Same pattern as AlexNet and VGG.
 
 \textbf{(c)} GAP turns $7\times7\times128$ into 128 numbers (0 parameters), then $128\cdot10+10=1290$. New total $94{,}784+1{,}290=96{,}074$, about 18 times smaller than before.
 
-\textbf{(d)} Spatial sizes: conv1 at stride 2: $\lfloor(32+2-3)/2\rfloor+1=16$; conv2 keeps 16; pool $\to8$; conv3, conv4 keep 8; pool $\to4$. Flatten $=64\cdot4\cdot4=1024$. Conv parameters do not change ($896+9{,}248+18{,}496+36{,}928=65{,}568$), because the filters are the same. First linear layer: $1024\cdot128+128=131{,}200$ (was $524{,}416$). New total: $65{,}568+131{,}200+1{,}290=198{,}058$. Striding early shrinks every later map by 4 in area, which shrinks the flatten length and therefore the big dense layer.
+\hlq{\textbf{(d)}} Spatial sizes: conv1 at stride 2: $\lfloor(32+2-3)/2\rfloor+1=16$; conv2 keeps 16; pool $\to8$; conv3, conv4 keep 8; pool $\to4$. Flatten $=64\cdot4\cdot4=1024$. Conv parameters do not change ($896+9{,}248+18{,}496+36{,}928=65{,}568$), because the filters are the same. First linear layer: $1024\cdot128+128=131{,}200$ (was $524{,}416$). New total: $65{,}568+131{,}200+1{,}290=198{,}058$. Striding early shrinks every later map by 4 in area, which shrinks the flatten length and therefore the big dense layer.
 
 % ------------------------------------------------------------
-\section{Question 21. Short answers on CNNs}
+\phantomsection\section[Question 21. Short answers on CNNs]{\hlq{Question 21}. Short answers on CNNs}
 % ------------------------------------------------------------
 \subsection*{Question}
 Answer each in two to four sentences.
 \begin{enumerate}[label=(\alph*)]
-\item Name the three structural choices that turn an MLP into a CNN, and the problem each one fixes.
-\item Why does $p=1$ with $k=3$ keep the size at stride 1 but halve it at stride 2?
-\item ``Sharing cuts parameters, not computation.'' Explain.
-\item For aligned passport photos (eyes always in the same place), why might parameter sharing be a poor assumption? What kind of layer could be better?
-\item Why is a stride-2 convolution sometimes used instead of max pooling? Give one reason for each.
-\item What does the first layer of a trained CNN usually detect, and why do deeper layers detect bigger things?
+\item[\hlq{(a)}] Name the three structural choices that turn an MLP into a CNN, and the problem each one fixes.
+\item[\hlq{(b)}] Why does $p=1$ with $k=3$ keep the size at stride 1 but halve it at stride 2?
+\item[(c)] ``Sharing cuts parameters, not computation.'' Explain.
+\item[\hlq{(d)}] For aligned passport photos (eyes always in the same place), why might parameter sharing be a poor assumption? What kind of layer could be better?
+\item[(e)] Why is a stride-2 convolution sometimes used instead of max pooling? Give one reason for each.
+\item[(f)] What does the first layer of a trained CNN usually detect, and why do deeper layers detect bigger things?
 \end{enumerate}
 
 \subsection*{What the question is asking}
@@ -1595,13 +1717,13 @@ All explained earlier: three choices \seeconcept{c:threechoices}{Three failures 
 Early layers have small views, high resolution and few channels: they detect edges and colour blobs. Middle layers combine those into textures and parts. Deep layers, which see a large region at low resolution with many channels, respond to object-level patterns. Each layer detects arrangements of the previous layer's detections over a bigger area.
 
 \subsection*{Solution}
-\textbf{(a)} Local connectivity fixes ``locality is ignored'' and most of ``too many weights'' (each output reads only a $k\times k$ patch). Parameter sharing fixes ``relearn every pattern at every position'' (one detector slides everywhere, giving equivariance) and removes the dependence on the number of positions. Downsampling (pooling or stride) shrinks the maps so later layers see larger regions and cost less.
+\hlq{\textbf{(a)}} Local connectivity fixes ``locality is ignored'' and most of ``too many weights'' (each output reads only a $k\times k$ patch). Parameter sharing fixes ``relearn every pattern at every position'' (one detector slides everywhere, giving equivariance) and removes the dependence on the number of positions. Downsampling (pooling or stride) shrinks the maps so later layers see larger regions and cost less.
 
-\textbf{(b)} At stride 1, $H+2p-k+1=H+2-3+1=H$. At stride 2 the same padding is used, but windows start only at every second row, so $\lfloor(H-1)/2\rfloor+1$, which is $H/2$ for even $H$. Same padding preserves size only at stride 1.
+\hlq{\textbf{(b)}} At stride 1, $H+2p-k+1=H+2-3+1=H$. At stride 2 the same padding is used, but windows start only at every second row, so $\lfloor(H-1)/2\rfloor+1$, which is $H/2$ for even $H$. Same padding preserves size only at stride 1.
 
 \textbf{(c)} Sharing means one set of $k^2C_{\text{in}}$ weights is reused at every position, so the parameter count does not depend on the image size. But every output position still does its own dot product of length $k^2C_{\text{in}}$, so the MACs grow with the number of positions.
 
-\textbf{(d)} Sharing assumes a pattern means the same thing anywhere. In aligned photos each location has a fixed role (eyes here, mouth there), so the best detector differs by position, and the benefit of sharing (finding a pattern wherever it moves) is never used. A locally connected layer (small patches, but private weights per position) fits better; locality is still a good assumption.
+\hlq{\textbf{(d)}} Sharing assumes a pattern means the same thing anywhere. In aligned photos each location has a fixed role (eyes here, mouth there), so the best detector differs by position, and the benefit of sharing (finding a pattern wherever it moves) is never used. A locally connected layer (small patches, but private weights per position) fits better; locality is still a good assumption.
 
 \textbf{(e)} Max pooling has no weights and gives local translation invariance (``is the feature anywhere in this window?''). A stride-2 convolution downsamples with \emph{learned} weights, so the network decides how to summarise, and it is cheaper than a stride-1 conv followed by pooling.
 
@@ -1611,7 +1733,7 @@ Early layers have small views, high resolution and few channels: they detect edg
 % ============================================================
 
 % ------------------------------------------------------------
-\section{Question 22. A vanilla RNN forward pass with a 2-unit hidden state}
+\phantomsection\section[Question 22. A vanilla RNN forward pass with a 2-unit hidden state]{\hlq{Question 22}. A vanilla RNN forward pass with a 2-unit hidden state}
 % ------------------------------------------------------------
 \subsection*{Question}
 A vanilla RNN has input size $d=1$, hidden size $H=2$, output size $o=1$, $h_0=0$, and
@@ -1667,15 +1789,15 @@ h_2\approx(0.8429,\ 0.9732),\qquad \hat y_2=0.8429-0.9732=-0.1303 .
 \textbf{(e)} Three: $W_x$, $W_h$, $W_y$ (plus the biases), reused at both steps. Unrolling means drawing the loop as a chain of identical cells, one per time step, so the RNN looks like a deep network with shared weights \seeconcept{c:unroll}{Folded and unrolled views}{22}.
 
 % ------------------------------------------------------------
-\section{Question 23. Counting RNN parameters}
+\phantomsection\section[Question 23. Counting RNN parameters]{\hlq{Question 23}. Counting RNN parameters}
 % ------------------------------------------------------------
 \subsection*{Question}
 \begin{enumerate}[label=(\alph*)]
-\item A vanilla RNN has $d=10$, $H=32$, $o=5$. Count the parameters of the recurrent core and of the output layer, and the total.
-\item How does the count change if the input sequences have length 50 instead of 5000?
-\item With the same $d$ and $H$, how many core parameters would an LSTM and a GRU have?
-\item Stack three recurrent layers, each with $H=32$, on $d=10$ inputs, with the same 5-unit output head. Count every layer and the total.
-\item A character-level language model has a vocabulary of 100 characters, one-hot inputs, $H=64$, and a softmax over the vocabulary at the output. Count the parameters.
+\item[\hlq{(a)}] A vanilla RNN has $d=10$, $H=32$, $o=5$. Count the parameters of the recurrent core and of the output layer, and the total.
+\item[\hlq{(b)}] How does the count change if the input sequences have length 50 instead of 5000?
+\item[\hlq{(c)}] With the same $d$ and $H$, how many core parameters would an LSTM and a GRU have?
+\item[\hlq{(d)}] Stack three recurrent layers, each with $H=32$, on $d=10$ inputs, with the same 5-unit output head. Count every layer and the total.
+\item[(e)] A character-level language model has a vocabulary of 100 characters, one-hot inputs, $H=64$, and a softmax over the vocabulary at the output. Count the parameters.
 \end{enumerate}
 
 \subsection*{What the question is asking}
@@ -1693,20 +1815,20 @@ It does not depend on the sequence length $T$. Gated cells have several such wei
 Layer 1 reads the input sequence; layer $\ell+1$ reads the hidden-state sequence of layer $\ell$. Lower layers learn short, local patterns, higher layers longer and more abstract structure. Layer 1 has input size $d$; every layer above has input size $H$ (the width of the layer below), so it costs $H(H+H+1)=H(2H+1)$. Typical depth is 2--4 layers, often with dropout between them.
 
 \subsection*{Solution}
-\textbf{(a)} \seeconcept{c:rnnparams}{RNN parameter count}{23}
+\hlq{\textbf{(a)}} \seeconcept{c:rnnparams}{RNN parameter count}{23}
 $W_x$: $32\cdot10=320$; $W_h$: $32\cdot32=1024$; $b_h$: 32. Core $=32(10+32+1)=1376$. Head: $W_y$: $5\cdot32=160$, $b_y$: 5, so $5(32+1)=165$. Total $1376+165=1541$.
 
-\textbf{(b)} It does not change. The same $W_x,W_h,W_y$ are reused at every step, whether there are 50 steps or 5000.
+\hlq{\textbf{(b)}} It does not change. The same $W_x,W_h,W_y$ are reused at every step, whether there are 50 steps or 5000.
 
-\textbf{(c)} LSTM: $4\cdot1376=5504$. GRU: $3\cdot1376=4128$.
+\hlq{\textbf{(c)}} LSTM: $4\cdot1376=5504$. GRU: $3\cdot1376=4128$.
 
-\textbf{(d)} \seeconcept{c:stacked}{Stacked RNNs}{23}
+\hlq{\textbf{(d)}} \seeconcept{c:stacked}{Stacked RNNs}{23}
 Layer 1: $32(10+32+1)=1376$. Layers 2 and 3: $32(2\cdot32+1)=32\cdot65=2080$ each. Recurrent total $1376+2080+2080=5536$. With the head: $5536+165=5701$.
 
 \textbf{(e)} One-hot inputs mean $d=100$; the softmax over the vocabulary means $o=100$. Core: $64(100+64+1)=64\cdot165=10{,}560$. Head: $100(64+1)=6{,}500$. Total $17{,}060$.
 
 % ------------------------------------------------------------
-\section{Question 24. RNN design choices: activations, sharing, types and stacking}
+\phantomsection\section[Question 24. RNN design choices: activations, sharing, types and stacking]{\hlq{Question 24}. RNN design choices: activations, sharing, types and stacking}
 % ------------------------------------------------------------
 \subsection*{Question}
 \begin{enumerate}[label=(\alph*)]
@@ -1766,7 +1888,7 @@ A \textbf{bidirectional} RNN reads the sequence forwards and backwards, giving e
 \textbf{(f)} A single recurrent layer captures one level of temporal features. Stacking feeds layer $\ell$'s hidden sequence into layer $\ell+1$: lower layers learn short, local patterns (e.g.\ characters forming syllables), higher layers learn longer, more abstract structure (words, phrases) \seeconcept{c:stacked}{Stacked RNNs}{23}.
 
 % ------------------------------------------------------------
-\section{Question 25. Language modelling and generation: softmax, temperature, decoding, perplexity}
+\phantomsection\section[Question 25. Language modelling and generation: softmax, temperature, decoding, perplexity]{\hlq{Question 25}. Language modelling and generation: softmax, temperature, decoding, perplexity}
 % ------------------------------------------------------------
 \subsection*{Question}
 A character model has vocabulary $V=\{a,b,c,d\}$. At one step its logits are $o_t=(\ln4,\ \ln2,\ 0,\ 0)$.
@@ -1841,7 +1963,7 @@ Higher temperature flattens the distribution (more diverse, more random output);
 % ============================================================
 
 % ------------------------------------------------------------
-\section{Question 26. BPTT on a scalar RNN, two steps, every gradient}
+\phantomsection\section[Question 26. BPTT on a scalar RNN, two steps, every gradient]{\hlq{Question 26}. BPTT on a scalar RNN, two steps, every gradient}
 % ------------------------------------------------------------
 \subsection*{Question}
 A scalar RNN ($d=H=o=1$) has a regression head and squared-error loss at each step:
@@ -1933,7 +2055,7 @@ Notice the future path ($+0.1986$) is bigger than the direct path ($-0.1515$) an
 \textbf{(f)} $W_h$ enters step $t$ as $W_hh_{t-1}$, so its gradient at step $t$ is $g_{z_t}h_{t-1}$. At step 1 that is $g_{z_1}h_0=g_{z_1}\cdot0=0$. With $h_0=0$, $W_h$ learns only from step 2 onwards.
 
 % ------------------------------------------------------------
-\section{Question 27. Exact BPTT on a linear cell, and vanishing/exploding gradients}
+\phantomsection\section[Question 27. Exact BPTT on a linear cell, and vanishing/exploding gradients]{\hlq{Question 27}. Exact BPTT on a linear cell, and vanishing/exploding gradients}
 % ------------------------------------------------------------
 \subsection*{Question}
 A linear cell with no tanh: $h_t=wh_{t-1}+x_t$, $\hat y_t=h_t$, $h_0=0$, targets $y_t=0$, and $L=\tfrac12\sum_{t=1}^3\hat y_t^2$. Use $w=0.5$ and $x=(1,\ 0,\ 2)$.
@@ -1990,7 +2112,7 @@ Check: $h_1=1$, $h_2=w$, $h_3=w^2+2$, so $L(w)=\tfrac12\bigl[1+w^2+(w^2+2)^2\big
 \textbf{(e)} The factor is $w^{20}$. For $w=0.5$: $0.5^{20}\approx9.5\times10^{-7}$, so a distant error has essentially no effect on early steps: vanishing gradient. For $w=1.5$: $1.5^{20}\approx3325$, so distant errors swamp everything and updates become huge: exploding gradient. Clipping fixes the exploding case; it cannot fix vanishing \seeconcept{c:fixes}{Fixes}{27}.
 
 % ------------------------------------------------------------
-\section{Question 28. One vector BPTT step: outer products and transposes}
+\phantomsection\section[Question 28. One vector BPTT step: outer products and transposes]{\hlq{Question 28}. One vector BPTT step: outer products and transposes}
 % ------------------------------------------------------------
 \subsection*{Question}
 A vanilla RNN has $d=2$, $H=2$, $o=1$, tanh hidden state and a linear head, trained for $T=2$ steps. The forward pass stored:
@@ -2071,17 +2193,17 @@ Each gradient has the same shape as its parameter: a quick check.
 \textbf{(f)} In the forward pass a matrix multiplies a column ($W_hh_{t-1}$). Sending blame back into a \emph{state} asks ``how does the loss change with each entry of $h_{t-1}$?'', and each entry of $h_{t-1}$ feeds every row of $W_h$ through one column of it, so you multiply by $W_h^\top$ (this also turns an ``output-sized'' vector into an ``input-sized'' one). Sending blame into a \emph{matrix} asks the question for each entry $W_{ij}$, which is (blame on output $i$) $\times$ (input $j$): a column times a row, i.e.\ an outer product, which has the same shape as the matrix.
 
 % ------------------------------------------------------------
-\section{Question 29. Short answers on BPTT}
+\phantomsection\section[Question 29. Short answers on BPTT]{\hlq{Question 29}. Short answers on BPTT}
 % ------------------------------------------------------------
 \subsection*{Question}
 Answer each in two to four sentences.
 \begin{enumerate}[label=(\alph*)]
-\item In a two-step RNN, set $W_h=0$. What is $\partial L/\partial h_1$? Does the target $y_2$ still affect $\partial L/\partial W_x$?
-\item Why is the gradient of a shared weight a \emph{sum} over time steps?
-\item Can the head weights $W_y$ carry a gradient from step 2 back to step 1 by themselves?
-\item What must the forward pass store for BPTT, and in what order is the backward work done?
-\item What is truncated BPTT, and what changes in the algebra?
-\item Why were LSTM and GRU invented, and why is the vanilla RNN still taught?
+\item[\hlq{(a)}] In a two-step RNN, set $W_h=0$. What is $\partial L/\partial h_1$? Does the target $y_2$ still affect $\partial L/\partial W_x$?
+\item[(b)] Why is the gradient of a shared weight a \emph{sum} over time steps?
+\item[\hlq{(c)}] Can the head weights $W_y$ carry a gradient from step 2 back to step 1 by themselves?
+\item[\hlq{(d)}] What must the forward pass store for BPTT, and in what order is the backward work done?
+\item[\hlq{(e)}] What is truncated BPTT, and what changes in the algebra?
+\item[(f)] Why were LSTM and GRU invented, and why is the vanilla RNN still taught?
 \end{enumerate}
 
 \subsection*{What the question is asking}
@@ -2094,15 +2216,15 @@ All explained in Questions~26--28: two paths \seeconcept{c:bpttpaths}{The loss s
 For long sequences, stop the backward walk after $k$ steps and treat $h_{t-k}$ as a constant (``detach'' it). The recurrence and the outer-product formulas are unchanged; the sum over time just gets shorter. It saves memory and time, at the cost of not learning dependencies longer than $k$ steps.
 
 \subsection*{Solution}
-\textbf{(a)} The future term of $\partial L/\partial h_1$ contains $W_h$, so it vanishes and $\partial L/\partial h_1=e_1W_y$: step 1's state hears nothing about $y_2$. But $y_2$ still affects $\partial L/\partial W_x$, through the step-2 term $g_{z_2}x_2$, because $W_x$ is used directly at step 2 \seeconcept{c:bpttweights}{Shared weights}{26}.
+\hlq{\textbf{(a)}} The future term of $\partial L/\partial h_1$ contains $W_h$, so it vanishes and $\partial L/\partial h_1=e_1W_y$: step 1's state hears nothing about $y_2$. But $y_2$ still affects $\partial L/\partial W_x$, through the step-2 term $g_{z_2}x_2$, because $W_x$ is used directly at step 2 \seeconcept{c:bpttweights}{Shared weights}{26}.
 
 \textbf{(b)} The same matrix is used at every step, so a small change to it changes every $z_t$ at once. The total effect on the loss is the sum of the effects at each step (the ``add the paths'' rule). One matrix appears in every $dz_t$, so its gradient is $\sum_tg_{z_t}(\cdot)^\top$.
 
-\textbf{(c)} No. $\hat y_t=W_yh_t+b_y$ only reads the current state; it does not feed the next step. Gradients travel through time only along $h_{t-1}\to z_t$, i.e.\ through $W_h$ and the tanh slope.
+\hlq{\textbf{(c)}} No. $\hat y_t=W_yh_t+b_y$ only reads the current state; it does not feed the next step. Gradients travel through time only along $h_{t-1}\to z_t$, i.e.\ through $W_h$ and the tanh slope.
 
-\textbf{(d)} Store every $x_t$, $h_t$ (and $z_t$) during the forward pass $t=1\to T$. Then set $g_{z_{T+1}}=0$ and all gradient accumulators to 0; for $t=T$ down to 1 compute $e_t$, then $g_{h_t}$, then $g_{z_t}$, and add the outer products for $W_x,W_h,W_y$ and the sums for the biases. Finally make one parameter update from the totals.
+\hlq{\textbf{(d)}} Store every $x_t$, $h_t$ (and $z_t$) during the forward pass $t=1\to T$. Then set $g_{z_{T+1}}=0$ and all gradient accumulators to 0; for $t=T$ down to 1 compute $e_t$, then $g_{h_t}$, then $g_{z_t}$, and add the outer products for $W_x,W_h,W_y$ and the sums for the biases. Finally make one parameter update from the totals.
 
-\textbf{(e)} \seeconcept{c:truncated}{Truncated BPTT}{29} The backward walk stops after $k$ steps and $h_{t-k}$ is detached. The formulas are the same; only the sum over time is shorter. It cannot learn dependencies longer than $k$ steps.
+\hlq{\textbf{(e)}} \seeconcept{c:truncated}{Truncated BPTT}{29} The backward walk stops after $k$ steps and $h_{t-k}$ is detached. The formulas are the same; only the sum over time is shorter. It cannot learn dependencies longer than $k$ steps.
 
 \textbf{(f)} BPTT multiplies one Jacobian per step, so gradients from distant steps vanish (or explode); clipping only fixes explosions. LSTM and GRU use gates (sigmoid ``valves'') to keep a path along which the gradient does not shrink at every step, which fixes vanishing. The vanilla RNN is still the clearest model for understanding the mechanics: unrolling, sharing, and the product of Jacobians.
 
