@@ -39,9 +39,9 @@
 % ============================================================
 \phantomsection\section{How to use this set}
 
-\textbf{Syllabus covered.} Week 1 slides and lecture notes (all of it); Week 3 slides pages 1--37 and the matching parts of the Week 3 lecture notes; the RNN slides (\texttt{rnn\_beamer}); the BPTT slides (\texttt{CSE425\_RNN\_BPTT}). Nothing beyond Week 3 slide 37 is used: no receptive-field recursion, no backprop through a conv layer, no ReLU-on-Sobel or average-pool examples, no depthwise/separable convolutions, no ResNet details.
+\textbf{Syllabus covered (updated).} Week 1 slides and lecture notes (all of it); Week 3 slides and lecture notes (all of it); the RNN slides (\texttt{rnn\_beamer}, all of it); the BPTT slides (\texttt{CSE425\_RNN\_BPTT}, all of it). Compared with the first version of this set, Questions 22--31 are new and cover the second half of Week 3: activation and pooling backprop, the conv--pool stack and receptive fields, backprop through a conv layer, a full miniature CNN with one SGD step, convolution variants, classic architectures, ResNet, training and regularisation, and attention modules. The RNN and BPTT questions keep their content but are now numbered 32--39.
 
-\textbf{The numbers are new.} The questions do not copy the slide examples. They ask for the same skills with fresh numbers and a few twists (two paths into one variable, a dead unit and a zero input in the same example, a tanh hidden layer with a regression head, a batch in NumPy layout, a new CNN ledger, a vector BPTT step). Every number in every solution was checked by a script, and the backprop and BPTT answers were also checked by finite differences.
+\textbf{The numbers are new.} The questions do not copy the slide examples. They ask for the same skills with fresh numbers and a few twists. Every number in every solution was checked by a script, and the backprop answers (MLP, CNN and BPTT) were also checked by finite differences.
 
 \textbf{Each question has four parts.}
 \begin{enumerate}[nosep]
@@ -51,7 +51,7 @@
 \item \textbf{Solution}: every step, with the reason for each step.
 \end{enumerate}
 
-\textbf{Suggested plan (about 8.5 hours).} Try each question on paper before you read the solution. The times include reading the concepts and checking your answer.
+\textbf{Suggested plan.} Try each question on paper before you read the solution. The times include reading the concepts and checking your answer.
 
 \begin{center}
 \begin{tabular}{@{}llr@{}}
@@ -59,16 +59,16 @@
 Part & Questions & Time \\
 \midrule
 I. Foundations (neurons, losses, backprop) & 1--11 & 3 h 20 min \\
-II. Convolutional networks (Week 3, slides 1--37) & 12--21 & 2 h 50 min \\
-III. Recurrent networks & 22--25 & 1 h \\
-IV. Backpropagation through time & 26--29 & 1 h 25 min \\
+II. Convolutional networks (Week 3) & 12--31 & 6 h 50 min \\
+III. Recurrent networks & 32--35 & 1 h \\
+IV. Backpropagation through time & 36--39 & 1 h 25 min \\
 \midrule
-Total & 29 questions & about 8 h 35 min \\
+Total & 39 questions & about 12 h 35 min \\
 \bottomrule
 \end{tabular}
 \end{center}
 
-If you are short on time, do the \hlq{yellow} minimum set first: it covers every syllabus topic in about 7.5 hours (see the next section).
+If you are short on time, do the \hlq{yellow} minimum set first: it covers every syllabus topic in about 11 hours (see the next section).
 
 \textbf{Notation.} Board convention (slides): one example is a column, $z^{(\ell)} = W^{(\ell)} a^{(\ell-1)} + b^{(\ell)}$, and $W^{(\ell)}$ has shape (outputs $\times$ inputs). Code convention (NumPy homework): a batch is a matrix with one example per row, $Z = X W_{\text{code}} + b$, and $W_{\text{code}} = (W^{(\ell)})^\top$ has shape (inputs $\times$ outputs). $\odot$ means multiply entry by entry. $\star$ is cross-correlation, $*$ is true convolution. $\log$ means the natural log $\ln$.
 
@@ -78,19 +78,19 @@ If you are short on time, do the \hlq{yellow} minimum set first: it covers every
 
 \textbf{How to read the highlights.} A \hlq{yellow} question title (for example \hlq{Question 20}) means the question is in the minimum set. If only the title is yellow, do the whole question. If some part letters are also yellow (for example \hlq{(b)}), do only those parts; the yellow letters appear both in the question list and in the solution. Questions with no yellow are optional extra practice.
 
-\textbf{How the set was chosen.} I listed every topic in the mid-term syllabus (Week 1 slides and notes, Week 3 slides 1--37 and the matching notes, the RNN slides, the BPTT slides). For each topic I picked the question part that tests it most directly, then dropped every part whose topics were already covered by a part already picked. The tables below show where each topic is covered, so you can check that nothing is missing.
+\textbf{How the set was chosen.} I listed every topic in the updated syllabus (Week 1 slides and notes, all of the Week 3 slides and notes, the RNN slides, the BPTT slides). For each topic I picked the question part that tests it most directly, then dropped every part whose topics were already covered by a part already picked. The tables below show where each topic is covered, so you can check that nothing is missing.
 
-\textbf{Result.} 16 whole questions plus selected parts of 11 more. Two questions (7 and 9) are fully covered by others and can be skipped: the ``add the paths'' rule of Question~7 is tested in Question~26(b,c) and the chain rule in Question~3(b); the tanh slope and identity + squared-error head of Question~9 are tested in Questions~2(b) and 26. Most questions stay in because each one was written for a different topic, so the saving comes from skipping parts, not whole questions. Estimated time: about 7.5 hours (instead of 8.5).
+\textbf{Result.} 23 whole questions plus selected parts of 14 more; Questions 7 and 9 can be skipped. The ``add the paths'' rule of Question~7 is tested in Questions~24(e) and 36(b,c), and its chain rule in Question~3(b); the tanh slope and identity + squared-error head of Question~9 are tested in Questions~2(b) and 36. Some parts that the old syllabus left out are now covered by the new questions: local translation invariance (17(e)) by 31(c), and 21(e,f) by 31(f,e). Estimated time: about 11 hours, instead of about 12.5 for everything.
 
 \begin{center}
-\begin{tabular}{@{}lll@{}}
+\begin{tabular}{@{}l>{\raggedright\arraybackslash}p{0.33\textwidth}>{\raggedright\arraybackslash}p{0.45\textwidth}@{}}
 \toprule
 Part & Whole questions & Only these parts\\
 \midrule
 I & 2, 3, 8, 10 & 1(a,d,e), 4(b,c,d), 5(a,b,d,f), 6(a,b,c,e,f), 11(a,c,d,e)\\
-II & 12, 13, 15, 16, 18, 19 & 14(b,c,d), 17(a,b,c,d), 20(a,b,d), 21(a,b,d)\\
-III & 22, 24, 25 & 23(a,b,c,d)\\
-IV & 26, 27, 28 & 29(a,c,d,e)\\
+II & 12, 13, 15, 16, 18, 19, 22, 23, 25, 26, 27, 28, 29 & 14(b,c,d), 17(a,b,c,d), 20(a,b,d), 21(a,b,d), 24(d,e,f,g), 30(a,c,d,e,f), 31(a,b,c,e,f)\\
+III & 32, 34, 35 & 33(a,b,c,d)\\
+IV & 36, 37, 38 & 39(a,c,d,e)\\
 \midrule
 Skip & 7, 9 & \\
 \bottomrule
@@ -120,7 +120,7 @@ Softmax, cross-entropy, $\nabla_zL=p-y$, sum-to-zero check & 6(a,b)\\
 Stable softmax (subtract the max) & 6(c)\\
 Two-class softmax is a sigmoid of the logit difference & 6(e)\\
 Softmax acts on the whole output layer, not per unit & 6(f)\\
-Chain rule; computation graph; several paths add & 3(b), 8, 26(b,c)\\
+Chain rule; computation graph; several paths add & 3(b), 8, 24(e), 36(b,c)\\
 $\delta$ recursion, outer products $\delta a^\top$, $W^\top\delta$, full backprop & 8(a,b)\\
 Dead ReLU (zero row) vs.\ zero input (zero column); cache $z$ & 8(a,c,d)\\
 One update step, loss falls & 8(e)\\
@@ -132,7 +132,7 @@ Gradient check against PyTorch ($<10^{-5}$), common bugs & 11(e)\\
 \end{tabular}
 \end{center}
 
-\subsection*{Topic coverage: Week 3 (slides 1--37 and matching notes)}
+\subsection*{Topic coverage: Week 3, first half (slides 1--37, notes Sections 2--7)}
 \begin{center}
 \begin{tabular}{@{}>{\raggedright\arraybackslash}p{0.62\textwidth}l@{}}
 \toprule
@@ -140,7 +140,7 @@ Topic & Covered by\\
 \midrule
 Images as tensors, flattening, NCHW vs.\ NHWC & 12(e,f)\\
 Dense vs.\ local vs.\ shared weight counts; sharing saves params not MACs & 12(a--d)\\
-Equivariance vs.\ invariance & 12(g)\\
+Equivariance vs.\ invariance & 12(g), 31(c)\\
 Three MLP failures and the three CNN choices & 21(a)\\
 1-D correlation vs.\ convolution, valid and full length, symmetric kernels & 13(a--e)\\
 Libraries compute cross-correlation; when the flip matters & 13(f)\\
@@ -156,10 +156,54 @@ im2col; conv as a sparse, tied dense layer & 18(d,e)\\
 Params independent of image size, MACs are not & 19(a,b)\\
 Stacked $3\times3$ vs.\ one large kernel; why a ReLU is needed between & 19(c,d)\\
 conv $\to$ BN $\to$ ReLU and the redundant bias & 19(e)\\
-Where parameters hide (dense head); global average pooling & 19(f), 20(b)\\
+Where parameters hide (dense head); global average pooling & 19(f), 20(b), 29(a)\\
 Architecture ledger: shapes, params, activation memory & 20(a)\\
 SmallCNN (assignment network) & 20(d)\\
 When sharing is a poor assumption (aligned faces) & 21(d)\\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\subsection*{Topic coverage: Week 3, second half (slides 38--72, notes Sections 8--16)}
+\begin{center}
+\begin{tabular}{@{}>{\raggedright\arraybackslash}p{0.62\textwidth}l@{}}
+\toprule
+Topic & Covered by\\
+\midrule
+Bias + ReLU as a threshold, sparse feature maps & 22(a)\\
+Leaky ReLU, GELU; positive homogeneity of ReLU & 22(b,c)\\
+Average pooling and global average pooling & 22(d)\\
+Pooling backward: route to argmax vs.\ spread by $1/k^2$; ReLU mask; bias gradient & 22(e,f), 31(a)\\
+Local translation invariance from pooling & 31(c)\\
+Full conv--pool--conv--pool stack; padding a too-small map; odd-map trap; slide correction & 23(a--d)\\
+Receptive field and jump recursion; pooling multiplies growth & 23(e,h)\\
+RF of the ResNet stem; RF with dilation & 23(f,g)\\
+Effective receptive field & 23(i)\\
+Feature hierarchy; first-layer filters & 31(e)\\
+Kernel gradient $X\star\delta$, bias gradient & 25(c)\\
+Input gradient: scatter and $\operatorname{pad}(\delta)\star\rot(K)$; overlaps add & 24(d,e), 25(d)\\
+Stride, padding, channels and batches in conv backprop & 24(f)\\
+Transposed convolution and its output size & 24(g)\\
+Dense vs.\ conv backprop comparison & 31(b)\\
+Full conv $\to$ ReLU $\to$ pool $\to$ loss, backward algorithm, gradient check, SGD step & 25\\
+$1\times1$ (pointwise) convolution & 26(d)\\
+Depthwise and depthwise separable convolution, cost ratio & 26(b,c)\\
+Group convolution & 26(e)\\
+Dilated convolution and gridding & 26(f)\\
+Large-kernel, deformable and dynamic convolution & 26(g,h)\\
+Generic pipeline; LeNet-5; AlexNet & 27(a,b)\\
+VGG and where its parameters/MACs sit; Inception and $1\times1$ reduction & 27(c,d)\\
+Reading an ImageNet comparison table & 27(e)\\
+Degradation problem; residual block; gradient through the shortcut & 28(a,b,c)\\
+Projection shortcut; bottleneck block; ResNet head & 28(d,e,f)\\
+CIFAR-10 design with GAP & 29(a)\\
+Batch norm for conv layers; He initialisation & 29(b,c)\\
+Weight decay, dropout, spatial dropout, data augmentation & 29(d)\\
+Ablation: separable replacement, cost prediction, decision rule & 29(e)\\
+CNN vs.\ MLP baseline; ``10\% accuracy'' bug & 29(f)\\
+Squeeze-and-excitation: forward pass and cost & 30(a,c)\\
+Spatial attention, CBAM, coordinate attention, self-attention cost & 30(d,e,f)\\
+Max pool vs.\ strided conv for downsampling & 31(f)\\
 \bottomrule
 \end{tabular}
 \end{center}
@@ -170,24 +214,24 @@ When sharing is a poor assumption (aligned faces) & 21(d)\\
 \toprule
 Topic & Covered by\\
 \midrule
-Why RNNs; vanilla RNN equations and shapes; forward pass; memory & 22\\
-Folded vs.\ unrolled view & 22(e)\\
-Parameter count, independent of length; LSTM and GRU counts & 23(a,b,c)\\
-Stacked RNNs and their parameter count & 23(d), 24(f)\\
-Parameter sharing across time; why a nonlinearity; why tanh & 24(a,b,c)\\
-RNN types, bidirectional RNNs, example applications & 24(d,e)\\
-Language modelling: chain rule, next-token softmax & 25(a,e)\\
-Temperature, greedy, top-$k$, top-$p$ & 25(b,c)\\
-Teacher forcing, cross-entropy, perplexity, generation loop & 25(d,e,f)\\
-BPTT forward pass, two paths into $h_1$, local derivatives & 26(a,b,c)\\
-BPTT recurrence; shared-weight gradients summed over time & 26(c,d)\\
-Head weights, $h_0=0$, one update & 26(d,e,f), 29(c)\\
-Unfolded recurrence, product of Jacobians, vanishing/exploding & 27(b,c,e)\\
-Exact linear-cell BPTT (slide practice problem 3) & 27(a--d)\\
-Gradient clipping and gated cells as fixes & 27(e)\\
-Vector BPTT: outer products and transposes & 28\\
-$W_h=0$ thought experiment (slide practice problem 2) & 29(a)\\
-Order of work; truncated BPTT & 29(d,e)\\
+Why RNNs; vanilla RNN equations and shapes; forward pass; memory & 32\\
+Folded vs.\ unrolled view & 32(e)\\
+Parameter count, independent of length; LSTM and GRU counts & 33(a,b,c)\\
+Stacked RNNs and their parameter count & 33(d), 34(f)\\
+Parameter sharing across time; why a nonlinearity; why tanh & 34(a,b,c)\\
+RNN types, bidirectional RNNs, example applications & 34(d,e)\\
+Language modelling: chain rule, next-token softmax & 35(a,e)\\
+Temperature, greedy, top-$k$, top-$p$ & 35(b,c)\\
+Teacher forcing, cross-entropy, perplexity, generation loop & 35(d,e,f)\\
+BPTT forward pass, two paths into $h_1$, local derivatives & 36(a,b,c)\\
+BPTT recurrence; shared-weight gradients summed over time & 36(c,d)\\
+Head weights, $h_0=0$, one update & 36(d,e,f), 39(c)\\
+Unfolded recurrence, product of Jacobians, vanishing/exploding & 37(b,c,e)\\
+Exact linear-cell BPTT (slide practice problem 3) & 37(a--d)\\
+Gradient clipping and gated cells as fixes & 37(e)\\
+Vector BPTT: outer products and transposes & 38\\
+$W_h=0$ thought experiment (slide practice problem 2) & 39(a)\\
+Order of work; truncated BPTT & 39(d,e)\\
 \bottomrule
 \end{tabular}
 \end{center}
@@ -343,7 +387,7 @@ Like sigmoid, it is S-shaped and its slope comes from the output. Unlike sigmoid
 When $|z|$ is large, the sigmoid (or tanh) output is stuck near its flat ends, so its slope is almost 0. The unit is called \emph{saturated}. During backprop the error passing through the unit is multiplied by that slope, so a saturated unit passes back almost nothing, and its incoming weights barely change.
 
 \concept{c:vanish}{Why gradients shrink through many layers}
-Backprop multiplies one factor per layer: roughly (weight) $\times$ (slope of the activation). Multiply many numbers smaller than 1 and you get a very small number very fast. With sigmoid the slope is at most $\tfrac14$, so every sigmoid layer takes at least a factor of 4 away, unless the weights are large. ReLU's slope on the active side is exactly 1, so the activation itself takes nothing away. This is one main reason ReLU replaced sigmoid in hidden layers. (The same ``product of many factors'' problem returns in RNNs, Question~27.)
+Backprop multiplies one factor per layer: roughly (weight) $\times$ (slope of the activation). Multiply many numbers smaller than 1 and you get a very small number very fast. With sigmoid the slope is at most $\tfrac14$, so every sigmoid layer takes at least a factor of 4 away, unless the weights are large. ReLU's slope on the active side is exactly 1, so the activation itself takes nothing away. This is one main reason ReLU replaced sigmoid in hidden layers. (The same ``product of many factors'' problem returns in RNNs, Question~37.)
 
 \concept{c:reluderiv}{ReLU slope, dead units and Leaky ReLU}
 \[
@@ -738,7 +782,7 @@ Path 1, $w\to u\to v\to r\to L$: $3\cdot1\cdot1\cdot4=12$. Path 2, $w\to v\to r\
 
 \textbf{(d)} $L=\tfrac12(wx+w-y)^2$, so $\dfrac{\partial L}{\partial w}=(wx+w-y)(x+1)=(6+2-4)(3+1)=4\cdot4=16$. Same answer. Forgetting the second path would give 12, which is wrong.
 
-\textbf{(e)} (1) A hidden unit feeds every unit of the next layer, so its gradient adds one path per next-layer unit; that sum is the $W^\top\delta$ in backprop (Question~8). (2) In an RNN the hidden state $h_t$ is used by the output at step $t$ and by the next step, so $\partial L/\partial h_t$ is a ``direct path + future path'' sum (Question~26).
+\textbf{(e)} (1) A hidden unit feeds every unit of the next layer, so its gradient adds one path per next-layer unit; that sum is the $W^\top\delta$ in backprop (Question~8). (2) In an RNN the hidden state $h_t$ is used by the output at step $t$ and by the next step, so $\partial L/\partial h_t$ is a ``direct path + future path'' sum (Question~36).
 % ------------------------------------------------------------
 \phantomsection\section[Question 8. Full forward and backward pass: a dead unit and a zero input together]{\hlq{Question 8}. Full forward and backward pass: a dead unit and a zero input together}
 % ------------------------------------------------------------
@@ -1042,7 +1086,7 @@ Copy your NumPy weights into PyTorch, run the same forward expression, call \tex
 
 \textbf{(f)} The output must be a probability between 0 and 1, which the sigmoid gives and ReLU does not. And sigmoid paired with BCE gives the clean gradient $\hat y-y$: the saturating slope cancels, so the output does not suffer from the vanishing slope that hurts sigmoid in hidden layers.
 % ============================================================
-\part{Convolutional neural networks (Week 3, slides 1--37)}
+\part{Convolutional neural networks (Week 3)}
 % ============================================================
 
 % ------------------------------------------------------------
@@ -1694,7 +1738,7 @@ Example memory row: conv1 $=128\cdot128\cdot32\cdot4/1024=2048$ KB. Two details:
 \hlq{\textbf{(d)}} Spatial sizes: conv1 at stride 2: $\lfloor(32+2-3)/2\rfloor+1=16$; conv2 keeps 16; pool $\to8$; conv3, conv4 keep 8; pool $\to4$. Flatten $=64\cdot4\cdot4=1024$. Conv parameters do not change ($896+9{,}248+18{,}496+36{,}928=65{,}568$), because the filters are the same. First linear layer: $1024\cdot128+128=131{,}200$ (was $524{,}416$). New total: $65{,}568+131{,}200+1{,}290=198{,}058$. Striding early shrinks every later map by 4 in area, which shrinks the flatten length and therefore the big dense layer.
 
 % ------------------------------------------------------------
-\phantomsection\section[Question 21. Short answers on CNNs]{\hlq{Question 21}. Short answers on CNNs}
+\phantomsection\section[Question 21. Short answers on CNNs (part 1)]{\hlq{Question 21}. Short answers on CNNs (part 1)}
 % ------------------------------------------------------------
 \subsection*{Question}
 Answer each in two to four sentences.
@@ -1728,12 +1772,718 @@ Early layers have small views, high resolution and few channels: they detect edg
 \textbf{(e)} Max pooling has no weights and gives local translation invariance (``is the feature anywhere in this window?''). A stride-2 convolution downsamples with \emph{learned} weights, so the network decides how to summarise, and it is cheaper than a stride-1 conv followed by pooling.
 
 \textbf{(f)} First-layer filters usually look like edge and colour detectors (like Sobel or blobs), not noise \seeconcept{c:hierarchy}{The feature hierarchy}{21}. Each later layer looks at a patch of the previous layer's map, which already summarises a patch of the image, so deeper units see a larger part of the input (stacked $3\times3$ layers see $3,5,7,\dots$ pixels) and combine simpler features into bigger ones.
+% ------------------------------------------------------------
+\phantomsection\section[Question 22. Bias, activation and pooling on a feature map: forward and backward]{\hlq{Question 22}. Bias, activation and pooling on a feature map: forward and backward}
+% ------------------------------------------------------------
+\subsection*{Question}
+A convolution (bias not yet added) produced the map
+\[
+Y=\begin{bmatrix}3&-1&5&0\\-2&4&1&-3\\0&2&-4&6\\7&-1&2&1\end{bmatrix}.
+\]
+\begin{enumerate}[label=(\alph*)]
+\item Add a bias $b=-1$ to get $Z=Y+b$, then apply ReLU to get $A$. How many entries of $A$ are zero? Explain why a negative bias acts like a threshold.
+\item Apply Leaky ReLU ($\alpha=0.1$) to $Z$ instead. Which entries differ from $A$? Using $\Phi(1)\approx0.8413$ and $\Phi(3)\approx0.9987$, compute $\operatorname{GELU}(z)=z\,\Phi(z)$ at $z=-1,1,3$.
+\item Show that ReLU is positively homogeneous: $\relu(cz)=c\,\relu(z)$ for $c\ge0$. What does this mean if every filter of a ReLU layer is doubled?
+\item Apply $2\times2$ max pooling and $2\times2$ average pooling (stride 2) to $A$, and global average pooling (GAP).
+\item The upstream gradient is $\partial L/\partial P=\begin{bmatrix}2&-1\\3&1\end{bmatrix}$. Compute $\partial L/\partial A$ when $P$ is the max pool, and when $P$ is the average pool.
+\item Send both results back through the ReLU to get $\partial L/\partial Z$, and give $\partial L/\partial b$ in each case. Two entries of $Z$ are exactly 0: what does the mask do there?
+\end{enumerate}
+
+\subsection*{What the question is asking}
+After a convolution, a CNN adds a bias, applies an activation, and usually pools. Do all three by hand on a small map, then run the backward pass through the same three steps. You will see that max pooling sends each gradient to one winner, average pooling spreads it out, and ReLU blocks the units that were switched off.
+
+\subsection*{Concepts you need}
+ReLU and its slope \seeconcept{c:reluderiv}{ReLU slope, dead units and Leaky ReLU}{2}; max pooling \seeconcept{c:maxpool}{Max pooling}{17}; the cache and the mask from $z$ \seeconcept{c:cache}{The cache}{8}.
+
+\concept{c:biasthresh}{A negative bias plus ReLU is a threshold}
+After adding $b<0$, an entry survives the ReLU only if the raw response was bigger than $|b|$. So the bias sets ``how strong must the pattern be before this unit reports it''. Everything weaker becomes exactly 0. That is why ReLU feature maps are usually \emph{sparse} (many zeros). The shape of the map does not change.
+
+\concept{c:acts2}{More activations: Leaky ReLU and GELU}
+\begin{center}
+\begin{tabular}{@{}lll@{}}
+\toprule
+Name & $\varphi(z)$ & Slope\\
+\midrule
+ReLU & $\max(0,z)$ & 1 if $z>0$, 0 if $z<0$\\
+Leaky ReLU & $\max(\alpha z,z)$, small $\alpha$ & 1 if $z>0$, $\alpha$ if $z<0$\\
+GELU & $z\,\Phi(z)$, $\Phi$ = normal CDF & $\Phi(z)+z\,\phi(z)$\\
+\bottomrule
+\end{tabular}
+\end{center}
+GELU is a smooth ReLU: for large positive $z$ it is almost $z$, for large negative $z$ almost 0, and it dips slightly below 0 in between. It is common in modern CNNs such as ConvNeXt. Sigmoid and tanh saturate, so in CNNs they are used inside gates and attention modules, not as the main activation.
+
+\concept{c:avgpool}{Average pooling and global average pooling}
+Average pooling outputs the mean of each window instead of the max: $P_{ij}=\frac{1}{k^2}\sum_{u,v}a_{si+u,\,sj+v}$. It is smoother; max pooling asks ``is the feature present anywhere here?''. Global average pooling (GAP) uses one window covering the whole map, giving one number per channel. All three have zero parameters and use the same output-size formula.
+
+\concept{c:poolback}{Backprop through pooling and ReLU}
+\begin{itemize}[nosep]
+\item \textbf{Max pool}: the output depends only on the winning entry (slope 1); the others could change a little without changing the max (slope 0). So each upstream gradient is \emph{routed} to the argmax of its window. The forward pass must store these winner positions (``switches''). If overlapping windows share a winner, the gradients add there.
+\item \textbf{Average pool}: every entry of the window counts $1/k^2$ towards the mean, so the upstream gradient is \emph{spread} evenly: each entry gets $\partial L/\partial P_{ij}/k^2$.
+\item \textbf{ReLU}: multiply by the mask $\mathbf 1[z>0]$ (built from $z$; at $z=0$ code uses 0).
+\item \textbf{Bias}: one bias is added to every position, so $\partial L/\partial b=\sum_{i,j}\partial L/\partial z_{ij}$.
+\end{itemize}
+
+\subsection*{Solution}
+\textbf{(a)}
+\[
+Z=Y-1=\begin{bmatrix}2&-2&4&-1\\-3&3&0&-4\\-1&1&-5&5\\6&-2&1&0\end{bmatrix},\qquad
+A=\relu(Z)=\begin{bmatrix}2&0&4&0\\0&3&0&0\\0&1&0&5\\6&0&1&0\end{bmatrix}.
+\]
+9 of the 16 entries are zero. Every raw response of 1 or less was removed: the bias $-1$ means ``only report responses stronger than 1'' \seeconcept{c:biasthresh}{A negative bias plus ReLU is a threshold}{22}.
+
+\textbf{(b)} Leaky ReLU keeps $0.1\times$ the negative entries: the 7 negative entries of $Z$ become $-0.2$, $-0.1$, $-0.3$, $-0.4$, $-0.1$, $-0.5$, $-0.2$ instead of 0. The positive entries and the two exact zeros are the same as in $A$. GELU \seeconcept{c:acts2}{More activations}{22}:
+\[
+\operatorname{GELU}(1)=0.8413,\qquad \operatorname{GELU}(-1)=-1\cdot\Phi(-1)=-(1-0.8413)=-0.1587,
+\]
+\[
+\operatorname{GELU}(3)=3\cdot0.9987\approx2.996 .
+\]
+So GELU is close to ReLU far from 0 ($2.996\approx3$) but smooth and slightly negative near 0.
+
+\textbf{(c)} If $z\ge0$ then $cz\ge0$, so $\relu(cz)=cz=c\,\relu(z)$. If $z<0$ then $cz\le0$, so $\relu(cz)=0=c\cdot0$. Doubling every filter (and bias) doubles every pre-activation, so every ReLU output is exactly doubled; the pattern of which units are on does not change, only the scale.
+
+\textbf{(d)} Windows: top-left $\{2,0,0,3\}$, top-right $\{4,0,0,0\}$, bottom-left $\{0,1,6,0\}$, bottom-right $\{0,5,1,0\}$ \seeconcept{c:avgpool}{Average pooling and GAP}{22}.
+\[
+\text{max}=\begin{bmatrix}3&4\\6&5\end{bmatrix},\qquad
+\text{avg}=\begin{bmatrix}5/4&4/4\\7/4&6/4\end{bmatrix}=\begin{bmatrix}1.25&1\\1.75&1.5\end{bmatrix},\qquad
+\text{GAP}=\frac{22}{16}=1.375 .
+\]
+
+\textbf{(e)} \seeconcept{c:poolback}{Backprop through pooling and ReLU}{22}
+Max pool: the winners are $3$ at $(1,1)$, $4$ at $(0,2)$, $6$ at $(3,0)$, $5$ at $(2,3)$. Each gets its window's gradient; everything else gets 0:
+\[
+\frac{\partial L}{\partial A}\Big|_{\max}=\begin{bmatrix}0&0&-1&0\\0&2&0&0\\0&0&0&1\\3&0&0&0\end{bmatrix}.
+\]
+Average pool: each window's gradient is divided by 4 and given to all four entries:
+\[
+\frac{\partial L}{\partial A}\Big|_{\text{avg}}=\begin{bmatrix}0.5&0.5&-0.25&-0.25\\0.5&0.5&-0.25&-0.25\\0.75&0.75&0.25&0.25\\0.75&0.75&0.25&0.25\end{bmatrix}.
+\]
+
+\textbf{(f)} The mask is $\mathbf 1[Z>0]=\begin{bmatrix}1&0&1&0\\0&1&0&0\\0&1&0&1\\1&0&1&0\end{bmatrix}$. The two exact zeros, $Z_{1,2}$ and $Z_{3,3}$, get mask 0 (code convention).
+
+Max case: all four winners have $Z>0$, so the mask changes nothing: $\partial L/\partial Z=\partial L/\partial A|_{\max}$ and $\partial L/\partial b=-1+2+1+3=5$.
+
+Average case: entries where $Z\le0$ are blocked:
+\[
+\frac{\partial L}{\partial Z}\Big|_{\text{avg}}=\begin{bmatrix}0.5&0&-0.25&0\\0&0.5&0&0\\0&0.75&0&0.25\\0.75&0&0.25&0\end{bmatrix},\qquad \frac{\partial L}{\partial b}=0.5-0.25+0.5+0.75+0.25+0.75+0.25=2.75 .
+\]
+Note the difference: max pool only ever trains the winners; average pool would train everything, but the ReLU still blocks the units that were off.
+
+% ------------------------------------------------------------
+\phantomsection\section[Question 23. A conv--pool--conv--pool stack, the odd-map trap, and receptive fields]{\hlq{Question 23}. A conv--pool--conv--pool stack, the odd-map trap, and receptive fields}
+% ------------------------------------------------------------
+\subsection*{Question}
+Use stride 1, bias 0, the anti-diagonal kernel $K=\begin{bmatrix}0&0&1\\0&1&0\\1&0&0\end{bmatrix}$ and
+\[
+X_6=\begin{bmatrix}2&0&1&3&0&1\\1&3&0&1&2&0\\0&1&2&0&1&3\\3&0&1&2&0&1\\1&2&0&1&3&0\\0&1&3&0&1&2\end{bmatrix}.
+\]
+\begin{enumerate}[label=(\alph*)]
+\item Write $y_{ij}$ for this kernel as a sum of three input entries, and compute the valid correlation $Y_6=X_6\star K$.
+\item Apply $2\times2$ max pooling, stride 2, to get $P_1$.
+\item Can a valid $3\times3$ convolution be applied to $P_1$? Pad with $p=1$, apply $K$ again to get $Y_7$, then pool once more. What is the final value?
+\item Repeat (a)--(b) on the $5\times5$ top-left corner of $X_6$. What size comes out of the pool, and which conv outputs are thrown away?
+\item Using $\mathrm{RF}_\ell=\mathrm{RF}_{\ell-1}+(k_\ell-1)J_{\ell-1}$ and $J_\ell=J_{\ell-1}s_\ell$, compute the receptive field and jump after each of the four layers of the stack in (a)--(c). Why can the final RF be larger than the 6-pixel image?
+\item Compute the RF of the ResNet-18 stem: conv $7\times7$ stride 2, max pool $3\times3$ stride 2, then two $3\times3$ stride-1 convs.
+\item Three stacked $3\times3$ convs with dilations 1, 2, 4 (stride 1): what is the RF?
+\item How many stacked $3\times3$ stride-1 convs are needed for an RF of at least 31? How many convs if each conv is followed by a $2\times2$ stride-2 pool?
+\item For three stacked 3-tap stride-1 layers in 1-D, count how many paths connect the top unit to each of the 7 input pixels. What does this say about the ``effective'' receptive field?
+\end{enumerate}
+
+\subsection*{What the question is asking}
+Push a small image through a whole conv--pool--conv--pool stack, keeping track of the shapes and the floor in the size formula. Then measure how much of the input one unit can ``see'' after several layers (its receptive field), and why strides and pooling make it grow faster.
+
+\subsection*{Concepts you need}
+Correlation \seeconcept{c:corr2d}{2-D cross-correlation}{14}; output size and floor \seeconcept{c:outsize}{The output-size formula}{16}; max pooling \seeconcept{c:maxpool}{Max pooling}{17}; dilation \seeconcept{c:dilation}{Dilation}{16}.
+
+\concept{c:stack}{The lecture stack and the odd-map trap}
+A conv--pool--conv--pool stack keeps the 2-D layout at every step. A valid $3\times3$ conv needs at least a $3\times3$ map, so a small map must be padded first. A $2\times2$ stride-2 pool halves an even map cleanly, but on an odd map the floor drops the last row and column. That is why designers use same padding to keep maps even. (Lecture note: in the slides' diagonal-kernel example the entry $y_{23}$ is printed as 8; the correct value is 7, which changes the later numbers to $\begin{bmatrix}7&7\\7&7\end{bmatrix}$, $\begin{bmatrix}14&7\\7&14\end{bmatrix}$ and a final value of 14, not 15.)
+
+\concept{c:rf}{Receptive field and jump}
+The receptive field (RF) of a unit is the region of the network input that can change it. The \emph{jump} $J_\ell=\prod_{m\le\ell}s_m$ is the distance, in input pixels, between neighbouring units of layer $\ell$ ($J_0=1$, $\mathrm{RF}_0=1$). A layer with kernel $k$ reads $k$ neighbouring units of the layer below, whose fields are $J$ pixels apart, so
+\[
+\mathrm{RF}_\ell=\mathrm{RF}_{\ell-1}+(k_\ell-1)\,J_{\ell-1},\qquad J_\ell=J_{\ell-1}\,s_\ell .
+\]
+Pooling layers count too. For a dilated layer use $k_e=d(k-1)+1$. Stride and pooling multiply the jump, so every later layer grows the RF faster.
+
+\concept{c:effrf}{The effective receptive field}
+Not every pixel in the RF matters equally. Central pixels reach the unit through many more paths than edge pixels, so their influence is much bigger. The \emph{effective} receptive field is roughly bell-shaped and much smaller than the theoretical one.
+
+\subsection*{Solution}
+\textbf{(a)} The kernel is 1 only on the anti-diagonal, so $y_{ij}=x_{i,j+2}+x_{i+1,j+1}+x_{i+2,j}$. For example $y_{00}=x_{02}+x_{11}+x_{20}=1+3+0=4$ and $y_{01}=x_{03}+x_{12}+x_{21}=3+0+1=4$. The output is $(6-3+1)^2=4\times4$:
+\[
+Y_6=\begin{bmatrix}4&4&3&3\\4&3&3&3\\3&3&3&4\\3&3&4&4\end{bmatrix}.
+\]
+
+\textbf{(b)} Quadrants: $\max\{4,4,4,3\}=4$, $\max\{3,3,3,3\}=3$, $\max\{3,3,3,3\}=3$, $\max\{3,4,4,4\}=4$:
+\[
+P_1=\begin{bmatrix}4&3\\3&4\end{bmatrix}.
+\]
+
+\textbf{(c)} No: $2-3+1<1$, a $3\times3$ window does not fit in $2\times2$. With $p=1$ the padded map is $\begin{bmatrix}0&0&0&0\\0&4&3&0\\0&3&4&0\\0&0&0&0\end{bmatrix}$ and $4-3+1=2$, so the output is $2\times2$ again. Each output is the sum of its window's anti-diagonal: top-left $0+4+0=4$, top-right $0+3+3=6$, bottom-left $3+3+0=6$, bottom-right $0+4+0=4$:
+\[
+Y_7=\begin{bmatrix}4&6\\6&4\end{bmatrix},\qquad \text{final pool}=\max\{4,6,6,4\}=6 .
+\]
+Shapes: $6\times6\to4\times4\to2\times2\to2\times2\to1\times1$ \seeconcept{c:stack}{The lecture stack}{23}.
+
+\textbf{(d)} On the $5\times5$ corner the valid conv gives $3\times3$: $\begin{bmatrix}4&4&3\\4&3&3\\3&3&3\end{bmatrix}$ (the top-left of $Y_6$). The pool gives $\lfloor(3-2)/2\rfloor+1=1$, i.e.\ $1\times1$ with value $\max\{4,4,4,3\}=4$. The last row and column of the $3\times3$ map ($3,3,3$ and $3,3$) are never looked at: the odd-map trap. There is also no room for a second $3\times3$ conv.
+
+\textbf{(e)} \seeconcept{c:rf}{Receptive field and jump}{23}
+\begin{center}
+\begin{tabular}{@{}lccc@{}}
+\toprule
+Layer & $k,s$ & RF & $J$\\
+\midrule
+input & -- & 1 & 1\\
+conv $3\times3$ & 3, 1 & $1+2\cdot1=3$ & 1\\
+pool $2\times2$ & 2, 2 & $3+1\cdot1=4$ & 2\\
+conv $3\times3$ ($p=1$) & 3, 1 & $4+2\cdot2=8$ & 2\\
+pool $2\times2$ & 2, 2 & $8+1\cdot2=10$ & 4\\
+\bottomrule
+\end{tabular}
+\end{center}
+The final unit has RF 10, larger than the 6-pixel image. The RF counts positions on the (padded) input grid; the padded zeros are part of what the window could see. Padding does not change the RF formula.
+
+\textbf{(f)} conv $7\times7$, $s=2$: $\mathrm{RF}=1+6\cdot1=7$, $J=2$. Pool $3\times3$, $s=2$: $7+2\cdot2=11$, $J=4$. Conv $3\times3$: $11+2\cdot4=19$. Conv $3\times3$: $19+2\cdot4=27$. Final RF $=27$.
+
+\textbf{(g)} Spans $k_e=3,5,9$ for $d=1,2,4$: $\mathrm{RF}=1+2=3$, then $3+4=7$, then $7+8=15$. Dilation grows the field quickly without pooling and without extra weights.
+
+\textbf{(h)} Each stride-1 $3\times3$ conv adds 2: $\mathrm{RF}=1+2n\ge31$ gives $n=15$. With a pool after each conv: conv 3, pool 4 ($J=2$), conv 8, pool 10 ($J=4$), conv 18, pool 22 ($J=8$), conv $22+16=38$. So 4 convs (with 3 pools between them) are enough: pooling multiplies later growth.
+
+\textbf{(i)} Each layer spreads every path over 3 neighbours, so the counts are the coefficients of $(1+1+1)^3$ spread out: $1,3,6,7,6,3,1$. The centre pixel reaches the top unit by 7 paths, the edge pixels by only 1. So the centre pixels dominate: the effective RF is concentrated in the middle and smaller than the theoretical 7 \seeconcept{c:effrf}{The effective receptive field}{23}.
+
+% ------------------------------------------------------------
+\phantomsection\section[Question 24. Gradients of a convolution layer: kernel, bias and input]{\hlq{Question 24}. Gradients of a convolution layer: kernel, bias and input}
+% ------------------------------------------------------------
+\subsection*{Question}
+A single-channel conv layer, stride 1, no padding:
+\[
+X=\begin{bmatrix}2&1&0\\1&3&1\\0&2&1\end{bmatrix},\quad K=\begin{bmatrix}1&-1\\2&0\end{bmatrix},\quad b=0.5,\qquad
+\delta=\frac{\partial L}{\partial Z}=\begin{bmatrix}1&2\\-1&0\end{bmatrix}.
+\]
+\begin{enumerate}[label=(\alph*)]
+\item[(a)] Compute the forward output $Z=X\star K+b$.
+\item[(b)] Compute $\partial L/\partial K=X\star\delta$ (write entry $(0,0)$ in full) and $\partial L/\partial b$.
+\item[(c)] Compute $\partial L/\partial X$ by scattering: place $\delta_{ij}K$ on the patch that produced $z_{ij}$, and add.
+\item[\hlq{(d)}] Compute $\partial L/\partial X$ again as $\operatorname{pad}_1(\delta)\star\rot(K)$ and check it matches.
+\item[\hlq{(e)}] Explain entry $\partial L/\partial x_{11}=5$ term by term. Why do overlapping windows add?
+\item[\hlq{(f)}] How do the formulas change for (i) stride 2, (ii) padding, (iii) several input and output channels and a mini-batch?
+\item[\hlq{(g)}] Why is the backward-to-input operation called a ``transposed convolution''? A transposed conv layer with $k=4$, $s=2$, $p=1$ takes a $4\times4$ map: what is its output size, and which ordinary conv maps it back?
+\end{enumerate}
+
+\subsection*{What the question is asking}
+Training a CNN needs the gradient of the loss with respect to the kernel (to update it) and with respect to the input (to keep backpropagating to earlier layers). Compute both by hand on a tiny example, two different ways for the input, and see why the kernel gradient adds contributions from every position.
+
+\subsection*{Concepts you need}
+Correlation and $\rot$ \seeconcept{c:corr2d}{2-D cross-correlation}{14} \seeconcept{c:rot180}{True convolution rotates the kernel}{14}; outer-product gradients of a dense layer \seeconcept{c:outer}{Weight gradients are outer products}{8}; im2col \seeconcept{c:im2col}{Convolution as a matrix product}{18}.
+
+\concept{c:convgradK}{The kernel gradient is a correlation}
+In $z_{ij}=b+\sum_{u,v}x_{i+u,j+v}k_{u,v}$ the weight $k_{u,v}$ is used at \emph{every} output position, so its gradient adds one term per position:
+\[
+\frac{\partial L}{\partial k_{u,v}}=\sum_{i,j}\delta_{ij}\,x_{i+u,\,j+v}\quad\Longleftrightarrow\quad \frac{\partial L}{\partial K}=X\star\delta,\qquad \frac{\partial L}{\partial b}=\sum_{i,j}\delta_{ij}.
+\]
+Slide $\delta$ over $X$ like a kernel. The result has the shape of $K$. This is the conv version of $\nabla_WL=\delta x^\top$, with every shared use added up.
+
+\concept{c:convgradX}{The input gradient: scatter, or full convolution}
+Forward, window $(i,j)$ \emph{gathers} a patch. Backward, $\delta_{ij}$ is \emph{scattered} back onto the same patch, weighted by $K$; where windows overlap, contributions add:
+\[
+\frac{\partial L}{\partial X}=\sum_{i,j}\delta_{ij}\cdot\bigl(K\text{ placed with its top-left at }(i,j)\bigr)=\operatorname{pad}_{k-1}(\delta)\star\rot(K).
+\]
+Forward uses $K$ as written; backward to the input uses the rotated kernel with full padding. This is the conv version of $\nabla_xL=W^\top\delta$.
+
+\concept{c:convgradmore}{Stride, padding, channels, batches, and transposed convolution}
+\begin{itemize}[nosep]
+\item \textbf{Stride $s$}: $\partial L/\partial k_{u,v}=\sum_{i,j}\delta_{ij}x_{si+u,\,sj+v}$. Equivalently, insert $s-1$ zeros between the entries of $\delta$ and use the stride-1 formulas.
+\item \textbf{Padding}: compute the gradient for the padded input, then crop away the border (the padding is constant).
+\item \textbf{Channels and batch}: the gradient of kernel $K^{(o)}_c$ correlates input channel $c$ with output-gradient channel $o$, summed over the batch; the input gradient of channel $c$ adds contributions from \emph{all} output channels, because every filter reads every input channel.
+\item \textbf{Transposed convolution}: in the im2col view, the backward-to-input step multiplies by the \emph{transpose} of the sparse, tied conv matrix. Used as a layer with a learned kernel, it upsamples (segmentation, generators). Output size: $(H_{\text{in}}-1)s-2p+k$, the inverse of the conv size formula when the division is exact. (``Deconvolution'' is a misleading name for it.)
+\end{itemize}
+
+\subsection*{Solution}
+\textbf{(a)} Each output is $x_{ij}-x_{i,j+1}+2x_{i+1,j}+0.5$:
+\[
+z_{00}=2-1+2+0.5=3.5,\qquad z_{01}=1-0+6+0.5=7.5,
+\]
+\[
+z_{10}=1-3+0+0.5=-1.5,\qquad z_{11}=3-1+4+0.5=6.5 .
+\]
+
+\textbf{(b)} \seeconcept{c:convgradK}{The kernel gradient is a correlation}{24}
+$\partial L/\partial k_{00}=\delta_{00}x_{00}+\delta_{01}x_{01}+\delta_{10}x_{10}+\delta_{11}x_{11}=1\cdot2+2\cdot1+(-1)\cdot1+0\cdot3=3$. Sliding $\delta$ to the other three positions of $X$:
+\[
+\frac{\partial L}{\partial K}=X\star\delta=\begin{bmatrix}3&-2\\7&3\end{bmatrix},\qquad \frac{\partial L}{\partial b}=1+2-1+0=2 .
+\]
+(For example $\partial L/\partial k_{01}=1\cdot1+2\cdot0+(-1)\cdot3+0\cdot1=-2$.)
+
+\textbf{(c)} \seeconcept{c:convgradX}{The input gradient}{24}
+$\delta_{00}=1$ puts $\begin{bmatrix}1&-1\\2&0\end{bmatrix}$ at rows 0--1, cols 0--1. $\delta_{01}=2$ puts $\begin{bmatrix}2&-2\\4&0\end{bmatrix}$ at rows 0--1, cols 1--2. $\delta_{10}=-1$ puts $\begin{bmatrix}-1&1\\-2&0\end{bmatrix}$ at rows 1--2, cols 0--1. $\delta_{11}=0$ adds nothing. Adding:
+\[
+\frac{\partial L}{\partial X}=\begin{bmatrix}1&-1+2&-2\\2-1&0+4+1&0\\-2&0&0\end{bmatrix}=\begin{bmatrix}1&1&-2\\1&5&0\\-2&0&0\end{bmatrix}.
+\]
+
+\hlq{\textbf{(d)}} $\rot(K)=\begin{bmatrix}0&2\\-1&1\end{bmatrix}$ and $\operatorname{pad}_1(\delta)=\begin{bmatrix}0&0&0&0\\0&1&2&0\\0&-1&0&0\\0&0&0&0\end{bmatrix}$. Correlating gives a $3\times3$ map; e.g.\ entry $(0,0)$ uses the window $\begin{bmatrix}0&0\\0&1\end{bmatrix}$: $0\cdot0+0\cdot2+0\cdot(-1)+1\cdot1=1$, and entry $(1,1)$ uses $\begin{bmatrix}1&2\\-1&0\end{bmatrix}$: $0+4+1+0=5$. The whole result equals (c).
+
+\hlq{\textbf{(e)}} $x_{11}$ sits inside all four windows, at a different kernel position each time: it is $k_{11}$'s input for $z_{00}$, $k_{10}$'s for $z_{01}$, $k_{01}$'s for $z_{10}$, and $k_{00}$'s for $z_{11}$. So
+\[
+\frac{\partial L}{\partial x_{11}}=\delta_{00}k_{11}+\delta_{01}k_{10}+\delta_{10}k_{01}+\delta_{11}k_{00}=1\cdot0+2\cdot2+(-1)(-1)+0\cdot1=5 .
+\]
+A pixel used by several windows affects the loss through each of them, and the ``add the paths'' rule \seeconcept{c:graph}{Computation graphs}{7} adds the effects.
+
+\hlq{\textbf{(f)}} \seeconcept{c:convgradmore}{Stride, padding, channels, batches}{24}
+(i) Stride 2: use $x_{2i+u,\,2j+v}$ in the kernel-gradient sum (or dilate $\delta$ with zeros and use stride 1). (ii) Padding: work with the padded input, then crop the border of $\partial L/\partial\tilde X$. (iii) Channels and batch: $\partial L/\partial K^{(o)}_c=\sum_n X^{(n)}_c\star\delta^{(n)}_o$; $\partial L/\partial X^{(n)}_c=\sum_o\operatorname{pad}(\delta^{(n)}_o)\star\rot(K^{(o)}_c)$.
+
+\hlq{\textbf{(g)}} Written as one big matrix, the forward conv is $z=Wx$ with a sparse tied $W$; the input gradient is $W^\top\delta$, multiplication by the transpose, hence ``transposed convolution''. Output size $(4-1)\cdot2-2\cdot1+4=8$, so $4\times4\to8\times8$. The conv with the same $k=4$, $s=2$, $p=1$ maps $8\to\lfloor(8+2-4)/2\rfloor+1=4$, back to $4\times4$.
+
+% ------------------------------------------------------------
+\phantomsection\section[Question 25. A miniature CNN: forward, backward, gradient check and one SGD step]{\hlq{Question 25}. A miniature CNN: forward, backward, gradient check and one SGD step}
+% ------------------------------------------------------------
+\subsection*{Question}
+Network: $Z=X\star K+b$ ($5\times5\to4\times4$), $A=\relu(Z)$, $P=$ $2\times2$ max pool, stride 2 ($4\times4\to2\times2$), loss $L=\tfrac12\sum_{i,j}(P_{ij}-T_{ij})^2$.
+\[
+X=\begin{bmatrix}2&0&1&3&1\\1&2&0&1&2\\0&1&3&0&1\\2&1&0&2&0\\1&0&2&1&3\end{bmatrix},\quad
+K=\begin{bmatrix}1&0\\-1&1\end{bmatrix},\quad b=-1,\quad T=\begin{bmatrix}2&1\\3&2\end{bmatrix}.
+\]
+\begin{enumerate}[label=(\alph*)]
+\item Write $z_{ij}$ for this kernel, and compute $Z$, $A$, $P$ (with the winner positions) and $L$.
+\item Compute $\partial L/\partial P$, route it through the pool, and apply the ReLU mask to get $\delta=\partial L/\partial Z$.
+\item Compute $\partial L/\partial K$ (show $\partial L/\partial k_{00}$ in full) and $\partial L/\partial b$.
+\item Compute $\partial L/\partial X$ by scattering.
+\item A finite-difference check gives $\partial L/\partial k_{00}\approx13.000$. Explain how the check works and why it agrees almost exactly here.
+\item Take one SGD step with $\eta=0.01$. The new loss is about $2.855$. Write the new $K$ and $b$.
+\end{enumerate}
+
+\subsection*{What the question is asking}
+Put everything together: one conv, one ReLU, one max pool, one loss. Run it forward, then backward through each layer in reverse order, get the kernel and bias gradients, and check that one update lowers the loss.
+
+\subsection*{Concepts you need}
+Pooling and ReLU backward \seeconcept{c:poolback}{Backprop through pooling and ReLU}{22}; conv gradients \seeconcept{c:convgradK}{The kernel gradient}{24} \seeconcept{c:convgradX}{The input gradient}{24}; squared error \seeconcept{c:sqerr}{Squared error}{3}; gradient descent \seeconcept{c:gd}{Gradient descent update}{3}.
+
+\concept{c:cnnbackalg}{The backward pass through conv $\to$ ReLU $\to$ max pool, as an algorithm}
+Cache $X$, $Z$ and the pool switches in the forward pass. Then:
+\begin{enumerate}[nosep]
+\item $\partial L/\partial A\leftarrow0$; for each pool window add its upstream gradient at its argmax.
+\item $\delta\leftarrow\partial L/\partial A\odot\mathbf 1[Z>0]$ (ReLU mask).
+\item $\partial L/\partial K\leftarrow X\star\delta$; $\ \partial L/\partial b\leftarrow\sum\delta$.
+\item $\partial L/\partial X\leftarrow\operatorname{pad}_{k-1}(\delta)\star\rot(K)$ (needed only if there is an earlier layer).
+\item $K\leftarrow K-\eta\,\partial L/\partial K$, $\ b\leftarrow b-\eta\,\partial L/\partial b$.
+\end{enumerate}
+
+\concept{c:fdcheck}{Finite-difference gradient check}
+Nudge one parameter up and down by a tiny $h$ and measure the slope: $\bigl(L(\theta+h)-L(\theta-h)\bigr)/(2h)$. It should match the analytic gradient to many decimals. Kinks (ReLU at 0, ties in a max) can spoil the check if a value sits within $h$ of the kink.
+
+\subsection*{Solution}
+\textbf{(a)} With $K=\begin{bmatrix}1&0\\-1&1\end{bmatrix}$: $z_{ij}=x_{ij}-x_{i+1,j}+x_{i+1,j+1}-1$. E.g.\ $z_{00}=2-1+2-1=2$, $z_{01}=0-2+0-1=-3$.
+\[
+Z=\begin{bmatrix}2&-3&1&3\\1&3&-4&1\\-2&-1&4&-3\\0&2&-2&3\end{bmatrix},\qquad
+A=\begin{bmatrix}2&0&1&3\\1&3&0&1\\0&0&4&0\\0&2&0&3\end{bmatrix}.
+\]
+Pool windows: top-left $\{2,0,1,3\}\to3$ at $(1,1)$; top-right $\{1,3,0,1\}\to3$ at $(0,3)$; bottom-left $\{0,0,0,2\}\to2$ at $(3,1)$; bottom-right $\{4,0,0,3\}\to4$ at $(2,2)$. Each maximum is unique.
+\[
+P=\begin{bmatrix}3&3\\2&4\end{bmatrix},\qquad L=\tfrac12\bigl[(3-2)^2+(3-1)^2+(2-3)^2+(4-2)^2\bigr]=\tfrac12(1+4+1+4)=5 .
+\]
+
+\textbf{(b)} $\partial L/\partial P=P-T=\begin{bmatrix}1&2\\-1&2\end{bmatrix}$. Route to the winners \seeconcept{c:cnnbackalg}{The backward pass as an algorithm}{25}: $1\to(1,1)$, $2\to(0,3)$, $-1\to(3,1)$, $2\to(2,2)$. All four winners have $Z>0$, so the mask lets them through:
+\[
+\delta=\begin{bmatrix}0&0&0&2\\0&1&0&0\\0&0&2&0\\0&-1&0&0\end{bmatrix}.
+\]
+
+\textbf{(c)} Only the four nonzero $\delta$'s contribute: at $(0,3),(1,1),(2,2),(3,1)$ with values $2,1,2,-1$.
+\[
+\frac{\partial L}{\partial k_{00}}=\sum\delta_{ij}x_{ij}=2\cdot x_{03}+1\cdot x_{11}+2\cdot x_{22}-1\cdot x_{31}=2\cdot3+1\cdot2+2\cdot3-1\cdot1=13 .
+\]
+Likewise $\partial L/\partial k_{01}=\sum\delta_{ij}x_{i,j+1}=2\cdot1+1\cdot0+2\cdot0-1\cdot0=2$; $\partial L/\partial k_{10}=\sum\delta_{ij}x_{i+1,j}=2\cdot1+1\cdot1+2\cdot0-1\cdot0=3$; $\partial L/\partial k_{11}=\sum\delta_{ij}x_{i+1,j+1}=2\cdot2+1\cdot3+2\cdot2-1\cdot2=9$.
+\[
+\frac{\partial L}{\partial K}=\begin{bmatrix}13&2\\3&9\end{bmatrix},\qquad \frac{\partial L}{\partial b}=2+1+2-1=4 .
+\]
+
+\textbf{(d)} Each nonzero $\delta_{ij}$ adds $\delta_{ij}\begin{bmatrix}1&0\\-1&1\end{bmatrix}$ to the $2\times2$ block at $(i,j)$:
+\[
+\frac{\partial L}{\partial X}=\begin{bmatrix}0&0&0&2&0\\0&1&0&-2&2\\0&-1&3&0&0\\0&-1&-2&2&0\\0&1&-1&0&0\end{bmatrix}.
+\]
+(The blocks of $\delta_{11}=1$ and $\delta_{22}=2$ overlap at $(2,2)$: $1+2=3$.)
+
+\textbf{(e)} \seeconcept{c:fdcheck}{Finite-difference gradient check}{25} Change $k_{00}$ by $\pm h$ (say $h=10^{-6}$), rerun the forward pass, and divide the change in loss by $2h$. The network is piecewise linear and no $z_{ij}$ is within $h$ of 0, and no pool window has a near-tie, so nothing switches; the check agrees up to round-off (about $10^{-9}$ here). All five parameters agree.
+
+\textbf{(f)} $K\leftarrow K-0.01\begin{bmatrix}13&2\\3&9\end{bmatrix}=\begin{bmatrix}0.87&-0.02\\-1.03&0.91\end{bmatrix}$ and $b\leftarrow-1-0.04=-1.04$. Running forward again gives $L\approx2.855$, down from 5.
+
+% ------------------------------------------------------------
+\phantomsection\section[Question 26. Convolution variants: pointwise, depthwise, separable, group, dilated and more]{\hlq{Question 26}. Convolution variants: pointwise, depthwise, separable, group, dilated and more}
+% ------------------------------------------------------------
+\subsection*{Question}
+Unless told otherwise use $C_{\text{in}}=C_{\text{out}}=128$, $k=3$, stride 1, same padding, a $16\times16$ map, and no biases.
+\begin{enumerate}[label=(\alph*)]
+\item Standard conv: weights and MACs.
+\item Depthwise conv: weights. What can a depthwise conv not do on its own?
+\item Depthwise separable conv (depthwise $3\times3$ + pointwise $1\times1$): weights, ratio to standard (check it equals $1/C_{\text{out}}+1/k^2$), MACs, and the speed-up. What is the ratio for $k=5$, $C_{\text{out}}=64$?
+\item A $1\times1$ conv with $W=\begin{bmatrix}2&0&-1\\1&1&1\end{bmatrix}$ ($3\to2$ channels, no bias) is applied to a pixel with channel vector $(1,3,2)$. Compute the output. Then give the parameters (with bias) and MACs of a $1\times1$ conv $256\to64$ on a $28\times28$ map. Name two uses.
+\item Group conv with $G=8$: weights, and which input channels each output channel can see. What are $G=1$ and $G=C$?
+\item Dilated conv with $d=2$: weights and span. What is ``gridding'' and how is it avoided?
+\item A $7\times7$ depthwise conv on $C=96$ channels versus a standard $7\times7$ conv $96\to96$: weights. Why are large depthwise kernels paired with $1\times1$ convs?
+\item How many output channels does the offset-predicting conv of a $3\times3$ deformable conv need? What does dynamic convolution do?
+\end{enumerate}
+
+\subsection*{What the question is asking}
+A standard conv mixes space and channels in one big kernel. The variants split that job or change where the kernel looks, to save computation or to see further. Count their weights and operations and say what each one is for.
+
+\subsection*{Concepts you need}
+Parameter and MAC formulas \seeconcept{c:multichannel}{Multi-channel convolution}{18}; dilation \seeconcept{c:dilation}{Dilation}{16}.
+
+\concept{c:pointwise}{$1\times1$ (pointwise) convolution}
+A $1\times1$ kernel has no spatial extent: at every pixel it applies the same matrix $W\in\mathbb R^{C_{\text{out}}\times C_{\text{in}}}$ to the channel vector, $z_{ij}=Wx_{ij}+b$. It is an MLP layer on the channels, shared over all positions; $C_{\text{in}}C_{\text{out}}$ weights. Uses: change the number of channels (e.g.\ the ResNet bottleneck $256\to64\to256$), mix features after a concatenation (Inception), cheap channel mixing.
+
+\concept{c:depthwise}{Depthwise and depthwise separable convolution}
+\emph{Depthwise}: one $k\times k$ kernel per input channel, no mixing between channels; $C\,k^2$ weights, $C_{\text{out}}=C_{\text{in}}$. \emph{Depthwise separable} = depthwise (``where'') followed by pointwise $1\times1$ (``which combination of channels''):
+\[
+\frac{C_{\text{in}}k^2+C_{\text{in}}C_{\text{out}}}{C_{\text{out}}k^2C_{\text{in}}}=\frac1{C_{\text{out}}}+\frac1{k^2}\approx\frac19\ \text{ for }k=3\text{ and many channels.}
+\]
+The same ratio holds for MACs. It is the building block of MobileNet and Xception.
+
+\concept{c:groupconv}{Group convolution}
+Split the input and output channels into $G$ groups; each group is a smaller standard conv from $C_{\text{in}}/G$ to $C_{\text{out}}/G$ channels: $C_{\text{out}}k^2C_{\text{in}}/G$ weights. $G=1$ is standard; $G=C$ (with $C_{\text{out}}=C_{\text{in}}$) is depthwise. Groups do not exchange information unless a later layer mixes them ($1\times1$ conv, or ShuffleNet's channel shuffle). ResNeXt calls $G$ the cardinality; AlexNet used groups to split across two GPUs.
+
+\concept{c:convvariants}{Dilated, deformable, large-kernel and dynamic convolution}
+\begin{itemize}[nosep]
+\item \textbf{Dilated}: same weights as standard, span $k_e=d(k-1)+1$; large RF without pooling, so resolution is kept (segmentation, WaveNet audio). Stacking the same $d$ leaves a checkerboard of never-seen pixels (\emph{gridding}); fix by mixing dilations (e.g.\ $1,2,4$, or parallel branches as in ASPP).
+\item \textbf{Deformable}: an extra conv predicts a 2-D offset $(\Delta x,\Delta y)$ for every tap, i.e.\ $2k^2$ output channels; values at fractional positions come from bilinear interpolation. The sampling grid bends to fit the object (detection); costs more and needs enough data.
+\item \textbf{Large-kernel}: $7\times7$ up to $31\times31$ kernels (ConvNeXt, RepLKNet), affordable when depthwise ($Ck^2$ instead of $C^2k^2$), paired with $1\times1$ layers for channel mixing.
+\item \textbf{Dynamic}: keep $M$ expert kernels and mix them per input, $K(x)=\sum_m\pi_m(x)K_m$, with $\pi$ computed from GAP of $x$ (softmax in DY-Conv, sigmoids in CondConv). More capacity at the cost of one conv per example.
+\end{itemize}
+
+\subsection*{Solution}
+\textbf{(a)} Weights $128\cdot128\cdot9=147{,}456$. MACs $=16\cdot16\cdot147{,}456=37{,}748{,}736$.
+
+\textbf{(b)} $128\cdot9=1{,}152$ weights \seeconcept{c:depthwise}{Depthwise and separable}{26}. It cannot combine channels or change their number: each output channel only ever sees its own input channel.
+
+\textbf{(c)} Depthwise $1{,}152$ + pointwise $128\cdot128=16{,}384$, total $17{,}536$. Ratio $17{,}536/147{,}456=0.1189$, and $1/128+1/9=0.0078+0.1111=0.1189$. MACs $=256\cdot17{,}536=4{,}489{,}216$, about $8.4\times$ fewer. For $k=5$, $C_{\text{out}}=64$: $1/64+1/25=0.0556$, about $18\times$ cheaper.
+
+\textbf{(d)} $z=Wx=(2\cdot1+0\cdot3-1\cdot2,\ 1+3+2)=(0,\ 6)$; every other pixel uses the same $W$ \seeconcept{c:pointwise}{$1\times1$ convolution}{26}. $1\times1$ conv $256\to64$: $256\cdot64+64=16{,}448$ parameters; MACs $=28\cdot28\cdot64\cdot256=12{,}845{,}056$. Uses: reduce channels before an expensive $3\times3$ or $5\times5$ conv (bottlenecks, Inception), and mix channels after a depthwise conv.
+
+\textbf{(e)} $147{,}456/8=18{,}432$ weights \seeconcept{c:groupconv}{Group convolution}{26}. Each group has $128/8=16$ input and 16 output channels, so each output channel sees only the 16 input channels of its own group. $G=1$ is a standard conv; $G=128$ is depthwise.
+
+\textbf{(f)} Still $147{,}456$ weights; span $2\cdot2+1=5$. Gridding: with the same $d$ in every layer the taps always land on the same sub-grid, so some input pixels are never used. Avoid it by mixing dilations ($1,2,4$) or using parallel branches with different $d$ (ASPP) \seeconcept{c:convvariants}{Dilated, deformable, large-kernel, dynamic}{26}.
+
+\textbf{(g)} Depthwise: $96\cdot49=4{,}704$; standard: $96\cdot96\cdot49=451{,}584$, 96 times more. The depthwise kernel only looks around spatially, so $1\times1$ layers are added to mix channels; together they work like a separable conv.
+
+\textbf{(h)} $2k^2=2\cdot9=18$ channels: an $x$ and a $y$ offset for each of the 9 taps. Dynamic convolution builds a different kernel for each input as a weighted mix of a few expert kernels (weights from a small layer on GAP of the input), then runs one ordinary conv.
+% ------------------------------------------------------------
+\phantomsection\section[Question 27. Classic architectures: LeNet-5, AlexNet, VGG, GoogLeNet, and reading a comparison table]{\hlq{Question 27}. Classic architectures: LeNet-5, AlexNet, VGG, GoogLeNet, and reading a comparison table}
+% ------------------------------------------------------------
+\subsection*{Question}
+\begin{enumerate}[label=(\alph*)]
+\item LeNet-5 (modern simplified version) on $32\times32\times1$: C1 conv $5\times5$, 6 filters; S2 pool $2\times2$, $s=2$; C3 conv $5\times5$, 16 filters; S4 pool $2\times2$, $s=2$; C5 conv $5\times5$, 120 filters; F6 FC $120\to84$; output FC $84\to10$. All convs valid, stride 1. Give every output shape, every parameter count, and the total.
+\item AlexNet's first layer: 96 filters of $11\times11\times3$, stride 4, no padding, on $227\times227\times3$. Give the output size, the parameters and the MACs. Its first dense layer is $9216\to4096$: how many parameters? Name four ingredients that made AlexNet work.
+\item VGG-16 block 3 is three $3\times3$ convs: $128\to256$, $256\to256$, $256\to256$. Count its parameters. Count FC6 ($25088\to4096$). Why do the dense layers hold 89\% of VGG-16's parameters but under 1\% of its MACs?
+\item In a GoogLeNet-style module, a $5\times5$ branch maps a $28\times28\times192$ input to 32 channels (same padding). Compare weights and MACs without and with a $1\times1$ reduction to 16 channels first (ignore biases).
+\item From this ImageNet table, compute top-1 accuracy per million parameters and per GMAC. Which model is most efficient by each measure? What does the table say about VGG?
+\begin{center}
+\begin{tabular}{@{}lccc@{}}
+\toprule
+Model & Params (M) & GMACs & Top-1 (\%)\\
+\midrule
+AlexNet & 61.1 & 0.71 & 56.5\\
+VGG-16 & 138.4 & 15.47 & 71.6\\
+ResNet-50 & 25.6 & 4.09 & 76.1\\
+MobileNet v2 & 3.5 & 0.30 & 71.9\\
+ConvNeXt-T & 28.6 & 4.46 & 82.5\\
+\bottomrule
+\end{tabular}
+\end{center}
+\end{enumerate}
+
+\subsection*{What the question is asking}
+The famous CNNs are the same building blocks in different arrangements. Trace their shapes and parameter counts, see where the parameters and the computation sit, and learn to judge a network by accuracy \emph{and} cost.
+
+\subsection*{Concepts you need}
+Output size \seeconcept{c:outsize}{The output-size formula}{16}; conv and dense parameters \seeconcept{c:multichannel}{Multi-channel convolution}{18} \seeconcept{c:paramcount}{Counting parameters}{5}; depth versus wide kernels and where parameters hide \seeconcept{c:depth}{Depth is cheaper}{19} \seeconcept{c:gap}{Where parameters hide}{19}; $1\times1$ conv \seeconcept{c:pointwise}{$1\times1$ convolution}{26}.
+
+\concept{c:pipeline}{The generic CNN pipeline}
+Almost every classifier is: input $\to$ [(conv $\to$ BN $\to$ ReLU) $\times m$ $\to$ downsample] $\times n$ $\to$ GAP or flatten $\to$ dense $\to$ softmax. Each stage halves the resolution and usually doubles the channels, so the cost per stage stays roughly constant ($\tfrac H2\cdot\tfrac W2\cdot(2C)^2=HWC^2$). The head is the same as an MLP's: logits, softmax, cross-entropy, gradient $p-y$.
+
+\concept{c:history}{The classic networks in one line each}
+\begin{itemize}[nosep]
+\item \textbf{LeNet-5} (1998): alternating conv and subsampling, then dense layers; digits on $32\times32$.
+\item \textbf{AlexNet} (2012): five convs, $11\times11$ stride-4 stem, ReLU, overlapping $3\times3$ stride-2 pooling, dropout in two 4096-wide dense layers, heavy data augmentation, trained on two GPUs (grouped convs). About 61M parameters.
+\item \textbf{VGG}: only $3\times3$ stride-1 convs with same padding and $2\times2$ pools; depth instead of big kernels. 138.4M parameters, 89\% in the dense head.
+\item \textbf{Network in Network / GoogLeNet}: $1\times1$ convs as per-pixel MLPs and GAP instead of a dense head. Inception modules run $1\times1$, $3\times3$, $5\times5$ convs and a pool in parallel and concatenate them, with $1\times1$ convs first to cut channels. About 6.6M parameters.
+\item \textbf{ResNet}: residual shortcuts (Question~28).
+\end{itemize}
+
+\concept{c:readtable}{Reading an accuracy table}
+Accuracy alone is incomplete: always look at parameters (memory) and MACs (compute) too. Dividing accuracy by cost gives a rough ``efficiency''. Depth with shortcuts (ResNet) beats width without them (VGG); mobile networks trade a little accuracy for very low cost; modernised CNNs (ConvNeXt) are still competitive. Accuracies also depend on the training recipe, not only the architecture.
+
+\subsection*{Solution}
+\textbf{(a)} \seeconcept{c:history}{The classic networks}{27}
+\begin{center}
+\begin{tabular}{@{}llllr@{}}
+\toprule
+Layer & Input & Output & Formula & Params\\
+\midrule
+C1 & $32\times32\times1$ & $28\times28\times6$ & $6(25\cdot1+1)$ & 156\\
+S2 & $28\times28\times6$ & $14\times14\times6$ & -- & 0\\
+C3 & $14\times14\times6$ & $10\times10\times16$ & $16(25\cdot6+1)$ & 2{,}416\\
+S4 & $10\times10\times16$ & $5\times5\times16$ & -- & 0\\
+C5 & $5\times5\times16$ & $1\times1\times120$ & $120(25\cdot16+1)$ & 48{,}120\\
+F6 & 120 & 84 & $120\cdot84+84$ & 10{,}164\\
+Out & 84 & 10 & $84\cdot10+10$ & 850\\
+\midrule
+Total & & & & 61{,}706\\
+\bottomrule
+\end{tabular}
+\end{center}
+Sizes: $32-5+1=28$, $\lfloor26/2\rfloor+1=14$, $14-5+1=10$, $5$, $5-5+1=1$. (The original LeNet-5 connected C3 to only some S2 maps, giving 1{,}516 instead of 2{,}416.)
+
+\textbf{(b)} $\lfloor(227-11)/4\rfloor+1=54+1=55$, so $55\times55\times96$. Parameters $96(11\cdot11\cdot3+1)=96\cdot364=34{,}944$. MACs $=55\cdot55\cdot96\cdot363=105{,}415{,}200$. First dense layer: $9216\cdot4096+4096=37{,}752{,}832$, more than half of AlexNet's 61M. Ingredients: ReLU, overlapping max pooling, dropout, data augmentation (and two-GPU training).
+
+\textbf{(c)} $256(9\cdot128+1)+2\cdot256(9\cdot256+1)=295{,}168+2\cdot590{,}080=1{,}475{,}328$. FC6: $25088\cdot4096+4096=102{,}764{,}544$. A dense weight is used once per image (one MAC), while a conv weight is reused at every position (thousands of MACs). So the dense layers have huge weight counts but few operations, and the convs the opposite.
+
+\textbf{(d)} Direct: weights $5\cdot5\cdot192\cdot32=153{,}600$; MACs $=28\cdot28\cdot153{,}600=120{,}422{,}400$. With the $1\times1$ reduction: $192\cdot16+5\cdot5\cdot16\cdot32=3{,}072+12{,}800=15{,}872$ weights; MACs $=784\cdot15{,}872=12{,}443{,}648$. About 10 times cheaper, which is why GoogLeNet puts $1\times1$ convs before its big kernels.
+
+\textbf{(e)} \seeconcept{c:readtable}{Reading an accuracy table}{27}
+\begin{center}
+\begin{tabular}{@{}lrr@{}}
+\toprule
+Model & Top-1 per M params & Top-1 per GMAC\\
+\midrule
+AlexNet & 0.92 & 79.6\\
+VGG-16 & 0.52 & 4.6\\
+ResNet-50 & 2.97 & 18.6\\
+MobileNet v2 & 20.5 & 239.7\\
+ConvNeXt-T & 2.88 & 18.5\\
+\bottomrule
+\end{tabular}
+\end{center}
+MobileNet v2 is by far the most efficient on both measures; ConvNeXt-T has the best raw accuracy. VGG-16 is the least efficient: the most parameters and the most MACs, yet not the most accurate.
+
+% ------------------------------------------------------------
+\phantomsection\section[Question 28. ResNet: the degradation problem, residual blocks and bottlenecks]{\hlq{Question 28}. ResNet: the degradation problem, residual blocks and bottlenecks}
+% ------------------------------------------------------------
+\subsection*{Question}
+\begin{enumerate}[label=(\alph*)]
+\item A 56-layer plain network has \emph{higher training error} than a 20-layer one. Is this overfitting? What is it called, and what is the explanation?
+\item A residual block computes $y=F(x)+x$. Why is it easy for such a block to behave like the identity?
+\item Show that $\dfrac{\partial L}{\partial x}=\dfrac{\partial L}{\partial y}+\dfrac{\partial L}{\partial y}\dfrac{\partial F}{\partial x}$. In a scalar toy, a gradient passes back through 10 blocks, each with $\partial F/\partial x=0.2$. Compare the factor for a plain stack ($y=F(x)$) and a residual stack.
+\item A block downsamples $56\times56\times64$ to $28\times28\times128$. The shortcut is a $1\times1$ conv with stride 2. Give its output shape and its parameters (without and with bias).
+\item Count the weights of a bottleneck block $1\times1\ (256\to64)$, $3\times3\ (64\to64)$, $1\times1\ (64\to256)$ and compare with two $3\times3$ convs at 256 channels.
+\item How does ResNet downsample, and what does it use instead of a big dense head?
+\end{enumerate}
+
+\subsection*{What the question is asking}
+Very deep plain networks are hard to train. ResNet adds a shortcut that copies the input past a couple of layers. Explain why that fixes the problem, show it in the gradient, and count the cost of the shortcut and of the bottleneck design.
+
+\subsection*{Concepts you need}
+Chain rule and adding paths \seeconcept{c:graph}{Computation graphs}{7}; vanishing products \seeconcept{c:vanish}{Why gradients shrink through many layers}{2}; $1\times1$ conv \seeconcept{c:pointwise}{$1\times1$ convolution}{26}.
+
+\concept{c:degradation}{The degradation problem}
+Making a plain (VGG-style) network deeper can \emph{raise the training error}. That is not overfitting, which would show low training error and high test error. The optimiser simply fails to find good weights; it cannot even learn identity-like layers that would let the deep net copy a shallower one.
+
+\concept{c:residual}{Residual blocks and why gradients flow}
+A residual block learns a correction on top of an identity shortcut: $y=F(x)+x$ (often followed by a ReLU). If the identity is best, the block only has to push $F$ towards 0, which is easy (small weights). Differentiating,
+\[
+\frac{\partial L}{\partial x}=\frac{\partial L}{\partial y}\Bigl(1+\frac{\partial F}{\partial x}\Bigr)=\underbrace{\frac{\partial L}{\partial y}}_{\text{shortcut}}+\frac{\partial L}{\partial y}\frac{\partial F}{\partial x}.
+\]
+The first term passes through untouched, whatever the convolutions do, so the gradient is not forced through a long product of small factors. This made networks with 50--152 layers trainable. When the shapes differ (stride 2 or more channels), the shortcut is a $1\times1$ conv with matching stride.
+
+\concept{c:bottleneck}{The bottleneck block}
+Deep ResNets (50+ layers) use $1\times1\to3\times3\to1\times1$: shrink the channels (e.g.\ $256\to64$), do the expensive $3\times3$ in the small space, and expand back ($64\to256$).
+
+\subsection*{Solution}
+\textbf{(a)} No: overfitting would mean \emph{low} training error and high test error. Higher training error with more depth is the \emph{degradation problem}: the optimiser cannot fit the deeper plain net, even though a solution at least as good exists (copy the 20 layers and make the rest identity) \seeconcept{c:degradation}{The degradation problem}{28}.
+
+\textbf{(b)} The block outputs $x$ plus a correction. To act as the identity it only needs $F(x)\approx0$, e.g.\ by shrinking its weights. A plain block would have to fit the identity exactly through several nonlinear layers, which is much harder.
+
+\textbf{(c)} $y$ depends on $x$ by two paths: directly (slope 1) and through $F$ (slope $\partial F/\partial x$). Adding the paths gives the formula \seeconcept{c:residual}{Residual blocks and why gradients flow}{28}.
+
+Plain stack: the factor is $0.2^{10}\approx1.0\times10^{-7}$: the early layers get almost nothing. Residual stack: each block contributes $(1+0.2)$, so $1.2^{10}\approx6.2$, of order 1. In practice batch norm and small initial residual weights keep each $\partial F/\partial x$ small, so the factor stays near 1; the key point is the ``1'' from the shortcut, which never vanishes.
+
+\textbf{(d)} Output $\lfloor(56-1)/2\rfloor+1=28$, so $28\times28\times128$, matching the main path. Parameters: $64\cdot128=8{,}192$ without bias (usual, since BN follows), $8{,}192+128=8{,}320$ with bias.
+
+\textbf{(e)} \seeconcept{c:bottleneck}{The bottleneck block}{28}
+\[
+256\cdot64+9\cdot64\cdot64+64\cdot256=16{,}384+36{,}864+16{,}384=69{,}632,\qquad 2\cdot9\cdot256^2=1{,}179{,}648 .
+\]
+The bottleneck is about 17 times cheaper.
+
+\textbf{(f)} Mainly with stride-2 convolutions (plus one max pool in the stem), and it ends with global average pooling and a single linear layer instead of large dense layers.
+
+% ------------------------------------------------------------
+\phantomsection\section[Question 29. Designing and training a CIFAR-10 CNN, and justifying a change]{\hlq{Question 29}. Designing and training a CIFAR-10 CNN, and justifying a change}
+% ------------------------------------------------------------
+\subsection*{Question}
+The notes' CIFAR-10 design (same padding, $3\times3$ convs, ReLU): conv $3\to32$; pool; conv $32\to64$; conv $64\to64$; pool; conv $64\to128$; conv $128\to128$; GAP; linear $128\to10$. Input $32\times32\times3$, pools $2\times2$ stride 2.
+\begin{enumerate}[label=(\alph*)]
+\item Give the output shape after every layer, every parameter count, and the total. Which layers hold most parameters? What would a flatten + dense $8192\to512$ layer cost instead of GAP?
+\item Batch norm is added after every conv. How many parameters does this add? Over which axes are the BN statistics computed, and why not over channels?
+\item Compute the He-initialisation standard deviation for a $3\times3$ conv with $C_{\text{in}}=64$, a $5\times5$ conv with $C_{\text{in}}=3$, and a $1\times1$ conv with $C_{\text{in}}=256$.
+\item Explain weight decay, dropout with $p=0.5$ (what happens to the survivors?), spatial dropout, and the CIFAR augmentation ``pad by 4 and crop $32\times32$, plus horizontal flips''. Why must flips be added by augmentation?
+\item Ablation: replace both 128-channel convs with depthwise separable blocks (with biases). Compute the new parameter count and the new MAC count (original: 279{,}050 parameters, 29{,}197{,}568 MACs; the two layers cost 4{,}718{,}592 and 9{,}437{,}184 MACs). Describe a fair experiment and a decision rule. Why might wall-clock time not fall as much as MACs?
+\item The assignment compares this kind of CNN with an MLP \texttt{Linear(3072, 256)} baseline. How many parameters does that first MLP layer have? On CIFAR-10 a small CNN reaches about 70\% and the MLP the mid-50s. A run stuck near 10\% usually means what bug?
+\end{enumerate}
+
+\subsection*{What the question is asking}
+Design a small, sensible CNN, then learn the training tools that go with it (initialisation, batch norm, regularisation, augmentation) and how to prove that an architectural change is worth it.
+
+\subsection*{Concepts you need}
+Output sizes and parameter counts \seeconcept{c:ledger}{How to fill a ledger}{20}; GAP \seeconcept{c:gap}{Where parameters hide}{19}; batch norm and the conv bias \seeconcept{c:bn}{Batch norm makes the conv bias redundant}{19}; separable convs \seeconcept{c:depthwise}{Depthwise and separable}{26}; softmax and cross-entropy \seeconcept{c:ce}{Cross-entropy}{6}.
+
+\concept{c:heinit}{He initialisation}
+Weights must start at a scale that keeps activations from exploding or vanishing as depth grows. For ReLU networks, draw weights with variance $2/n_{\text{in}}$, i.e.\ standard deviation $\sqrt{2/n_{\text{in}}}$. For a conv layer the fan-in is the length of one dot product: $n_{\text{in}}=k^2C_{\text{in}}$.
+
+\concept{c:bnconv}{Batch normalisation for conv layers}
+For each channel $c$, compute the mean and variance over the batch \emph{and all positions} ($N$, $H$, $W$), normalise, then scale and shift: $y=\gamma_c\frac{x-\mu_c}{\sqrt{\sigma_c^2+\epsilon}}+\beta_c$. Two learnable parameters per channel ($2C$ per layer). Statistics are per channel because each channel is one shared detector used at every position. At test time running averages replace batch statistics. BN allows higher learning rates, reduces sensitivity to initialisation and regularises a little.
+
+\concept{c:regularise}{Regularisation and augmentation}
+\begin{itemize}[nosep]
+\item \textbf{Weight decay}: add $\tfrac\lambda2\sum w^2$ to the loss, i.e.\ an extra $-\eta\lambda w$ in every update (shrinks weights).
+\item \textbf{Dropout}: during training zero each unit with probability $p$ and scale the survivors by $1/(1-p)$ so the expected value is unchanged. Used mostly before the classifier.
+\item \textbf{Spatial dropout}: inside conv layers neighbouring activations are strongly correlated, so dropping single pixels does little; drop whole channels instead.
+\item \textbf{Data augmentation}: label-preserving changes (random crops, flips, scale and colour jitter). Convolution is equivariant to shifts, but not to flips, rotations or colour changes, so those invariances must come from the data.
+\item \textbf{Fewer parameters by design} (GAP, separable or grouped convs) also regularises.
+\end{itemize}
+
+\concept{c:ablation}{Justifying an architectural change}
+State a hypothesis and the predicted cost first. Change one thing only (an ablation), keep the whole training recipe fixed (epochs, augmentation, optimiser, schedule, batch size), and report mean $\pm$ standard deviation of test accuracy over at least 3 seeds. Decide in advance: e.g.\ accept if accuracy drops by less than 0.5 points (and less than the seed noise) while parameters fall by 20\% or more.
+
+\subsection*{Solution}
+\textbf{(a)}
+\begin{center}
+\begin{tabular}{@{}lllr@{}}
+\toprule
+Layer & Output & Formula & Params\\
+\midrule
+conv $3\to32$ & $32\times32\times32$ & $32(27+1)$ & 896\\
+pool & $16\times16\times32$ & -- & 0\\
+conv $32\to64$ & $16\times16\times64$ & $64(288+1)$ & 18{,}496\\
+conv $64\to64$ & $16\times16\times64$ & $64(576+1)$ & 36{,}928\\
+pool & $8\times8\times64$ & -- & 0\\
+conv $64\to128$ & $8\times8\times128$ & $128(576+1)$ & 73{,}856\\
+conv $128\to128$ & $8\times8\times128$ & $128(1152+1)$ & 147{,}584\\
+GAP & 128 & -- & 0\\
+linear & 10 & $128\cdot10+10$ & 1{,}290\\
+\midrule
+Total & & & 279{,}050\\
+\bottomrule
+\end{tabular}
+\end{center}
+The last two convs hold $221{,}440$ of the $279{,}050$. A flatten + dense $8192\to512$ layer would cost $8192\cdot512+512=4{,}194{,}816$, fifteen times the whole network.
+
+\textbf{(b)} Two per channel: $2(32+64+64+128+128)=2\cdot416=832$. Statistics are over $N$, $H$, $W$ for each channel separately \seeconcept{c:bnconv}{Batch normalisation for conv layers}{29}: each channel is one detector shared over all positions, so all its positions belong to the same distribution; different channels detect different things and have different scales.
+
+\textbf{(c)} \seeconcept{c:heinit}{He initialisation}{29} $\sqrt{2/576}\approx0.059$; $\sqrt{2/75}\approx0.163$; $\sqrt{2/256}\approx0.088$.
+
+\textbf{(d)} \seeconcept{c:regularise}{Regularisation and augmentation}{29} Weight decay adds $-\eta\lambda w$ to each update, pulling weights towards 0. Dropout $p=0.5$ zeroes half the units at random during training and doubles the survivors, so the expected activation is unchanged; at test time nothing is dropped. Spatial dropout drops whole channels, because dropping single pixels of a correlated map removes almost no information. Pad-and-crop creates small shifts and flips create mirror images, both with the same label. A conv layer handles shifts by equivariance, but nothing in it makes a left-facing cat look like a right-facing cat, so flips must be taught through the data.
+
+\textbf{(e)} Separable replacements \seeconcept{c:ablation}{Justifying an architectural change}{29}:
+\begin{itemize}[nosep]
+\item $64\to128$: depthwise $64\cdot9+64=640$, pointwise $64\cdot128+128=8{,}320$, total $8{,}960$ (was $73{,}856$).
+\item $128\to128$: depthwise $128\cdot9+128=1{,}280$, pointwise $128\cdot128+128=16{,}512$, total $17{,}792$ (was $147{,}584$).
+\end{itemize}
+New parameters: $279{,}050-73{,}856-147{,}584+8{,}960+17{,}792=84{,}362$ ($30.2\%$ of the original, a $69.8\%$ cut).
+
+MACs on the $8\times8$ map: $64\to128$ separable $=64\cdot(64\cdot9)+64\cdot(64\cdot128)=36{,}864+524{,}288=561{,}152$; $128\to128$ separable $=64\cdot(128\cdot9)+64\cdot(128\cdot128)=73{,}728+1{,}048{,}576=1{,}122{,}304$. New total $29{,}197{,}568-4{,}718{,}592-9{,}437{,}184+561{,}152+1{,}122{,}304=16{,}725{,}248$ (a $42.7\%$ cut).
+
+Fair experiment: same recipe for both versions, only this change, at least 3 seeds, report mean $\pm$ std of test accuracy and the measured training time. Accept if the accuracy drop is below about 0.5 points and within seed noise. Wall-clock time can fall less than MACs because depthwise convs do few operations per memory access, which GPUs handle inefficiently; that is why time must be measured, not predicted.
+
+\textbf{(f)} $3072\cdot256+256=786{,}688$ parameters in that one layer, with no shared detector. Accuracy stuck near 10\% on 10 classes is chance level; the slides' usual cause is applying softmax twice (a softmax layer at the end \emph{and} a loss such as \texttt{CrossEntropyLoss} that already applies softmax to the logits).
+
+% ------------------------------------------------------------
+\phantomsection\section[Question 30. Attention in CNNs: squeeze-and-excitation, spatial attention, CBAM, coordinate attention]{\hlq{Question 30}. Attention in CNNs: squeeze-and-excitation, spatial attention, CBAM, coordinate attention}
+% ------------------------------------------------------------
+\subsection*{Question}
+\begin{enumerate}[label=(\alph*)]
+\item[\hlq{(a)}] An SE block with $C=2$, $r=2$ (so $C/r=1$), no biases, $W_1=\begin{bmatrix}1&-1\end{bmatrix}$, $W_2=\begin{bmatrix}2\\-1\end{bmatrix}$, acts on $X_1=\begin{bmatrix}4&0\\2&2\end{bmatrix}$, $X_2=\begin{bmatrix}1&1\\0&2\end{bmatrix}$. Compute the squeeze vector, the hidden value, the gates (use $\sigma(2)\approx0.8808$, $\sigma(-1)\approx0.2689$) and the rescaled maps.
+\item[(b)] Change $W_1$ to $\begin{bmatrix}-1&1\end{bmatrix}$. What are the gates now, and why?
+\item[\hlq{(c)}] Count the parameters (with biases) of an SE block with $C=512$, $r=16$, and compare with a $3\times3$ conv $512\to512$ with bias.
+\item[\hlq{(d)}] A toy spatial attention computes, at each pixel, the channel average $a$ and channel max $m$ of $(X_1,X_2)$, then $M=\sigma(a+0.5m-3)$. Compute $M$ (use $\sigma(1.5)\approx0.8176$, $\sigma(-2)\approx0.1192$) and $M\odot X_1$. How many weights does the usual $7\times7$ conv on the 2 pooled maps have?
+\item[\hlq{(e)}] What does CBAM do, in which order? Why can SE not express ``the object is in the top-left corner'' while coordinate attention can?
+\item[\hlq{(f)}] Self-attention on a $56\times56$ map compares every pair of positions. How many pairs is that, versus the taps used by a $3\times3$ conv over the whole map? When would you use SE, CBAM or self-attention?
+\end{enumerate}
+
+\subsection*{What the question is asking}
+A convolution applies the same kernel everywhere, whatever the image contains. Attention modules compute weights from the data itself and use them to boost useful channels or positions. Run the SE block and a spatial map by hand, count their cost, and compare the main options.
+
+\subsection*{Concepts you need}
+GAP \seeconcept{c:avgpool}{Average pooling and GAP}{22}; sigmoid \seeconcept{c:sigmoid}{The sigmoid}{2}.
+
+\concept{c:attnidea}{Channel attention versus spatial attention}
+\emph{Channel attention} asks ``which maps matter?'': one gate $s_c\in[0,1]$ per channel, $x'_c=s_cx_c$. \emph{Spatial attention} asks ``where?'': one gate $M_{ij}\in[0,1]$ per position, multiplied into every channel. Both are cheap when the gates come from pooling followed by a tiny MLP or a small conv. Full self-attention, which compares all pairs of positions, is a different and much more expensive operation.
+
+\concept{c:se}{Squeeze-and-excitation (SE)}
+\begin{enumerate}[nosep]
+\item \textbf{Squeeze}: GAP each channel, $z_c=\frac1{HW}\sum_{i,j}x_{c,i,j}$.
+\item \textbf{Excite}: a bottleneck MLP with a sigmoid, $s=\sigma(W_2\relu(W_1z))$, with $W_1\in\mathbb R^{(C/r)\times C}$, $W_2\in\mathbb R^{C\times(C/r)}$.
+\item \textbf{Scale}: $x'_c=s_cx_c$.
+\end{enumerate}
+About $2C^2/r$ weights (plus $C/r+C$ biases). It is usually placed in the residual branch, after the convs.
+
+\concept{c:cbam}{Spatial attention, CBAM and coordinate attention}
+\begin{itemize}[nosep]
+\item \textbf{Spatial attention}: pool across channels (average and max) to two $H\times W$ maps, apply a small conv (often $7\times7$) and a sigmoid to get $M$, then $X'=M\odot X$.
+\item \textbf{CBAM}: channel attention first (an SE-like MLP shared by the average- and max-pooled descriptors), then spatial attention. Slightly more costly than SE, localises better.
+\item \textbf{Coordinate attention}: SE's GAP throws away \emph{where}. Coordinate attention pools along each direction separately (over $W$ to get a per-row descriptor, over $H$ to get a per-column one), so the gates $g^h_c(i)$ and $g^w_c(j)$ keep row and column information: $y_c(i,j)=x_c(i,j)\,g^h_c(i)\,g^w_c(j)$. Cost close to SE.
+\item \textbf{Self-attention}: every position attends to every other: cost grows as $(HW)^2$. A different architecture, not a drop-in for a $3\times3$ conv.
+\end{itemize}
+
+\subsection*{Solution}
+\hlq{\textbf{(a)}} \seeconcept{c:se}{Squeeze-and-excitation}{30} Squeeze: $z=(8/4,\ 4/4)=(2,\ 1)$. Hidden: $h=\relu(1\cdot2-1\cdot1)=1$. Gates: $s=(\sigma(2\cdot1),\ \sigma(-1\cdot1))\approx(0.8808,\ 0.2689)$. Scale:
+\[
+X_1'\approx0.8808X_1=\begin{bmatrix}3.523&0\\1.762&1.762\end{bmatrix},\qquad X_2'\approx0.2689X_2=\begin{bmatrix}0.269&0.269\\0&0.538\end{bmatrix}.
+\]
+The stronger channel is kept, the weaker one is suppressed.
+
+\textbf{(b)} $h=\relu(-2+1)=\relu(-1)=0$, so both gates are $\sigma(0)=0.5$. The ReLU in the bottleneck killed the hidden unit, so the module no longer distinguishes the channels and just halves both.
+
+\hlq{\textbf{(c)}} $W_1$: $32\times512=16{,}384$ plus 32 biases; $W_2$: $512\times32=16{,}384$ plus 512 biases. Total $33{,}312$. A $3\times3$ conv $512\to512$: $512(9\cdot512+1)=2{,}359{,}808$, about 70 times more. SE is a cheap add-on.
+
+\hlq{\textbf{(d)}} Channel average $a=\begin{bmatrix}2.5&0.5\\1&2\end{bmatrix}$, channel max $m=\begin{bmatrix}4&1\\2&2\end{bmatrix}$, so $a+0.5m-3=\begin{bmatrix}1.5&-2\\-1&0\end{bmatrix}$ and
+\[
+M\approx\begin{bmatrix}0.8176&0.1192\\0.2689&0.5\end{bmatrix},\qquad M\odot X_1\approx\begin{bmatrix}3.270&0\\0.538&1.0\end{bmatrix}.
+\]
+The top-left position, where both channels are strong, is kept; the others are damped \seeconcept{c:cbam}{Spatial attention, CBAM and coordinate attention}{30}. A $7\times7$ conv on 2 maps has $2\cdot49=98$ weights (plus one bias).
+
+\hlq{\textbf{(e)}} CBAM applies channel attention, then spatial attention, to the output of the convs. SE squeezes each channel to a single average, so all positions get the same gate and position information is gone. Coordinate attention keeps a gate per row and per column, so it can boost, for example, the top rows and left columns of a channel.
+
+\hlq{\textbf{(f)}} $56\cdot56=3136$ positions, so $3136^2\approx9.8$ million pairs (per channel group), versus $3136\cdot9=28{,}224$ taps for a $3\times3$ conv. Start with SE on a ResNet; use CBAM or coordinate attention if location matters (detection, mobile models); self-attention is for long-range interactions and is a different architecture.
+
+% ------------------------------------------------------------
+\phantomsection\section[Question 31. Short answers on CNNs (part 2)]{\hlq{Question 31}. Short answers on CNNs (part 2)}
+% ------------------------------------------------------------
+\subsection*{Question}
+Answer each in two to four sentences.
+\begin{enumerate}[label=(\alph*)]
+\item[\hlq{(a)}] Why does max pooling need to store ``switches'', and what happens to the gradient at a position that wins two overlapping windows?
+\item[\hlq{(b)}] Write the weight gradient and the input gradient for a dense layer and for a conv layer side by side, and explain the two differences.
+\item[\hlq{(c)}] Convolution is equivariant, pooling is locally invariant. What does each give the network, and why does stacking them help?
+\item[(d)] Why is the effective receptive field smaller than the theoretical one?
+\item[\hlq{(e)}] Why does the assignment ask you to plot the first eight channels of the first conv layer, and what should they look like?
+\item[\hlq{(f)}] Give one reason to downsample with max pooling and one to downsample with a stride-2 convolution.
+\item[(g)] Why were $3\times3$ kernels preferred by VGG, but $7\times7$--$31\times31$ kernels are used again in ConvNeXt and RepLKNet?
+\end{enumerate}
+
+\subsection*{What the question is asking}
+Short reasons covering the second half of Week 3.
+
+\subsection*{Concepts you need}
+All explained earlier: pooling backward \seeconcept{c:poolback}{Backprop through pooling}{22}; conv gradients \seeconcept{c:convgradK}{The kernel gradient}{24} \seeconcept{c:convgradX}{The input gradient}{24}; equivariance \seeconcept{c:equivariance}{Equivariance versus invariance}{12}; invariance \seeconcept{c:invariance}{Local translation invariance}{17}; effective RF \seeconcept{c:effrf}{The effective receptive field}{23}; feature hierarchy \seeconcept{c:hierarchy}{The feature hierarchy}{21}; depth \seeconcept{c:depth}{Depth is cheaper}{19}; large kernels \seeconcept{c:convvariants}{Dilated, deformable, large-kernel, dynamic}{26}.
+
+\subsection*{Solution}
+\hlq{\textbf{(a)}} The max depends only on the winner, so the backward pass must know which entry won in each window; the forward pass stores those positions. With overlapping windows (e.g.\ $3\times3$, stride 2) one entry can win two windows; it then receives the sum of both upstream gradients.
+
+\hlq{\textbf{(b)}} Dense: $\partial L/\partial W=\delta x^\top$, $\partial L/\partial x=W^\top\delta$. Conv: $\partial L/\partial K=X\star\delta$ (summed over positions), $\partial L/\partial X=\operatorname{pad}(\delta)\star\rot(K)$ (scatter, overlaps add). Differences: (1) sharing: one kernel is used at every position, so its gradient \emph{adds} contributions from all positions; (2) sparsity: each output touches only its patch, so the gradient is scattered only onto that patch.
+
+\hlq{\textbf{(c)}} Equivariance: a pattern is detected wherever it is, and the map moves with it. Local invariance: small shifts inside a pooling window do not change the output. Stacking conv (equivariant) and pool (locally invariant) layers gives representations that are increasingly robust to small shifts and deformations.
+
+\textbf{(d)} Central pixels reach a deep unit through many more paths than edge pixels (Question~23(i): 7 paths versus 1), so they have much more influence. The influence is roughly bell-shaped and concentrated in the middle.
+
+\hlq{\textbf{(e)}} To check that the network learned something sensible: first-layer filters of a trained CNN look like edge and colour detectors (similar to Sobel kernels or colour blobs), not random noise. Noise usually means the network did not train properly.
+
+\hlq{\textbf{(f)}} Max pooling has no weights and gives local invariance (``is the feature present anywhere in this window?''). A stride-2 conv downsamples with learned weights, so the network decides how to summarise, and it is cheaper than a stride-1 conv followed by a pool.
+
+\textbf{(g)} VGG: a $7\times7$ standard conv costs $49C^2$ against $27C^2$ for three $3\times3$ convs with the same RF and more nonlinearities, and big kernels overfitted. Modern nets use large kernels \emph{depthwise} ($Ck^2$, cheap) with BN, residual connections and better training recipes, getting a large RF in one layer and pairing it with $1\times1$ layers for channel mixing.
 % ============================================================
 \part{Recurrent neural networks}
 % ============================================================
 
 % ------------------------------------------------------------
-\phantomsection\section[Question 22. A vanilla RNN forward pass with a 2-unit hidden state]{\hlq{Question 22}. A vanilla RNN forward pass with a 2-unit hidden state}
+\phantomsection\section[Question 32. A vanilla RNN forward pass with a 2-unit hidden state]{\hlq{Question 32}. A vanilla RNN forward pass with a 2-unit hidden state}
 % ------------------------------------------------------------
 \subsection*{Question}
 A vanilla RNN has input size $d=1$, hidden size $H=2$, output size $o=1$, $h_0=0$, and
@@ -1768,7 +2518,7 @@ Shapes: $W_x\in\mathbb R^{H\times d}$ (input to hidden), $W_h\in\mathbb R^{H\tim
 The folded picture is one cell with a loop. Unrolling draws one copy of the cell per time step, connected by the hidden state $h_1\to h_2\to\cdots$. The result is a deep feedforward network whose layers all share $W_x,W_h,W_y$. Training it with ordinary backprop on this unrolled graph is called backpropagation through time (Part IV).
 
 \subsection*{Solution}
-\textbf{(a)} $W_x$: $H\times d=2\times1$; $W_h$: $H\times H=2\times2$; $W_y$: $o\times H=1\times2$. All match \seeconcept{c:vanillarnn}{The vanilla RNN}{22}.
+\textbf{(a)} $W_x$: $H\times d=2\times1$; $W_h$: $H\times H=2\times2$; $W_y$: $o\times H=1\times2$. All match \seeconcept{c:vanillarnn}{The vanilla RNN}{32}.
 
 \textbf{(b)} $W_xx_1=(0.5,1.0)$ and $W_hh_0=(0,0)$, so $z_1=(0.5,1.0)$ and
 \[
@@ -1784,12 +2534,12 @@ W_hh_1=\begin{bmatrix}0.5\cdot0.4621+0\\-0.5\cdot0.4621+0.5\cdot0.7616\end{bmatr
 h_2\approx(0.8429,\ 0.9732),\qquad \hat y_2=0.8429-0.9732=-0.1303 .
 \]
 
-\textbf{(d)} With $x_1=0$: $z_1=(0,0)$, so $h_1=(0,0)$. Then $z_2=W_xx_2+W_h\cdot0=(1,2)$, $h_2=(\tanh1,\tanh2)\approx(0.7616,\ 0.9640)$, and $\hat y_2\approx-0.2024$ (instead of $-0.1303$). The step-2 input is the same, but $h_2$ is built from $h_1$, and $h_1$ carries information about $x_1$ through $W_h$. That recurrence is the network's memory \seeconcept{c:whyrnn}{Why RNNs}{22}. An MLP that only sees $x_2$ would give the same output both times.
+\textbf{(d)} With $x_1=0$: $z_1=(0,0)$, so $h_1=(0,0)$. Then $z_2=W_xx_2+W_h\cdot0=(1,2)$, $h_2=(\tanh1,\tanh2)\approx(0.7616,\ 0.9640)$, and $\hat y_2\approx-0.2024$ (instead of $-0.1303$). The step-2 input is the same, but $h_2$ is built from $h_1$, and $h_1$ carries information about $x_1$ through $W_h$. That recurrence is the network's memory \seeconcept{c:whyrnn}{Why RNNs}{32}. An MLP that only sees $x_2$ would give the same output both times.
 
-\textbf{(e)} Three: $W_x$, $W_h$, $W_y$ (plus the biases), reused at both steps. Unrolling means drawing the loop as a chain of identical cells, one per time step, so the RNN looks like a deep network with shared weights \seeconcept{c:unroll}{Folded and unrolled views}{22}.
+\textbf{(e)} Three: $W_x$, $W_h$, $W_y$ (plus the biases), reused at both steps. Unrolling means drawing the loop as a chain of identical cells, one per time step, so the RNN looks like a deep network with shared weights \seeconcept{c:unroll}{Folded and unrolled views}{32}.
 
 % ------------------------------------------------------------
-\phantomsection\section[Question 23. Counting RNN parameters]{\hlq{Question 23}. Counting RNN parameters}
+\phantomsection\section[Question 33. Counting RNN parameters]{\hlq{Question 33}. Counting RNN parameters}
 % ------------------------------------------------------------
 \subsection*{Question}
 \begin{enumerate}[label=(\alph*)]
@@ -1815,20 +2565,20 @@ It does not depend on the sequence length $T$. Gated cells have several such wei
 Layer 1 reads the input sequence; layer $\ell+1$ reads the hidden-state sequence of layer $\ell$. Lower layers learn short, local patterns, higher layers longer and more abstract structure. Layer 1 has input size $d$; every layer above has input size $H$ (the width of the layer below), so it costs $H(H+H+1)=H(2H+1)$. Typical depth is 2--4 layers, often with dropout between them.
 
 \subsection*{Solution}
-\hlq{\textbf{(a)}} \seeconcept{c:rnnparams}{RNN parameter count}{23}
+\hlq{\textbf{(a)}} \seeconcept{c:rnnparams}{RNN parameter count}{33}
 $W_x$: $32\cdot10=320$; $W_h$: $32\cdot32=1024$; $b_h$: 32. Core $=32(10+32+1)=1376$. Head: $W_y$: $5\cdot32=160$, $b_y$: 5, so $5(32+1)=165$. Total $1376+165=1541$.
 
 \hlq{\textbf{(b)}} It does not change. The same $W_x,W_h,W_y$ are reused at every step, whether there are 50 steps or 5000.
 
 \hlq{\textbf{(c)}} LSTM: $4\cdot1376=5504$. GRU: $3\cdot1376=4128$.
 
-\hlq{\textbf{(d)}} \seeconcept{c:stacked}{Stacked RNNs}{23}
+\hlq{\textbf{(d)}} \seeconcept{c:stacked}{Stacked RNNs}{33}
 Layer 1: $32(10+32+1)=1376$. Layers 2 and 3: $32(2\cdot32+1)=32\cdot65=2080$ each. Recurrent total $1376+2080+2080=5536$. With the head: $5536+165=5701$.
 
 \textbf{(e)} One-hot inputs mean $d=100$; the softmax over the vocabulary means $o=100$. Core: $64(100+64+1)=64\cdot165=10{,}560$. Head: $100(64+1)=6{,}500$. Total $17{,}060$.
 
 % ------------------------------------------------------------
-\phantomsection\section[Question 24. RNN design choices: activations, sharing, types and stacking]{\hlq{Question 24}. RNN design choices: activations, sharing, types and stacking}
+\phantomsection\section[Question 34. RNN design choices: activations, sharing, types and stacking]{\hlq{Question 34}. RNN design choices: activations, sharing, types and stacking}
 % ------------------------------------------------------------
 \subsection*{Question}
 \begin{enumerate}[label=(\alph*)]
@@ -1844,7 +2594,7 @@ Layer 1: $32(10+32+1)=1376$. Layers 2 and 3: $32(2\cdot32+1)=32\cdot65=2080$ eac
 Explain the design reasons behind the vanilla RNN and match tasks to the right input/output shape.
 
 \subsection*{Concepts you need}
-The vanilla RNN and stacking were covered in Questions~22--23 \seeconcept{c:vanillarnn}{The vanilla RNN}{22} \seeconcept{c:stacked}{Stacked RNNs}{23}. tanh and sigmoid slopes \seeconcept{c:tanh}{tanh and its slope}{2}.
+The vanilla RNN and stacking were covered in Questions~32--33 \seeconcept{c:vanillarnn}{The vanilla RNN}{32} \seeconcept{c:stacked}{Stacked RNNs}{33}. tanh and sigmoid slopes \seeconcept{c:tanh}{tanh and its slope}{2}.
 
 \concept{c:timesharing}{Parameter sharing across time}
 Without sharing, a length-$T$ sequence would need $T$ separate weight matrices: the count grows with length, and the model cannot handle a length it never saw. Sharing one matrix means the network learns a \emph{rule} (``how to update the memory given a new symbol''), so a pattern learned at position 3 is usable at position 300. It is the time version of a CNN sharing one filter across space.
@@ -1874,21 +2624,21 @@ Sigmoid is still used inside the gates of LSTM and GRU, where a value between 0 
 A \textbf{bidirectional} RNN reads the sequence forwards and backwards, giving each step both past and future context; it needs the whole sequence to be available in advance.
 
 \subsection*{Solution}
-\textbf{(a)} Sharing keeps the parameter count independent of the sequence length, lets the model handle any length, and lets a pattern learned at one position be reused everywhere \seeconcept{c:timesharing}{Parameter sharing across time}{24}. A CNN does the same across space: one filter slides over all positions of the image; an RNN's one update rule slides over all time steps.
+\textbf{(a)} Sharing keeps the parameter count independent of the sequence length, lets the model handle any length, and lets a pattern learned at one position be reused everywhere \seeconcept{c:timesharing}{Parameter sharing across time}{34}. A CNN does the same across space: one filter slides over all positions of the image; an RNN's one update rule slides over all time steps.
 
 \textbf{(b)} Without it, each step is linear and a chain of linear maps is still one linear map: $W_a(W_bx)=Wx$ \seeconcept{c:collapse}{Stacked affine layers collapse}{1}. The whole RNN would be a single linear function of its inputs and could not model complex sequences. tanh makes each step a bounded nonlinear transformation, so depth in time adds expressive power.
 
-\textbf{(c)} \seeconcept{c:whytanh}{Why tanh for the hidden state}{24} tanh is bounded in $(-1,1)$, so a state fed back hundreds of times cannot explode; it is centred on 0 (positive and negative values), which helps optimisation; and its slope at 0 is 1, four times sigmoid's $0.25$. Against sigmoid: always positive, so the state drifts, and its gradients are smaller. Against ReLU: unbounded, so a state reused every step can grow without limit. Sigmoid is still used for gates in LSTM/GRU.
+\textbf{(c)} \seeconcept{c:whytanh}{Why tanh for the hidden state}{34} tanh is bounded in $(-1,1)$, so a state fed back hundreds of times cannot explode; it is centred on 0 (positive and negative values), which helps optimisation; and its slope at 0 is 1, four times sigmoid's $0.25$. Against sigmoid: always positive, so the state drifts, and its gradients are smaller. Against ReLU: unbounded, so a state reused every step can grow without limit. Sigmoid is still used for gates in LSTM/GRU.
 
-\textbf{(d)} \seeconcept{c:rnntypes}{RNN types}{24}
+\textbf{(d)} \seeconcept{c:rnntypes}{RNN types}{34}
 (i) Many-to-one. (ii) One-to-many. (iii) Seq2seq. (iv) Many-to-many aligned. (v) Many-to-one. (vi) One-to-many.
 
 \textbf{(e)} Bidirectional works when the whole sequence is available before predicting: sentiment (i), translation input (iii), word tagging (iv), and the 30-day history in (v). It cannot be used when outputs must be produced as the sequence streams in (live speech recognition, real-time forecasting step by step) or when generating (ii, vi), because the future does not exist yet.
 
-\textbf{(f)} A single recurrent layer captures one level of temporal features. Stacking feeds layer $\ell$'s hidden sequence into layer $\ell+1$: lower layers learn short, local patterns (e.g.\ characters forming syllables), higher layers learn longer, more abstract structure (words, phrases) \seeconcept{c:stacked}{Stacked RNNs}{23}.
+\textbf{(f)} A single recurrent layer captures one level of temporal features. Stacking feeds layer $\ell$'s hidden sequence into layer $\ell+1$: lower layers learn short, local patterns (e.g.\ characters forming syllables), higher layers learn longer, more abstract structure (words, phrases) \seeconcept{c:stacked}{Stacked RNNs}{33}.
 
 % ------------------------------------------------------------
-\phantomsection\section[Question 25. Language modelling and generation: softmax, temperature, decoding, perplexity]{\hlq{Question 25}. Language modelling and generation: softmax, temperature, decoding, perplexity}
+\phantomsection\section[Question 35. Language modelling and generation: softmax, temperature, decoding, perplexity]{\hlq{Question 35}. Language modelling and generation: softmax, temperature, decoding, perplexity}
 % ------------------------------------------------------------
 \subsection*{Question}
 A character model has vocabulary $V=\{a,b,c,d\}$. At one step its logits are $o_t=(\ln4,\ \ln2,\ 0,\ 0)$.
@@ -1949,13 +2699,13 @@ $\tau=0.5$: $o_t/0.5=(2\ln4,\ 2\ln2,\ 0,\ 0)$, so $e^{2o_t}=(16,4,1,1)$ with tot
 \[
 p=\Bigl(\frac{16}{22},\frac4{22},\frac1{22},\frac1{22}\Bigr)\approx(0.727,\ 0.182,\ 0.045,\ 0.045).
 \]
-Higher temperature flattens the distribution (more diverse, more random output); lower temperature sharpens it (safer, more confident). Same model and same state, only $\tau$ changed. $\tau\to0$: all probability on $a$ (greedy); $\tau\to\infty$: $\tfrac14$ each (uniform) \seeconcept{c:decoding}{Decoding strategies}{25}.
+Higher temperature flattens the distribution (more diverse, more random output); lower temperature sharpens it (safer, more confident). Same model and same state, only $\tau$ changed. $\tau\to0$: all probability on $a$ (greedy); $\tau\to\infty$: $\tfrac14$ each (uniform) \seeconcept{c:decoding}{Decoding strategies}{35}.
 
 \textbf{(c)} Top-2 keeps $\{a,b\}$ and renormalises: $\tfrac12/\tfrac34=\tfrac23$ and $\tfrac14/\tfrac34=\tfrac13$. Top-$p$ sorts by probability and accumulates: $a$ gives $0.5$, then $a,b$ gives $0.75$. For $p=0.7$ the smallest set reaching $0.7$ is $\{a,b\}$ (probabilities $\tfrac23,\tfrac13$). For $p=0.4$, $a$ alone already reaches $0.5\ge0.4$, so the set is $\{a\}$: it behaves like greedy here.
 
 \textbf{(d)} $L_t=-\log p(b)=-\log\tfrac14=\ln4\approx1.386$.
 
-\textbf{(e)} \seeconcept{c:lmchain}{Language modelling with the chain rule}{25} $p(\text{sequence})=\tfrac12\cdot\tfrac14\cdot\tfrac18=\tfrac1{64}$. Total loss $L=\ln2+\ln4+\ln8=6\ln2\approx4.159$ (which is also $-\ln\tfrac1{64}$). Per token $L/T=2\ln2\approx1.386$. Perplexity $=\exp(2\ln2)=4$. On average the model was as uncertain as choosing uniformly among 4 tokens; equivalently, 4 is the geometric mean of $2,4,8$ \seeconcept{c:teacher}{Teacher forcing and perplexity}{25}.
+\textbf{(e)} \seeconcept{c:lmchain}{Language modelling with the chain rule}{35} $p(\text{sequence})=\tfrac12\cdot\tfrac14\cdot\tfrac18=\tfrac1{64}$. Total loss $L=\ln2+\ln4+\ln8=6\ln2\approx4.159$ (which is also $-\ln\tfrac1{64}$). Per token $L/T=2\ln2\approx1.386$. Perplexity $=\exp(2\ln2)=4$. On average the model was as uncertain as choosing uniformly among 4 tokens; equivalently, 4 is the geometric mean of $2,4,8$ \seeconcept{c:teacher}{Teacher forcing and perplexity}{35}.
 
 \textbf{(f)} Teacher forcing: during training, the true next token is fed as the next input, whatever the model predicted. At generation time there is no true token, so the model's own chosen (greedy or sampled) token is fed back as the next input.
 % ============================================================
@@ -1963,7 +2713,7 @@ Higher temperature flattens the distribution (more diverse, more random output);
 % ============================================================
 
 % ------------------------------------------------------------
-\phantomsection\section[Question 26. BPTT on a scalar RNN, two steps, every gradient]{\hlq{Question 26}. BPTT on a scalar RNN, two steps, every gradient}
+\phantomsection\section[Question 36. BPTT on a scalar RNN, two steps, every gradient]{\hlq{Question 36}. BPTT on a scalar RNN, two steps, every gradient}
 % ------------------------------------------------------------
 \subsection*{Question}
 A scalar RNN ($d=H=o=1$) has a regression head and squared-error loss at each step:
@@ -1987,7 +2737,7 @@ Use $\tanh(0.5)\approx0.4621$ and $\tanh(-1.2311)\approx-0.8429$. Work to 4 deci
 Unroll the RNN for two steps, run it forward, then run backprop on the unrolled chain. The key new idea is that $h_1$ affects the loss in two ways: through its own output $\hat y_1$, and through $h_2$ (the memory path). Then each shared weight collects a gradient from every step.
 
 \subsection*{Concepts you need}
-Unrolling \seeconcept{c:unroll}{Folded and unrolled views}{22}; two paths add \seeconcept{c:graph}{Computation graphs}{7}; tanh slope \seeconcept{c:tanh}{tanh and its slope}{2}.
+Unrolling \seeconcept{c:unroll}{Folded and unrolled views}{32}; two paths add \seeconcept{c:graph}{Computation graphs}{7}; tanh slope \seeconcept{c:tanh}{tanh and its slope}{2}.
 
 \concept{c:bpttpaths}{The loss sees the future through $h$}
 The total loss adds the per-step losses, $L=\sum_tL_t$. $\hat y_t$ depends only on $h_t$, but $h_t$ is also an input to $h_{t+1}$, and through it to every later loss. For two steps, $L=L_1(h_1)+L_2(h_2(h_1))$, so
@@ -2025,13 +2775,13 @@ $e_1=0.9242-1=-0.0758$, $e_2=-1.6858-(-1)=-0.6858$.
 L=\tfrac12(0.0758)^2+\tfrac12(0.6858)^2=0.0029+0.2351=0.2380 .
 \]
 
-\textbf{(b)} \seeconcept{c:bpttpaths}{The loss sees the future through $h$}{26}
+\textbf{(b)} \seeconcept{c:bpttpaths}{The loss sees the future through $h$}{36}
 \[
 \frac{\partial L}{\partial h_1}=\underbrace{e_1W_y}_{\text{direct}}+\underbrace{e_2W_y(1-h_2^2)W_h}_{\text{future}}.
 \]
 The direct term: $h_1$ changes $\hat y_1$, which changes $L_1$. The future term: $h_1$ changes $z_2$ (through $W_h$), which changes $h_2$ (through tanh's slope), which changes $\hat y_2$ (through $W_y$), which changes $L_2$. Without the future term, step 1 would never learn anything about $y_2$.
 
-\textbf{(c)} Slopes of tanh: $1-h_1^2=1-0.4621^2=0.7864$; $1-h_2^2=1-0.8429^2=0.2895$. Walk backwards \seeconcept{c:bpttrec}{The BPTT recurrence}{26}. Nothing comes after step 2, so $g_{h_2}$ has only the head term:
+\textbf{(c)} Slopes of tanh: $1-h_1^2=1-0.4621^2=0.7864$; $1-h_2^2=1-0.8429^2=0.2895$. Walk backwards \seeconcept{c:bpttrec}{The BPTT recurrence}{36}. Nothing comes after step 2, so $g_{h_2}$ has only the head term:
 \begin{align*}
 g_{h_2}&=e_2W_y=-0.6858\cdot2=-1.3715\\
 g_{z_2}&=g_{h_2}(1-h_2^2)=-1.3715\cdot0.2895=-0.3971\\
@@ -2040,7 +2790,7 @@ g_{z_1}&=g_{h_1}(1-h_1^2)=0.0470\cdot0.7864=0.0370
 \end{align*}
 Notice the future path ($+0.1986$) is bigger than the direct path ($-0.1515$) and flips the sign: the large error at step 2 dominates what $h_1$ should do.
 
-\textbf{(d)} \seeconcept{c:bpttweights}{Shared weights: sum over time}{26}
+\textbf{(d)} \seeconcept{c:bpttweights}{Shared weights: sum over time}{36}
 \begin{align*}
 \frac{\partial L}{\partial W_x}&=g_{z_1}x_1+g_{z_2}x_2=0.0370\cdot0.5+(-0.3971)(-1)=0.0185+0.3971=0.4156\\
 \frac{\partial L}{\partial W_h}&=g_{z_1}h_0+g_{z_2}h_1=0+(-0.3971)(0.4621)=-0.1835\\
@@ -2055,7 +2805,7 @@ Notice the future path ($+0.1986$) is bigger than the direct path ($-0.1515$) an
 \textbf{(f)} $W_h$ enters step $t$ as $W_hh_{t-1}$, so its gradient at step $t$ is $g_{z_t}h_{t-1}$. At step 1 that is $g_{z_1}h_0=g_{z_1}\cdot0=0$. With $h_0=0$, $W_h$ learns only from step 2 onwards.
 
 % ------------------------------------------------------------
-\phantomsection\section[Question 27. Exact BPTT on a linear cell, and vanishing/exploding gradients]{\hlq{Question 27}. Exact BPTT on a linear cell, and vanishing/exploding gradients}
+\phantomsection\section[Question 37. Exact BPTT on a linear cell, and vanishing/exploding gradients]{\hlq{Question 37}. Exact BPTT on a linear cell, and vanishing/exploding gradients}
 % ------------------------------------------------------------
 \subsection*{Question}
 A linear cell with no tanh: $h_t=wh_{t-1}+x_t$, $\hat y_t=h_t$, $h_0=0$, targets $y_t=0$, and $L=\tfrac12\sum_{t=1}^3\hat y_t^2$. Use $w=0.5$ and $x=(1,\ 0,\ 2)$.
@@ -2071,7 +2821,7 @@ A linear cell with no tanh: $h_t=wh_{t-1}+x_t$, $\hat y_t=h_t$, $h_0=0$, targets
 With no tanh, every number is exact, so you can see the BPTT recurrence and its unrolled form clearly. Then see why errors far in the future get multiplied by $w$ once per step, which makes them vanish or explode.
 
 \subsection*{Concepts you need}
-The BPTT recurrence and the sum over time \seeconcept{c:bpttrec}{The BPTT recurrence}{26} \seeconcept{c:bpttweights}{Shared weights: sum over time}{26}. Here there is no tanh, so $g_{z_t}=g_{h_t}$, and $W_y=1$.
+The BPTT recurrence and the sum over time \seeconcept{c:bpttrec}{The BPTT recurrence}{36} \seeconcept{c:bpttweights}{Shared weights: sum over time}{36}. Here there is no tanh, so $g_{z_t}=g_{h_t}$, and $W_y=1$.
 
 \concept{c:jacprod}{The product of Jacobians: vanishing and exploding}
 Unrolling the recurrence gives, for three steps,
@@ -2098,7 +2848,7 @@ g_{h_3}=2.25,\qquad g_{h_2}=0.5+0.5\cdot2.25=1.625,\qquad g_{h_1}=1+0.5\cdot1.62
 \[
 g_{h_1}=e_1+w\,e_2+w^2e_3=1+0.5\cdot0.5+0.25\cdot2.25=1+0.25+0.5625=1.8125 .
 \]
-Each later error is multiplied by one extra $w$ per step it travels back \seeconcept{c:jacprod}{The product of Jacobians}{27}.
+Each later error is multiplied by one extra $w$ per step it travels back \seeconcept{c:jacprod}{The product of Jacobians}{37}.
 
 \textbf{(d)} $w$ is used at every step as $wh_{t-1}$, so $\partial L/\partial w=\sum_tg_{h_t}h_{t-1}$:
 \[
@@ -2109,10 +2859,10 @@ Check: $h_1=1$, $h_2=w$, $h_3=w^2+2$, so $L(w)=\tfrac12\bigl[1+w^2+(w^2+2)^2\big
 \frac{dL}{dw}=w+(w^2+2)\cdot2w=0.5+2.25\cdot1=2.75 .
 \]
 
-\textbf{(e)} The factor is $w^{20}$. For $w=0.5$: $0.5^{20}\approx9.5\times10^{-7}$, so a distant error has essentially no effect on early steps: vanishing gradient. For $w=1.5$: $1.5^{20}\approx3325$, so distant errors swamp everything and updates become huge: exploding gradient. Clipping fixes the exploding case; it cannot fix vanishing \seeconcept{c:fixes}{Fixes}{27}.
+\textbf{(e)} The factor is $w^{20}$. For $w=0.5$: $0.5^{20}\approx9.5\times10^{-7}$, so a distant error has essentially no effect on early steps: vanishing gradient. For $w=1.5$: $1.5^{20}\approx3325$, so distant errors swamp everything and updates become huge: exploding gradient. Clipping fixes the exploding case; it cannot fix vanishing \seeconcept{c:fixes}{Fixes}{37}.
 
 % ------------------------------------------------------------
-\phantomsection\section[Question 28. One vector BPTT step: outer products and transposes]{\hlq{Question 28}. One vector BPTT step: outer products and transposes}
+\phantomsection\section[Question 38. One vector BPTT step: outer products and transposes]{\hlq{Question 38}. One vector BPTT step: outer products and transposes}
 % ------------------------------------------------------------
 \subsection*{Question}
 A vanilla RNN has $d=2$, $H=2$, $o=1$, tanh hidden state and a linear head, trained for $T=2$ steps. The forward pass stored:
@@ -2131,10 +2881,10 @@ and the output errors are $e_1=0.2$, $e_2=1$. (The values are given directly so 
 \end{enumerate}
 
 \subsection*{What the question is asking}
-The same BPTT recipe as Question~26, but now the hidden state is a vector. Every scalar product becomes either a transpose-times-vector (to send blame to an earlier state) or an outer product (to get a weight-matrix gradient). Keep the shapes straight.
+The same BPTT recipe as Question~36, but now the hidden state is a vector. Every scalar product becomes either a transpose-times-vector (to send blame to an earlier state) or an outer product (to get a weight-matrix gradient). Keep the shapes straight.
 
 \subsection*{Concepts you need}
-Outer products \seeconcept{c:outer}{Weight gradients are outer products}{8}; the BPTT recurrence and sums over time \seeconcept{c:bpttrec}{The BPTT recurrence}{26} \seeconcept{c:bpttweights}{Shared weights: sum over time}{26}.
+Outer products \seeconcept{c:outer}{Weight gradients are outer products}{8}; the BPTT recurrence and sums over time \seeconcept{c:bpttrec}{The BPTT recurrence}{36} \seeconcept{c:bpttweights}{Shared weights: sum over time}{36}.
 
 \concept{c:transposes}{Where each transpose comes from}
 \begin{center}
@@ -2158,7 +2908,7 @@ The tanh slope $1-h_t^2$ acts on each unit separately (a diagonal matrix), so it
 g_{z_2}=g_{h_2}\odot(1-h_2^2)=\begin{bmatrix}0.75\\-1\end{bmatrix}.
 \]
 
-\textbf{(c)} Column times row \seeconcept{c:transposes}{Where each transpose comes from}{28}:
+\textbf{(c)} Column times row \seeconcept{c:transposes}{Where each transpose comes from}{38}:
 \[
 g_{z_2}x_2^\top=\begin{bmatrix}0.75\\-1\end{bmatrix}\begin{bmatrix}1&2\end{bmatrix}=\begin{bmatrix}0.75&1.5\\-1&-2\end{bmatrix},\qquad
 g_{z_2}h_1^\top=\begin{bmatrix}0.75\\-1\end{bmatrix}\begin{bmatrix}0.6&-0.5\end{bmatrix}=\begin{bmatrix}0.45&-0.375\\-0.6&0.5\end{bmatrix}.
@@ -2179,7 +2929,7 @@ g_{h_1}=\begin{bmatrix}0.2+1.75\\-0.2-1.625\end{bmatrix}=\begin{bmatrix}1.95\\-1
 \nabla_{W_x}L=\begin{bmatrix}2.496+0.75&-1.248+1.5\\-2.7375-1&1.36875-2\end{bmatrix}=\begin{bmatrix}3.246&0.252\\-3.7375&-0.63125\end{bmatrix},
 \]
 \[
-\nabla_{W_h}L=g_{z_1}h_0^\top+g_{z_2}h_1^\top=0+\begin{bmatrix}0.45&-0.375\\-0.6&0.5\end{bmatrix}\quad(h_0=0,\text{ as in Question 26(f)}),
+\nabla_{W_h}L=g_{z_1}h_0^\top+g_{z_2}h_1^\top=0+\begin{bmatrix}0.45&-0.375\\-0.6&0.5\end{bmatrix}\quad(h_0=0,\text{ as in Question 36(f)}),
 \]
 \[
 \nabla_{b_h}L=g_{z_1}+g_{z_2}=\begin{bmatrix}1.998\\-2.36875\end{bmatrix},\qquad
@@ -2193,7 +2943,7 @@ Each gradient has the same shape as its parameter: a quick check.
 \textbf{(f)} In the forward pass a matrix multiplies a column ($W_hh_{t-1}$). Sending blame back into a \emph{state} asks ``how does the loss change with each entry of $h_{t-1}$?'', and each entry of $h_{t-1}$ feeds every row of $W_h$ through one column of it, so you multiply by $W_h^\top$ (this also turns an ``output-sized'' vector into an ``input-sized'' one). Sending blame into a \emph{matrix} asks the question for each entry $W_{ij}$, which is (blame on output $i$) $\times$ (input $j$): a column times a row, i.e.\ an outer product, which has the same shape as the matrix.
 
 % ------------------------------------------------------------
-\phantomsection\section[Question 29. Short answers on BPTT]{\hlq{Question 29}. Short answers on BPTT}
+\phantomsection\section[Question 39. Short answers on BPTT]{\hlq{Question 39}. Short answers on BPTT}
 % ------------------------------------------------------------
 \subsection*{Question}
 Answer each in two to four sentences.
@@ -2210,13 +2960,13 @@ Answer each in two to four sentences.
 Short conceptual checks of the BPTT slides.
 
 \subsection*{Concepts you need}
-All explained in Questions~26--28: two paths \seeconcept{c:bpttpaths}{The loss sees the future}{26}; recurrence \seeconcept{c:bpttrec}{The BPTT recurrence}{26}; sums over time \seeconcept{c:bpttweights}{Shared weights: sum over time}{26}; vanishing/exploding \seeconcept{c:jacprod}{The product of Jacobians}{27}.
+All explained in Questions~36--38: two paths \seeconcept{c:bpttpaths}{The loss sees the future}{36}; recurrence \seeconcept{c:bpttrec}{The BPTT recurrence}{36}; sums over time \seeconcept{c:bpttweights}{Shared weights: sum over time}{36}; vanishing/exploding \seeconcept{c:jacprod}{The product of Jacobians}{37}.
 
 \concept{c:truncated}{Truncated BPTT}
 For long sequences, stop the backward walk after $k$ steps and treat $h_{t-k}$ as a constant (``detach'' it). The recurrence and the outer-product formulas are unchanged; the sum over time just gets shorter. It saves memory and time, at the cost of not learning dependencies longer than $k$ steps.
 
 \subsection*{Solution}
-\hlq{\textbf{(a)}} The future term of $\partial L/\partial h_1$ contains $W_h$, so it vanishes and $\partial L/\partial h_1=e_1W_y$: step 1's state hears nothing about $y_2$. But $y_2$ still affects $\partial L/\partial W_x$, through the step-2 term $g_{z_2}x_2$, because $W_x$ is used directly at step 2 \seeconcept{c:bpttweights}{Shared weights}{26}.
+\hlq{\textbf{(a)}} The future term of $\partial L/\partial h_1$ contains $W_h$, so it vanishes and $\partial L/\partial h_1=e_1W_y$: step 1's state hears nothing about $y_2$. But $y_2$ still affects $\partial L/\partial W_x$, through the step-2 term $g_{z_2}x_2$, because $W_x$ is used directly at step 2 \seeconcept{c:bpttweights}{Shared weights}{36}.
 
 \textbf{(b)} The same matrix is used at every step, so a small change to it changes every $z_t$ at once. The total effect on the loss is the sum of the effects at each step (the ``add the paths'' rule). One matrix appears in every $dz_t$, so its gradient is $\sum_tg_{z_t}(\cdot)^\top$.
 
@@ -2224,7 +2974,7 @@ For long sequences, stop the backward walk after $k$ steps and treat $h_{t-k}$ a
 
 \hlq{\textbf{(d)}} Store every $x_t$, $h_t$ (and $z_t$) during the forward pass $t=1\to T$. Then set $g_{z_{T+1}}=0$ and all gradient accumulators to 0; for $t=T$ down to 1 compute $e_t$, then $g_{h_t}$, then $g_{z_t}$, and add the outer products for $W_x,W_h,W_y$ and the sums for the biases. Finally make one parameter update from the totals.
 
-\hlq{\textbf{(e)}} \seeconcept{c:truncated}{Truncated BPTT}{29} The backward walk stops after $k$ steps and $h_{t-k}$ is detached. The formulas are the same; only the sum over time is shorter. It cannot learn dependencies longer than $k$ steps.
+\hlq{\textbf{(e)}} \seeconcept{c:truncated}{Truncated BPTT}{39} The backward walk stops after $k$ steps and $h_{t-k}$ is detached. The formulas are the same; only the sum over time is shorter. It cannot learn dependencies longer than $k$ steps.
 
 \textbf{(f)} BPTT multiplies one Jacobian per step, so gradients from distant steps vanish (or explode); clipping only fixes explosions. LSTM and GRU use gates (sigmoid ``valves'') to keep a path along which the gradient does not shrink at every step, which fixes vanishing. The vanilla RNN is still the clearest model for understanding the mechanics: unrolling, sharing, and the product of Jacobians.
 
